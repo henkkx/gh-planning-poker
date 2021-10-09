@@ -15,7 +15,7 @@ import { Logo } from "./Logo";
 
 export const App = () => {
   React.useEffect(() => {
-    fetch(`http://localhost:8000/api/test?text=testing`)
+    fetch(`/api/test?text=testing`)
       .then((res) => res.json())
       .then(console.log);
   });
