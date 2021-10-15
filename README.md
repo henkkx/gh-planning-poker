@@ -1,4 +1,4 @@
-# Planning Poker with Github Integration
+# Planning Poker with Github Integration
 
 ### Backend
 
@@ -18,7 +18,7 @@
 
 ### Backend
 
-Create a virtual environment from cmd (or do it in Pycharm manually)
+Create a virtual environment
 
 ```shell script
 cd backend
@@ -46,12 +46,6 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-Create superuser
-
-```shell script
-python manage.py createsuper user
-```
-
 ### Frontend
 
 Install dependencies.
@@ -74,7 +68,7 @@ npm start
 
 While in the **root directory**, build docker images and run them with docker-compose.
 This might take up to few minutes.
-rebuild images after installing new packages.
+make sure to rebuild images after installing new packages.
 
 ```shell script
 docker-compose up --build
