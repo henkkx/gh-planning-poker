@@ -3,8 +3,8 @@ import { screen } from "@testing-library/react";
 import { render } from "./test-utils";
 import { App } from "./App";
 
-test("renders greeting", () => {
+test("renders", () => {
   render(<App />);
-  const greeting = screen.getByText(/hello world/i);
-  expect(greeting).toBeInTheDocument();
+  const msg = screen.getByText(/sign in/i);
+  expect(msg).toBeInTheDocument();
 });

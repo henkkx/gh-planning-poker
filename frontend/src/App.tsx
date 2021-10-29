@@ -9,25 +9,37 @@ import {
   Grid,
   theme,
   Button,
+  Center,
+  useColorModeValue,
 } from "@chakra-ui/react";
+import * as api from "./api";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
-import { Logo } from "./Logo";
+import Login from "./screens/login/Login";
+import { Navbar } from "./components/Navbar";
+import { NavTabLink } from "./components/Navbar/NavTabLink";
+import { UserProfile } from "./components/Navbar/UserProfile";
 
 export const App = () => {
-  React.useEffect(() => {
-    fetch(`/api/test?text=testing`)
-      .then((res) => res.json())
-      .then(console.log);
-  });
-
   return (
     <ChakraProvider theme={theme}>
-      <Box textAlign="center" fontSize="xl">
-        <Grid minH="100vh" p={3}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-          hello world
-        </Grid>
-      </Box>
+      <Navbar>
+        <Navbar.Brand>
+          <Center marginEnd={6}>Planning Poker</Center>
+        </Navbar.Brand>
+        <Navbar.Links>
+          <NavTabLink>About</NavTabLink>
+          <NavTabLink>Play</NavTabLink>
+        </Navbar.Links>
+        <Navbar.UserProfile>
+          <UserProfile
+            name="user"
+            avatarUrl="avatar_url_for_user_profile"
+            email="mail@test.com"
+          />
+          <ColorModeSwitcher />
+        </Navbar.UserProfile>
+      </Navbar>
+      <Login />
     </ChakraProvider>
   );
 };

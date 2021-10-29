@@ -13,6 +13,9 @@ services:
       - db
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.dev
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
 
   frontend:
     build: ./frontend
@@ -24,6 +27,7 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_CLIENT_ID=${CLIENT_ID}
     depends_on:
       - backend
     command: npm start

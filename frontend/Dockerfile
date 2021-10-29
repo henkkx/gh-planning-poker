@@ -4,7 +4,7 @@ FROM node:14.17.5-alpine
 WORKDIR /app/
 
 # Install dependencies
-COPY package.json yarn.lock /app/
+COPY package.json package-lock.json /app/
 
 # install dependencies and avoid `node-gyp rebuild` errors
 RUN apk add --no-cache --virtual .gyp \
