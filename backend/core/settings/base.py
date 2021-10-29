@@ -35,18 +35,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    # cors headers
     'corsheaders',
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
-    # apps
+    # project specific apps
     'api',
     'users',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -122,11 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Warsaw'
-
-USE_I18N = True
-
-USE_L10N = True
+TIME_ZONE = 'Europe/London'
 
 USE_TZ = True
 
@@ -141,7 +135,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-AUHTENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
+AUHTENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend", ]
 AUTH_USER_MODEL = 'users.User'
 
 # Static files (CSS, JavaScript, Images)
@@ -151,7 +145,15 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS headers
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
 
 # required by django.contrib.sites
 SITE_ID = 1
+
+# github oauth
+CLIENT_ID = os.environ.get('CLIENT_ID', 'no_github_client_id_set')
+CLIENT_SECRET = os.environ.get('CLIENT_SECRET', 'no_github_secret_set')
+
+REACT_APP_BASE_URL = os.environ.get(
+    'REACT_APP_BASE_URL', 'http://127.0.0.1:3000/')

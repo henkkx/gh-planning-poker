@@ -1,24 +1,11 @@
 # Use image with both python and node installed
-FROM nikolaik/python-nodejs:python3.9-nodejs14-alpine
+FROM nikolaik/python-nodejs:python3.9-nodejs14
 
 WORKDIR /app/backend
 
-# Install required libraries and Python dependencies
-COPY ./backend/requirements.txt /app/backend
-RUN  \
-    apk update && \
-    apk upgrade && \
-    apk add --no-cache bash && \
-    apk add --no-cache postgresql-libs && \
-    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
-    pip3 install --upgrade pip -r requirements.txt && \
-    apk --purge del .build-deps
-
-# Add the rest of the code
-COPY ./backend /app/backend
-
-# Copy scripts to main directory
-COPY ./backend/scripts/ /app/
+# Install Python dependencies
+COPY ./backend/requirements.txt /app/backend/
+RUN pip3 install --upgrade pip -r requirements.txt
 
 # Install frontend dependencies
 WORKDIR /app/frontend
@@ -27,24 +14,31 @@ COPY ./frontend/package.json ./frontend/yarn.lock /app/frontend/
 RUN npm install
 
 # Add the rest of the code
-COPY ./frontend /app/frontend
+COPY . /app/
+COPY ./backend/scripts/ /app/
 
-# Build react static files
+# Build static files
 RUN npm run build
 
-# Move non-static files to newly created dir (/app/frontend/build/root/)
-RUN cd build && mkdir root && mv *.ico *.json root
+# Move all static files other than index.html to root/ for whitenoise middleware
+WORKDIR /app/frontend/build
+
+RUN mkdir root && mv *.ico *.json root
 
 # Collect static files
-RUN mkdir /app/staticfiles
+RUN mkdir /app/backend/staticfiles
+
+# SECRET_KEY is only included here to avoid raising an error when generating static files.
+# Add a real SECRET_KEY config variable in Heroku.
 
 WORKDIR /app
 
-# Make port 8000 available for the app
+RUN DJANGO_SETTINGS_MODULE=core.settings.build \
+    SECRET_KEY=TEST_SECRET_KEY \
+    python3 backend/manage.py collectstatic --noinput
+
 ENV PORT 8000
 EXPOSE 8000
 
-# Be sure to use 0.0.0.0 for the host within the Docker container,
-# otherwise the browser won't be able to find it
 RUN ["chmod", "+x", "/app/entrypoint-build.sh"]
-ENTRYPOINT [ "/app/entrypoint-build.sh" ]
+ENTRYPOINT ["/app/entrypoint-build.sh"]

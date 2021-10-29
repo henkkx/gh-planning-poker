@@ -16,11 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required
+from users.views import github_callback, github_test
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('auth/', include('users.urls')),
-    # frontend urls
+    path('github/test/', github_test, name='github-test'),
+    path('github-callback/', github_callback, name='gh_callback'),
     re_path(".*", TemplateView.as_view(template_name="index.html")),
 ]

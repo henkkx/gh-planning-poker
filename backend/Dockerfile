@@ -1,19 +1,21 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9.6-alpine
+FROM python:3.9.0-slim-buster
 
 # Adding backend directory to make absolute filepaths consistent across services
 WORKDIR /app/backend
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Install system deps
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg2
+
 # Install Python dependencies
-COPY requirements.txt /app/backend
-RUN  \
-    apk update && \
-    apk upgrade && \
-    apk add --no-cache bash && \
-    apk add --no-cache postgresql-libs && \
-    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
-    pip3 install --upgrade pip -r requirements.txt && \
-    apk --purge del .build-deps
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
 
 # Add the rest of the code
 COPY . /app/backend
