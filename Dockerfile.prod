@@ -17,6 +17,10 @@ RUN npm install
 COPY . /app/
 COPY ./backend/scripts/ /app/
 
+# client_id is not a secret so it's fine to expose it here
+# only the client_secret must be protected
+ENV REACT_APP_CLIENT_ID 150f2abf195e28624a8b
+
 # Build static files
 RUN npm run build
 
