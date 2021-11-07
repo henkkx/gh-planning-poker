@@ -43,4 +43,4 @@ def get_or_create_user(*, email: str, access_token: str, **extra_data) -> Tuple[
         update_token(user, access_token)
         return user, False
 
-    return create_user(email=email, access_token=access_token ** extra_data), True
+    return create_user(email=email, access_token=access_token, **extra_data), True
