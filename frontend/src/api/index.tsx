@@ -6,15 +6,20 @@ function getCSRF() {
     .catch(console.log);
 }
 
-function getIsAuthenticated() {
-  const response = fetch("/api/session/", {
+function getUserInfo() {
+  return fetch("/users/me/", {
     credentials: "same-origin",
   })
-    .then((res) => res.json())
-    .then((data) => data.isAuthenticated)
+    .then(isResponseOk)
     .catch(console.log);
-
-  return Boolean(response);
 }
 
-export { getCSRF, getIsAuthenticated };
+function isResponseOk(response: Response) {
+  if (response.status >= 200 && response.status <= 299) {
+    return response.json();
+  } else {
+    throw Error(response.statusText);
+  }
+}
+
+export { getCSRF, getUserInfo };

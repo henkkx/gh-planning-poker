@@ -16,7 +16,7 @@ services:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET=${CLIENT_SECRET}
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
-
+      - SUPER_USER_EMAIL=${SUPER_USER_EMAIL}
   frontend:
     build: ./frontend
     volumes:
@@ -35,5 +35,6 @@ services:
   db:
     image: postgres:12.0-alpine
     restart: always
+    command: postgres -c listen_addresses='*'
     volumes:
       - ./postgres-data:/var/lib/postgresql/data

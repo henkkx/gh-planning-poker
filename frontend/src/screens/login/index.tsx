@@ -8,53 +8,32 @@ import {
   VisuallyHidden,
 } from "@chakra-ui/react";
 import * as React from "react";
-import { FaFacebook, FaGithub, FaGoogle } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
+import { openGithubLoginPage } from "../../auth/github";
+import { ColorModeSwitcher } from "../../ColorModeSwitcher";
 import { Card } from "../../components/Card";
-import { DividerWithText } from "../../components/DividerWIthText";
-
-const CLIENT_ID = process.env.REACT_APP_CLIENT_ID ?? "";
-const GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize";
-
-function redirect(url: string, params: URLSearchParams) {
-  window.location.href = `${url}?${params.toString()}`;
-}
-
-function createUrlParams() {
-  const scope = ["user", "repo"].join(" ");
-
-  const params = {
-    response_type: "code",
-    client_id: CLIENT_ID,
-    // redirect_uri: `${REACT_APP_BASE_BACKEND_URL}/${redirectUri}`,
-    scope,
-  };
-  return new URLSearchParams(params);
-}
-
-function openGithubLoginPage() {
-  // const redirectUri = "github-callback";
-  const urlParams = createUrlParams();
-  redirect(GITHUB_AUTH_URL, urlParams);
-}
 
 function Login() {
   return (
     <Box
+      display="flex"
       bg={useColorModeValue("gray.50", "inherit")}
       minH="100vh"
       py="12"
       px={{ base: "4", lg: "8" }}
     >
-      <Box maxW="md" mx="auto">
+      <Box maxW="lg" mx="auto" align="center">
         <Card>
           <Heading textAlign="center" size="xl" fontWeight="extrabold">
-            Sign in
+            Planning Poker for Github
           </Heading>
-          <Box mt="6" align="center" justify="center">
+          <Box mt="8" align="center" justify="center">
             <Button leftIcon={<FaGithub />} onClick={openGithubLoginPage}>
               Login with Github
             </Button>
+            <br />
             <Button
+              mt="2"
               onClick={() => {
                 fetch(`/github/test/`)
                   .then((res) => res.json())
@@ -66,6 +45,7 @@ function Login() {
           </Box>
         </Card>
       </Box>
+      <ColorModeSwitcher justifySelf="flex-end" />
     </Box>
   );
 }

@@ -26,7 +26,7 @@ type State = {
   data?: any;
   error?: any;
 };
-function useAsync(initialState: State) {
+function useAsync(initialState?: State) {
   const initialStateRef = React.useRef({
     ...defaultInitialState,
     ...initialState,

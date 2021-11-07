@@ -157,3 +157,5 @@ CLIENT_SECRET = os.environ.get('CLIENT_SECRET', 'no_github_secret_set')
 
 REACT_APP_BASE_URL = os.environ.get(
     'REACT_APP_BASE_URL', 'http://127.0.0.1:3000/')
+
+SUPER_USER_EMAIL = os.environ.get('SUPER_USER_EMAIL')

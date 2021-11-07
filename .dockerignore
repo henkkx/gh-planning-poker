@@ -1,6 +1,8 @@
 # JS stuff
 node_modules
 
+
+
 # Dev stuff
 .github
 .git
@@ -10,5 +12,11 @@ venv
 README.md
 .vscode
 .idea
+build
+dist
+*.egg-info
+*.egg/
+*.pyc
+*.swp
 
 db.sqlite3

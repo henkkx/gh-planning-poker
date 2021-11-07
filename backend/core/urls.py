@@ -16,14 +16,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.generic import TemplateView
-from django.contrib.auth.decorators import login_required
-from users.views import github_callback, github_test
+from django.conf import settings
+from users.views import github_oauth_callback, user_info_view, repos
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('github/test/', github_test, name='github-test'),
-    path('github-callback/', github_callback, name='gh_callback'),
-    re_path(".*", TemplateView.as_view(template_name="index.html")),
+    path('users/me/', user_info_view, name='user_info_view'),
+    path('repos', repos, name='repos'),
+    path('github-callback/', github_oauth_callback, name='gh_callback'),
 ]
+
+if not settings.DEBUG:
+    urlpatterns += [
+        re_path(".*", TemplateView.as_view(template_name="index.html"))
+    ]
