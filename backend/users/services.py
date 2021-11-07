@@ -6,13 +6,10 @@ from users.models import User
 
 def create_user(email: str, access_token: str, **extra_fields) -> User:
     extra_fields = {
-        'is_staff': False,
-        'is_superuser': False,
         'is_active': True,
         **extra_fields
     }
 
-    print(extra_fields['access_token'])
     user = User.objects.create(
         email=email, access_token=access_token, **extra_fields)
     user.save()

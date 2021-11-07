@@ -1,17 +1,17 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase
-
-User = get_user_model()
+from users.services import create_user
+from users.models import User
 
 
 class SimpleTestCase(TestCase):
-    def test_add(self):
-        self.assertEqual(1 + 1, 2)
 
     def test_create_user(self):
-        user = User.objects.create_user(
-            username='test_user',
-            password='test_123',
+        email = 'user@example.com'
+        token = 'test token'
+        user = create_user(
+            email=email,
+            access_token=token
         )
-        query = User.objects.filter(username='test_user')
-        self.assertEqual(user, query.first())
+        that_same_guy = User.objects.filter(email=email).first()
+        self.assertEqual(user, that_same_guy)
+        self.assertEqual(that_same_guy.access_token, token)
