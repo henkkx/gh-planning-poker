@@ -1,5 +1,5 @@
 from github import Github
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
 from django.contrib.auth import login
@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from api.mixins import AuthRequiredMixin
 from users.github_auth import GithubAuthException, get_github_access_token, get_github_user_info
 from users.services import get_or_create_user
-import os
 
 
 def github_oauth_callback(request):
@@ -25,11 +24,8 @@ def github_oauth_callback(request):
     except GithubAuthException as e:
         return HttpResponse(str(e), status_code=401)
 
-    try:
-        user_info = get_github_user_info(token)
-        user, _ = get_or_create_user(access_token=token, **user_info)
-    except Exception as e:
-        return JsonResponse({'error': str(e), })
+    user_info = get_github_user_info(token)
+    user, _ = get_or_create_user(access_token=token, **user_info)
 
     login(request, user)
 
