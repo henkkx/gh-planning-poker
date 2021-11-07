@@ -29,7 +29,7 @@ def github_oauth_callback(request):
         user_info = get_github_user_info(token)
         user, _ = get_or_create_user(access_token=token, **user_info)
     except Exception as e:
-        return JsonResponse({'error': str(e), 'db': os.environ.get('DATABASE_URL')})
+        return JsonResponse({'error': str(e), })
 
     login(request, user)
 

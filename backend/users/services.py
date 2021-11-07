@@ -12,7 +12,6 @@ def create_user(email: str, access_token: str, **extra_fields) -> User:
 
     user = User.objects.create(
         email=email, access_token=access_token, **extra_fields)
-    user.save()
 
     return user
 
@@ -39,8 +38,13 @@ def update_token(user: User, access_token: str) -> None:
 def get_or_create_user(*, email: str, access_token: str, **extra_data) -> Tuple[User, bool]:
     user = User.objects.filter(email=email).first()
 
-    if user:
-        update_token(user, access_token)
-        return user, False
+    is_new_user_created = not user
 
-    return create_user(email=email, access_token=access_token, **extra_data), True
+    if is_new_user_created:
+        user = create_user(
+            email=email, access_token=access_token, **extra_data
+        )
+    else:
+        update_token(user, access_token)
+
+    return user, is_new_user_created
