@@ -1,5 +1,5 @@
 arrow==1.2.0
-asgiref==3.4.1
+asgiref==3.3.4
 astroid==2.8.2
 attrs==21.2.0
 autobahn==21.3.1
