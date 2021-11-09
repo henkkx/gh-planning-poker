@@ -11,7 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 django_asgi_app = get_asgi_application()
 
 # from poker.consumers import PokerConsumer
-
+os.environ['ASGI_THREADS'] = "5"
 application = ProtocolTypeRouter({
     # Django's ASGI application to handle traditional HTTP requests
     "http": django_asgi_app,
