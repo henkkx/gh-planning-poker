@@ -36,8 +36,7 @@ class Repos(AuthRequiredMixin, APIView):
     def get(self, request):
         token = request.user.access_token
         g = Github(token)
-        all_repos = list(g.get_user().get_repos())
-        return Response(all_repos)
+        return Response(repo.name for repo in g.get_user().get_repos())
 
 
 repos = Repos.as_view()

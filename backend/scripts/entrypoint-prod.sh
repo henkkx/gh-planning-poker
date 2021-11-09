@@ -1,5 +1,6 @@
 #!/bin/bash
-python3 backend/manage.py makemigrations --no-input
-python3 backend/manage.py migrate --no-input
+cd backend
+python3 manage.py migrate --no-input
 
-gunicorn --chdir backend core.wsgi
+# gunicorn --chdir backend core.wsgi
+bin/start-pgbouncer daphne core.asgi:application

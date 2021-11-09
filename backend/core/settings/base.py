@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # project specific apps
     'api',
     'users',
+    'poker'
 ]
 
 MIDDLEWARE = [
