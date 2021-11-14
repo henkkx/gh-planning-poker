@@ -18,11 +18,11 @@ def github_oauth_callback(request):
     try:
         if 'error' in query_params or code is None:
             raise GithubAuthException(
-                "There's a problem authenticating with github"
+                "There was a problem authenticating with github"
             )
         token = get_github_access_token(code)
     except GithubAuthException as e:
-        return HttpResponse(str(e), status_code=401)
+        return HttpResponse(str(e), status=401)
 
     user_info = get_github_user_info(token)
     user, _ = get_or_create_user(access_token=token, **user_info)
@@ -30,16 +30,6 @@ def github_oauth_callback(request):
     login(request, user)
 
     return redirect(settings.REACT_APP_BASE_URL)
-
-
-class Repos(AuthRequiredMixin, APIView):
-    def get(self, request):
-        token = request.user.access_token
-        g = Github(token)
-        return Response(repo.name for repo in g.get_user().get_repos())
-
-
-repos = Repos.as_view()
 
 
 class UserInfo(AuthRequiredMixin, APIView):

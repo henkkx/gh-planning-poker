@@ -7,7 +7,7 @@ function getCSRF() {
 }
 
 function getUserInfo() {
-  return fetch("/users/me/", {
+  return fetch("/users/me", {
     credentials: "same-origin",
   })
     .then(isResponseOk)
