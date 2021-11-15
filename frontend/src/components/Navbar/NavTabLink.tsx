@@ -1,31 +1,34 @@
 import {
   Link,
   LinkProps,
-  Tab,
+  chakra,
   useColorModeValue as mode,
 } from "@chakra-ui/react";
 import * as React from "react";
+import { Link as RouterLink } from "react-router-dom";
 
-export const NavTabLink: React.FC<LinkProps> = (props) => {
+type RouterLinkProps = LinkProps & { to: string; isActive: boolean };
+
+export const NavTabLink: React.FC<RouterLinkProps> = ({
+  to,
+  isActive,
+  ...rest
+}) => {
   return (
-    <Tab
-      _selected={{ color: mode("blue.600", "blue.200") }}
+    <chakra.a
+      _activeLink={{
+        color: mode("blue.600", "blue.300"),
+        fontWeight: "bold",
+      }}
       _focus={{ shadow: "none" }}
-      justifyContent="flex-start"
-      px={{ base: 4, md: 6 }}
-    >
-      <Link
-        as="div"
-        display="block"
-        fontWeight="medium"
-        lineHeight="1.25rem"
-        color="inherit"
-        _hover={{ color: mode("blue.600", "blue.200") }}
-        _activeLink={{
-          color: mode("blue.600", "blue.200"),
-        }}
-        {...props}
-      />
-    </Tab>
+      fontSize={{ base: 20, md: 18 }}
+      aria-current={isActive ? "page" : undefined}
+      px={{ base: 6, md: 4 }}
+      as={RouterLink}
+      mt={{ md: 0, sm: 10 }}
+      to={to}
+      _hover={{ color: mode("blue.600", "blue.200") }}
+      {...rest}
+    />
   );
 };

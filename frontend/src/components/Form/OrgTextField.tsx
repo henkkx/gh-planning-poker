@@ -1,0 +1,18 @@
+import {
+  FormControl,
+  FormControlProps,
+  FormLabel,
+  InputProps,
+  Switch,
+} from "@chakra-ui/react";
+import React from "react";
+import { Input } from "./Input";
+
+export const OrgTextField = ({ isDisabled, ...props }: InputProps) => {
+  return (
+    <FormControl isRequired id="orgInput">
+      <FormLabel> Name of your Github Organization</FormLabel>
+      <Input type="text" {...props} placeholder="insert cool org name here" />
+    </FormControl>
+  );
+};

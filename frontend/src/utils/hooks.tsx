@@ -1,4 +1,12 @@
 import * as React from "react";
+import { useLocation } from "react-router-dom";
+
+// custom hook to get the current pathname in React
+
+const usePathname = () => {
+  const location = useLocation();
+  return location.pathname;
+};
 
 function useSafeDispatch(dispatch: React.Dispatch<any>) {
   const isMounted = React.useRef(false);
@@ -85,4 +93,4 @@ function useAsync(initialState?: State) {
   };
 }
 
-export { useAsync };
+export { useAsync, usePathname };

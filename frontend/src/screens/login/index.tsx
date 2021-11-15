@@ -2,16 +2,24 @@ import {
   Box,
   Button,
   Heading,
-  SimpleGrid,
-  Text,
   useColorModeValue,
-  VisuallyHidden,
+  Text,
 } from "@chakra-ui/react";
 import * as React from "react";
 import { FaGithub } from "react-icons/fa";
 import { openGithubLoginPage } from "../../auth/github";
-import { ColorModeSwitcher } from "../../ColorModeSwitcher";
+import { ColorModeSwitcher } from "../../components/ColorModeSwitcher";
 import { Card } from "../../components/Card";
+
+export function GithubButton() {
+  return (
+    <Box mt="8" align="center" justify="center">
+      <Button size="lg" leftIcon={<FaGithub />} onClick={openGithubLoginPage}>
+        Login with Github
+      </Button>
+    </Box>
+  );
+}
 
 function Login() {
   return (
@@ -19,33 +27,36 @@ function Login() {
       display="flex"
       bg={useColorModeValue("gray.50", "inherit")}
       minH="100vh"
+      mawW="500px"
       py="12"
       px={{ base: "4", lg: "8" }}
     >
-      <Box maxW="lg" mx="auto" align="center">
+      <Box mx="auto" align="center">
+        <Heading
+          color="teal"
+          as="h1"
+          size="2xl"
+          mt="2"
+          mb="12"
+          fontWeight="extrabold"
+        >
+          Planning Poker For Github
+        </Heading>
+
         <Card>
-          <Heading textAlign="center" size="xl" fontWeight="extrabold">
-            Planning Poker for Github
+          <Heading
+            textAlign="center"
+            color="gray.700"
+            size="xl"
+            fontWeight="extrabold"
+          >
+            Login to Get Started
           </Heading>
-          <Box mt="8" align="center" justify="center">
-            <Button leftIcon={<FaGithub />} onClick={openGithubLoginPage}>
-              Login with Github
-            </Button>
-            <br />
-            <Button
-              mt="2"
-              onClick={() => {
-                fetch(`/github/test/`)
-                  .then((res) => res.json())
-                  .then(console.log);
-              }}
-            >
-              print name to console
-            </Button>
-          </Box>
+
+          <GithubButton />
         </Card>
       </Box>
-      <ColorModeSwitcher justifySelf="flex-end" />
+      {/* <ColorModeSwitcher justifySelf="flex-end" /> */}
     </Box>
   );
 }

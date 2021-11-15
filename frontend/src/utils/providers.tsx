@@ -1,7 +1,7 @@
 import * as React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { AuthProvider } from "./auth/auth-provider";
+import { AuthProvider } from "../auth/auth-provider";
 import theme from "./theme";
 import { ChakraProvider } from "@chakra-ui/react";
 
