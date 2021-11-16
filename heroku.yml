@@ -1,3 +1,5 @@
 build:
   docker:
     web: Dockerfile.prod
+run:
+  web: heroku-run.sh
