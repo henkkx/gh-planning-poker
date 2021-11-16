@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ev
 
 cd backend
 python3 manage.py migrate --no-input
