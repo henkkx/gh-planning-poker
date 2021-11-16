@@ -43,5 +43,6 @@ RUN DJANGO_SETTINGS_MODULE=core.settings.prod \
 
 EXPOSE $PORT
 
+WORKDIR /app/backend
 # RUN ["chmod", "+x", "/app/entrypoint-prod.sh"]
 # ENTRYPOINT ["/app/entrypoint-prod.sh"]

@@ -2,4 +2,7 @@ build:
   docker:
     web: Dockerfile.prod
 run:
-  web: heroku-run.sh
+  web: bin/start-pgbouncer daphne core.asgi:application -b 0.0.0.0 -p $PORT
+release:
+  command:
+    - python3 manage.py migrate
