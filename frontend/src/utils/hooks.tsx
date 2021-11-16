@@ -28,13 +28,16 @@ function useSafeDispatch(dispatch: React.Dispatch<any>) {
 //   run(fetchSomething(path))
 // }, [path, run])
 // thanks to Kent C. Dodds for his tutorial on creating the useAsync hook
+// I have modified it slightly to fit my needs, mainly using typescript
 const defaultInitialState = { status: "idle", data: null, error: null };
-type State = {
-  status: "idle" | "resolved" | "rejected";
-  data?: any;
+
+type State<DataType> = {
+  status: "idle" | "resolved" | "rejected" | "pending";
+  data?: DataType;
   error?: any;
 };
-function useAsync(initialState?: State) {
+
+function useAsync<DataType>(initialState?: State<DataType>) {
   const initialStateRef = React.useRef({
     ...defaultInitialState,
     ...initialState,
@@ -43,12 +46,12 @@ function useAsync(initialState?: State) {
   const reducer = (s: any, a: any) => ({ ...s, ...a });
   const [state, setState] = React.useReducer(reducer, initialStateRef.current);
 
-  const { status, data, error } = state;
+  const { status, data, error } = state as State<DataType>;
 
   const safeSetState = useSafeDispatch(setState);
 
   const setData = React.useCallback(
-    (data) => safeSetState({ data, status: "resolved" }),
+    (data: DataType) => safeSetState({ data, status: "resolved" }),
     [safeSetState]
   );
   const setError = React.useCallback(
@@ -61,16 +64,16 @@ function useAsync(initialState?: State) {
   );
 
   const run = React.useCallback(
-    (promise: Promise<any>) => {
+    (promise: Promise<DataType>) => {
       safeSetState({ status: "pending" });
       return promise.then(
-        (data) => {
+        (data: DataType) => {
           setData(data);
           return data;
         },
         (error) => {
           setError(error);
-          return Promise.reject(error);
+          // throw error;
         }
       );
     },

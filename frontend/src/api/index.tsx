@@ -1,17 +1,17 @@
+import type { User } from "../auth";
+
 function getCSRF() {
-  fetch("/api/csrf/", {
-    credentials: "same-origin",
-  })
-    .then((res) => res.headers.get("X-CSRFToken"))
-    .catch(console.log);
+  return fetch("/api/csrf").then((res) =>
+    res.headers.get("X-CSRFToken")
+  ) as Promise<string>;
 }
 
-function getUserInfo() {
-  return fetch("/users/me", {
-    credentials: "same-origin",
-  })
+function getUserInfo(): Promise<User> {
+  return fetch("/api/users/me")
     .then(isResponseOk)
-    .catch(console.log);
+    .catch(() => {
+      console.log("must login first");
+    });
 }
 
 function isResponseOk(response: Response) {
@@ -22,4 +22,16 @@ function isResponseOk(response: Response) {
   }
 }
 
-export { getCSRF, getUserInfo };
+type PokerSessionData = { repo_name: string; org_name?: string };
+function createPokerSession(data: PokerSessionData, crsfToken: string) {
+  return fetch("/api/poker-sessions/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": crsfToken,
+    },
+    body: JSON.stringify(data),
+  }).then(isResponseOk);
+}
+
+export { getCSRF, getUserInfo, createPokerSession };

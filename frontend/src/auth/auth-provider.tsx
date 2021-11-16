@@ -1,23 +1,20 @@
-import { Spinner } from "@chakra-ui/spinner";
 import * as React from "react";
-import { ReactElement } from "react";
-// import { queryCache } from "react-query";
 import * as api from "../api";
 import { FullPageProgress } from "../components/Spinner";
-// import { client } from "utils/api-client";
 import { useAsync } from "../utils/hooks";
-// import { setQueryDataForBook } from "utils/books";
-// import { FullPageSpinner, FullPageErrorFallback } from "components/lib";
 
-type User = {
+export type User = {
   name: string;
   email: string;
   isAuthenticated: boolean;
 };
 
-type AuthContextProps = {
+type AuthContextValue = {
   user?: User;
   logout?: () => void;
+};
+
+type AuthContextProps = AuthContextValue & {
   children: React.ReactNode;
 };
 
@@ -35,7 +32,7 @@ function AuthProvider(props: AuthContextProps) {
     isSuccess,
     run,
     setData,
-  } = useAsync();
+  } = useAsync<User>();
 
   React.useEffect(() => {
     const userInfoPromise = api.getUserInfo();
@@ -45,17 +42,20 @@ function AuthProvider(props: AuthContextProps) {
   const logout = React.useCallback(() => {
     // auth.logout();
     // queryCache.clear();
-    setData(null);
+    // setData(null);
   }, [setData]);
 
-  const value = React.useMemo(() => ({ user, logout }), [logout, user]);
+  const value: AuthContextValue = React.useMemo(
+    () => ({ user, logout }),
+    [logout, user]
+  );
 
   if (isLoading || isIdle) {
     return <FullPageProgress />;
   }
 
   if (isError) {
-    return <p> error</p>;
+    return <p> {error.statusText}</p>;
   }
 
   if (isSuccess) {

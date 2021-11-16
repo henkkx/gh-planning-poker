@@ -13,7 +13,11 @@ export const App = () => {
 
   return (
     <React.Suspense fallback={<FullPageProgress />}>
-      {isAuthenticated ? <AuthenticatedApp /> : <UnauthenticatedApp />}
+      {isAuthenticated ? (
+        <AuthenticatedApp user={user} />
+      ) : (
+        <UnauthenticatedApp />
+      )}
     </React.Suspense>
   );
 };

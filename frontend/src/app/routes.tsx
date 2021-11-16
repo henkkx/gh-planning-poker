@@ -1,8 +1,7 @@
 import * as React from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import { CreateSessionView } from "../screens/create-session";
 import Home from "../screens/home";
-import Login from "../screens/login";
 
 function AppRoutes() {
   return (

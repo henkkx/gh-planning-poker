@@ -15,6 +15,7 @@ import { OrgRepoSwitch } from "../../components/Form/OrgRepoSwitch";
 import { OrgTextField } from "../../components/Form/OrgTextField";
 import { RepoTextField } from "../../components/Form/RepoTextField";
 import CreateSessionImg from "./create_game.svg";
+import * as api from "../../api";
 
 interface FormElements extends HTMLFormControlsCollection {
   orgInput?: HTMLInputElement;
@@ -27,13 +28,16 @@ interface GithubFormElement extends HTMLFormElement {
 export const CreateSessionView = () => {
   const [isOrgRepoSelected, orgRepo] = useBoolean(false);
 
-  function handleSubmit(e: React.FormEvent<GithubFormElement>) {
+  async function handleSubmit(e: React.FormEvent<GithubFormElement>) {
     e.preventDefault();
     const { repoInput, orgInput } = e.currentTarget.elements;
-    if (orgInput) {
-      alert(orgInput.value);
-    } else {
-      alert(repoInput.value);
+
+    const repoData = { repo_name: repoInput.value, org_name: orgInput?.value };
+    const csrfToken = await api.getCSRF();
+    try {
+      await api.createPokerSession(repoData, csrfToken);
+    } catch (err) {
+      console.log(err);
     }
   }
 

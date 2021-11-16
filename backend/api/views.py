@@ -1,22 +1,47 @@
-from rest_framework import status
+from django.middleware.csrf import get_token
+from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework import viewsets
+from rest_framework.generics import ListAPIView
+from .utils import get_github_repo, get_github_user
 
-from api.utils import get_github_user
-
+from poker.models import PlanningPokerSession
+from users.models import User
+from .serializers import PlanningPokerSessionSerializer, UserSearchSerializer
 from .mixins import AuthRequiredMixin
 
 
-class SimpleAPIView(APIView):
+@api_view()
+def get_csrf(request):
+    return Response({'detail': 'CSRF cookie set'}, headers={'X-CSRFToken': get_token(request)})
+
+
+class UserInfo(AuthRequiredMixin, APIView):
+
     def get(self, request):
-        text = request.query_params.get('text', '')
-        return Response({"text": text.upper()}, status=status.HTTP_200_OK)
+        user = request.user
+
+        return Response({
+            'name': user.name,
+            'email': user.email,
+            'isAuthenticated': True
+        })
+
+
+user_info_view = UserInfo.as_view()
 
 
 class ChooseRepo(AuthRequiredMixin, APIView):
-    def get(self, request, repo):
-
+    def get(self, request):
+        params = request.GET
+        repo = params.get('repo')
+        org = params.get('org')
+        if org is None:
+            pass
         user = get_github_user(request.user)
+
         return Response(repo.name for repo in user.get_repos())
 
 
@@ -26,3 +51,46 @@ choose_repo_view = ChooseRepo.as_view()
 class Orgs(AuthRequiredMixin, APIView):
     def get(self, request):
         pass
+
+
+class PlanningPokerSessionViewSet(AuthRequiredMixin, viewsets.ModelViewSet):
+    queryset = PlanningPokerSession.objects.all()
+    serializer_class = PlanningPokerSessionSerializer
+    filterset_fields = ['id', 'current_task', 'tasks']
+
+    def perform_create(self, serializer):
+        user = self.request.user
+
+        post_data = self.request.data
+        repo_name = post_data.get('repo_name')
+        org_name = post_data.get('org_name')
+
+        repo = get_github_repo(user, repo_name, org_name)
+        issues = repo.get_issues(state='open')
+
+        fields = {
+            "repo_name": repo_name,
+            "org_name": org_name,
+            "moderator": user,
+            "issues": issues
+        }
+
+        serializer.save(**fields)
+
+
+class UserSearchView(AuthRequiredMixin, ListAPIView):
+    queryset = User.objects.filter(is_active=True).all()
+    serializer_class = UserSearchSerializer
+    filter_backends = [filters.SearchFilter, ]
+    search_fields = ["email"]
+
+    def get(self, request, *args, **kwargs):
+        params = request.query_params
+        poker_session_id = params.get("poker_session", "")
+        search = params.get("search", "")
+        if not poker_session_id.isdigit() or not PlanningPokerSession.objects.filter(id=poker_session_id).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if len(search) < 3:
+            return Response([])
+
+        return super().get(request, *args, **kwargs)

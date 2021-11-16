@@ -4,7 +4,6 @@ import {
   Flex,
   Heading,
   Img,
-  SimpleGrid,
   Text,
   useColorModeValue as mode,
 } from "@chakra-ui/react";
@@ -12,7 +11,7 @@ import * as React from "react";
 import { Link as RouterLink, Redirect } from "react-router-dom";
 import { useAuth } from "../../auth";
 import { usePathname } from "../../utils/hooks";
-import Login, { GithubButton } from "../login";
+import Login from "../login";
 import HeroImg from "./hero_illustration.svg";
 
 function Home() {

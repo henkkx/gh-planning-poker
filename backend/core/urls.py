@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.generic import TemplateView
 from django.conf import settings
+from users.views import github_oauth_callback
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('users/', include('users.urls')),
+    path('github-callback/', github_oauth_callback, name='gh_callback')
 ]
 
 if not settings.DEBUG:
