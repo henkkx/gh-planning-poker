@@ -6,4 +6,4 @@ release:
   command:
     - python3 manage.py migrate --no-input
 run:
-  web: bin/start-pgbouncer daphne core.asgi:application -b 0.0.0.0 -p $PORT
+  web: /bin/start-pgbouncer daphne core.asgi:application -b 0.0.0.0 -p $PORT
