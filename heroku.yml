@@ -3,6 +3,8 @@ build:
     web: Dockerfile.prod
 run:
   web: bin/start-pgbouncer daphne core.asgi:application -b 0.0.0.0 -p $PORT
+
 release:
+  image: web
   command:
     - python3 manage.py migrate
