@@ -47,10 +47,15 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 # db config
 db_from_env = dj_database_url.config(
-    default=DATABASE_URL, conn_max_age=500, ssl_require=True
+    default=DATABASE_URL, conn_max_age=500, ssl_require=True, engine='django_postgrespool2'
 )
 
 DATABASES['default'].update(db_from_env)
+
+DATABASE_POOL_ARGS = {
+    'max_overflow': 10,
+    'pool_size': 5,
+}
 
 # required when using pgbouncer's pool_mode=transaction
 DISABLE_SERVER_SIDE_CURSORS = True
