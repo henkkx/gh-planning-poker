@@ -47,7 +47,8 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 # db config
 db_from_env = dj_database_url.config(
-    default=DATABASE_URL, conn_max_age=500, ssl_require=True, engine='django_postgrespool2'
+    default=DATABASE_URL, conn_max_age=500, ssl_require=True,
+    engine='django_postgrespool2'
 )
 
 DATABASES['default'].update(db_from_env)
