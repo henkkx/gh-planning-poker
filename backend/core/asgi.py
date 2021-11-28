@@ -2,7 +2,6 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.urls import re_path
 from django.core.asgi import get_asgi_application
-from poker.consumers import PlanningPokerConsumer
 
 
 # Initialize Django ASGI application early to ensure the AppRegistry
@@ -10,14 +9,23 @@ from poker.consumers import PlanningPokerConsumer
 django_asgi_app = get_asgi_application()
 
 # os.environ['ASGI_THREADS'] = "5"
-application = ProtocolTypeRouter({
-    # Django's ASGI application to handle traditional HTTP requests
-    "http": django_asgi_app,
 
-    # WebSocket chat handler
-    "websocket": AuthMiddlewareStack(
-        URLRouter([
-            re_path(r"^some-route/$", PlanningPokerConsumer.as_asgi()),
-        ])
-    ),
-})
+
+def with_router(app):
+    # only import it after app is initalized so that Django Apps are loaded
+    from poker.consumers import PlanningPokerConsumer
+
+    return ProtocolTypeRouter({
+        # Django's ASGI application handler to handle traditional HTTP requests
+        "http": app,
+
+        # WebSocket handler for the game itself
+        "websocket": AuthMiddlewareStack(
+            URLRouter([
+                re_path(r"^some-route/$", PlanningPokerConsumer.as_asgi()),
+            ])
+        ),
+    })
+
+
+application = with_router(django_asgi_app)
