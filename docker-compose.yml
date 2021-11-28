@@ -11,6 +11,7 @@ services:
     tty: true
     depends_on:
       - db
+      - redis
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.dev
       - CLIENT_ID=${CLIENT_ID}
@@ -38,3 +39,9 @@ services:
     command: postgres -c listen_addresses='*'
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - 6379:6379

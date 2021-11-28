@@ -14,7 +14,7 @@ import { Card } from "../../components/Card";
 import { OrgRepoSwitch } from "../../components/Form/OrgRepoSwitch";
 import { OrgTextField } from "../../components/Form/OrgTextField";
 import { RepoTextField } from "../../components/Form/RepoTextField";
-import CreateSessionImg from "./create_game.svg";
+import CreateSessionImg from "./new_game.svg";
 import * as api from "../../api";
 
 interface FormElements extends HTMLFormControlsCollection {

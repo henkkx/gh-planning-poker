@@ -28,6 +28,7 @@ ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1"]
 
 # Application definition
 INSTALLED_APPS = [
+    # django stuff
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,10 +36,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+
+    # 3rd party
     'corsheaders',
-    # rest framework
+    'channels',
+    # have to extend channels_presence app config due to the following issue
+    # https://github.com/mitmedialab/django-channels-presence/issues/19
+    'poker.apps.ChannelsPresenceConfig',
     'rest_framework',
     'rest_framework.authtoken',
+
     # project specific apps
     'api',
     'users',
@@ -160,3 +167,16 @@ REACT_APP_BASE_URL = os.environ.get(
     'REACT_APP_BASE_URL', 'http://127.0.0.1:3000/')
 
 SUPER_USER_EMAIL = os.environ.get('SUPER_USER_EMAIL')
+ASGI_THREADS = 5
+
+ASGI_APPLICATION = 'core.asgi.application'
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}

@@ -57,6 +57,18 @@ DATABASE_POOL_ARGS = {
     'max_overflow': 10,
     'pool_size': 5,
 }
-
 # required when using pgbouncer's pool_mode=transaction
 DISABLE_SERVER_SIDE_CURSORS = True
+
+
+REDIS_URL = os.environ.get('REDIS_URL')
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    },
+}
