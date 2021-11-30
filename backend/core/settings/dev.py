@@ -22,3 +22,9 @@ DATABASES = {
         'PORT': 5432
     }
 }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

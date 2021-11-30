@@ -6,7 +6,6 @@ import {
   Heading,
   Stack,
   useBoolean,
-  useColorModeValue,
   Img,
 } from "@chakra-ui/react";
 import * as React from "react";
@@ -16,6 +15,7 @@ import { OrgTextField } from "../../components/Form/OrgTextField";
 import { RepoTextField } from "../../components/Form/RepoTextField";
 import CreateSessionImg from "./new_game.svg";
 import * as api from "../../api";
+import { useHistory } from "react-router-dom";
 
 interface FormElements extends HTMLFormControlsCollection {
   orgInput?: HTMLInputElement;
@@ -27,6 +27,7 @@ interface GithubFormElement extends HTMLFormElement {
 
 export const CreateSessionView = () => {
   const [isOrgRepoSelected, orgRepo] = useBoolean(false);
+  const history = useHistory();
 
   async function handleSubmit(e: React.FormEvent<GithubFormElement>) {
     e.preventDefault();
@@ -35,7 +36,9 @@ export const CreateSessionView = () => {
     const repoData = { repo_name: repoInput.value, org_name: orgInput?.value };
     const csrfToken = await api.getCSRF();
     try {
-      await api.createPokerSession(repoData, csrfToken);
+      const { id } = await api.createPokerSession(repoData, csrfToken);
+      console.log(id);
+      history.push(`/poker/${id}`);
     } catch (err) {
       console.log(err);
     }

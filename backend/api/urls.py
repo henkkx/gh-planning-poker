@@ -1,15 +1,12 @@
 from django.urls import path
-from rest_framework import routers
+
+from .views import planning_poker_session_view, get_csrf, user_info_view
 
 
-from .views import PlanningPokerSessionViewSet, get_csrf, user_info_view
+urlpatterns = [
 
-router = routers.DefaultRouter()
-
-router.register(r'poker-sessions',
-                PlanningPokerSessionViewSet, 'planningPokerSession')
-
-urlpatterns = router.urls + [
     path('users/me', user_info_view, name='user_info_view'),
+    path('poker', planning_poker_session_view,
+         name='planning_poker_sessions'),
     path('csrf', get_csrf, name='get_csrf_token')
 ]

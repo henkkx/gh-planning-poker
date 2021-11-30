@@ -1,10 +1,9 @@
-from django.middleware.csrf import get_token
-from rest_framework import filters, status
+from django.middleware import csrf
+from rest_framework import filters, mixins, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
-from rest_framework import viewsets
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from .utils import get_github_repo, get_github_user
 
 from poker.models import PlanningPokerSession
@@ -15,7 +14,8 @@ from .mixins import AuthRequiredMixin
 
 @api_view()
 def get_csrf(request):
-    return Response({'detail': 'CSRF cookie set'}, headers={'X-CSRFToken': get_token(request)})
+    csrf_token = csrf.get_token(request)
+    return Response({'detail': 'CSRF cookie set'}, headers={'X-CSRFToken': csrf_token})
 
 
 class UserInfo(AuthRequiredMixin, APIView):
@@ -53,7 +53,7 @@ class Orgs(AuthRequiredMixin, APIView):
         pass
 
 
-class PlanningPokerSessionViewSet(AuthRequiredMixin, viewsets.ModelViewSet):
+class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):
     queryset = PlanningPokerSession.objects.all()
     serializer_class = PlanningPokerSessionSerializer
     filterset_fields = ['id', 'current_task', 'tasks']
@@ -72,10 +72,13 @@ class PlanningPokerSessionViewSet(AuthRequiredMixin, viewsets.ModelViewSet):
             "repo_name": repo_name,
             "org_name": org_name,
             "moderator": user,
-            "issues": issues
+            "issues": issues,
         }
 
         serializer.save(**fields)
+
+
+planning_poker_session_view = PlanningPokerSessionView.as_view()
 
 
 class UserSearchView(AuthRequiredMixin, ListAPIView):

@@ -20,6 +20,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             self.channel_name,
             self.scope['user']
         )
+
         self.accept()
 
     def disconnect(self, _close_code):
@@ -27,8 +28,10 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
     @cached_property
     def current_session(self) -> PlanningPokerSession:
+        # additionally select the related current task object from db so that later use of
+        # PlanningPokerSession.current_task does not require hitting the database again
         return PlanningPokerSession.objects.select_related('current_task').get(
-            pk=self.scope['url_route']['kwargs']['planning_poker_session']
+            pk=self.scope['url_route']['kwargs']['game_id']
         )
 
     def send_event(self, name: str, **data):
