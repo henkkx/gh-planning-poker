@@ -41,7 +41,7 @@ jobs:
       - name: Django tests
         run: |
           cd backend
-          pytest
+          DJANGO_SETTINGS_MODULE=core.settings.base pytest
       # - name: Tests coverage
       #   run: |
       #     cd backend
