@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9.0-slim-buster
+FROM python:3.10.0-slim-buster
 
 # Adding backend directory to make absolute filepaths consistent across services
 WORKDIR /app/backend

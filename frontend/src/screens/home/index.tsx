@@ -20,7 +20,7 @@ function Home() {
   const path = usePathname();
 
   if (!isAuthenticated) {
-    if (path == "/login") {
+    if (path === "/login") {
       return <Login />;
     } else if (path !== "/") {
       return <Redirect to="/" />;
@@ -44,7 +44,7 @@ function Home() {
         <Box flex="1" maxW={{ lg: "xl" }} pt="6">
           <Heading as="h1" size="3xl" mt="8" fontWeight="extrabold">
             {isAuthenticated
-              ? `Welcome ${user.name}`
+              ? `Welcome ${user!.name}`
               : "Online Planning Poker with Github Integration"}
           </Heading>
           <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="xl">

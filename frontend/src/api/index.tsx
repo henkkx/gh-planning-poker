@@ -15,16 +15,15 @@ function getUserInfo(): Promise<User> {
 }
 
 function isResponseOk(response: Response) {
-  if (response.status >= 200 && response.status <= 299) {
+  if (200 <= response.status && response.status <= 299) {
     return response.json();
-  } else {
-    throw Error(response.statusText);
   }
+  throw Error(response.statusText);
 }
 
 type PokerSessionData = { repo_name: string; org_name?: string };
 function createPokerSession(data: PokerSessionData, crsfToken: string) {
-  return fetch("/api/poker-sessions/", {
+  return fetch("/api/poker", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

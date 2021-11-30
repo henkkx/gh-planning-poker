@@ -1,9 +1,4 @@
-import {
-  Link,
-  LinkProps,
-  chakra,
-  useColorModeValue as mode,
-} from "@chakra-ui/react";
+import { LinkProps, chakra, useColorModeValue as mode } from "@chakra-ui/react";
 import * as React from "react";
 import { Link as RouterLink } from "react-router-dom";
 

@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/layout";
-import { Progress, Spinner } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import * as React from "react";
 
 const FullPageProgress = () => (

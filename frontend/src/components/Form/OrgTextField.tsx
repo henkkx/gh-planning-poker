@@ -1,10 +1,4 @@
-import {
-  FormControl,
-  FormControlProps,
-  FormLabel,
-  InputProps,
-  Switch,
-} from "@chakra-ui/react";
+import { FormControl, FormLabel, InputProps } from "@chakra-ui/react";
 import React from "react";
 import { Input } from "./Input";
 

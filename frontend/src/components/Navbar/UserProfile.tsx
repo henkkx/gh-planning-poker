@@ -1,5 +1,4 @@
-import { BellIcon } from "@chakra-ui/icons";
-import { Flex, IconButton, HStack, Avatar, Text } from "@chakra-ui/react";
+import { Flex, HStack, Avatar, Text } from "@chakra-ui/react";
 import * as React from "react";
 
 interface Props {
@@ -9,7 +8,7 @@ interface Props {
 }
 
 export const UserProfile: React.FC<Props> = (props) => {
-  const { name, email, avatarUrl } = props;
+  const { name, email } = props;
   return (
     <HStack spacing={3} order={{ base: 1, md: 2 }} flex="1">
       <Avatar name={name} size="sm" />

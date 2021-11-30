@@ -42,8 +42,8 @@ function AuthProvider(props: AuthContextProps) {
   const logout = React.useCallback(() => {
     // auth.logout();
     // queryCache.clear();
-    // setData(null);
-  }, [setData]);
+    // setData(undefined);
+  }, []);
 
   const value: AuthContextValue = React.useMemo(
     () => ({ user, logout }),

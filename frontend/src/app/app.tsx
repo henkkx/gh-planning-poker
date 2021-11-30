@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useAuth } from "../auth";
+import { useAuth, User } from "../auth";
 import { FullPageProgress } from "../components/Spinner";
 
 const AuthenticatedApp = React.lazy(
@@ -9,15 +9,10 @@ const UnauthenticatedApp = React.lazy(() => import("../screens/home/"));
 
 export const App = () => {
   const { user } = useAuth();
-  const isAuthenticated = !!user;
 
   return (
     <React.Suspense fallback={<FullPageProgress />}>
-      {isAuthenticated ? (
-        <AuthenticatedApp user={user} />
-      ) : (
-        <UnauthenticatedApp />
-      )}
+      {user ? <AuthenticatedApp user={user} /> : <UnauthenticatedApp />}
     </React.Suspense>
   );
 };

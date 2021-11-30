@@ -8,7 +8,6 @@ import {
 import * as React from "react";
 import { FaGithub } from "react-icons/fa";
 import { openGithubLoginPage } from "../../auth/github";
-import { ColorModeSwitcher } from "../../components/ColorModeSwitcher";
 import { Card } from "../../components/Card";
 
 export function GithubButton() {
