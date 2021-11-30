@@ -8,7 +8,6 @@ from django.core.asgi import get_asgi_application
 django_asgi_app = get_asgi_application()
 
 # os.environ['ASGI_THREADS'] = "5"
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.dev')
 
 
 def get_poker_urlpatterns():
