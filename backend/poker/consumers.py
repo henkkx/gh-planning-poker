@@ -14,7 +14,12 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         }
 
     def connect(self):
-        self.room_name = f'planning_poker_session_{self.current_session.id}'
+        try:
+            self.room_name = f'planning_poker_session_{self.current_session.id}'
+        except PlanningPokerSession.DoesNotExist:
+            self.room_name = 'rejected'
+            self.close(code=4004)
+
         Room.objects.add(
             self.room_name,
             self.channel_name,

@@ -4,11 +4,14 @@ import {
   Flex,
   Heading,
   Text,
-  useColorModeValue as mode,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import { FullPageProgress } from "../../components/Spinner";
+import { NotFoundCard } from "../not-found/not-found-card";
+import Game from "./game";
 
 type PokerParams = {
   id: string;
@@ -29,7 +32,8 @@ const HOST = isDev ? "127.0.0.1:8000" : window.location.host;
 
 function Poker(props: any) {
   const { id } = useParams<PokerParams>();
-
+  const textColor = useColorModeValue("gray.600", "gray.400");
+  const [closeCode, setCloseCode] = React.useState<number | null>(null);
   const pokerGamePath = `/ws/poker/${id}`;
   const socketUrl = WS_PREFIX + HOST + pokerGamePath;
 
@@ -39,7 +43,9 @@ function Poker(props: any) {
 
   const { sendJsonMessage, lastJsonMessage, readyState, getWebSocket } =
     useWebSocket(socketUrl, {
-      onOpen: () => alert("opened"),
+      onClose: (e: CloseEvent) => {
+        setCloseCode(e.code);
+      },
       // shouldReconnect: (_) => !didUnmount.current,
       // reconnectAttempts: 1,
       // reconnectInterval: 3000,
@@ -55,52 +61,37 @@ function Poker(props: any) {
     };
   }, [readyState]);
 
+  let content;
+
+  const handleSendVote = React.useCallback((vote: number) => {
+    sendJsonMessage({ event: "vote", data: vote });
+  }, []);
+
+  switch (readyState) {
+    case ReadyState.CONNECTING:
+      content = <FullPageProgress />;
+      break;
+    case ReadyState.CLOSED:
+      content =
+        closeCode === 1006 ? (
+          <NotFoundCard message={`Could not find a session with id: ${id}`} />
+        ) : (
+          <p> something went wrong </p>
+        );
+      break;
+    default:
+      content = <Game sendVote={handleSendVote} />;
+  }
+
   return (
     <Box
-      pt="24"
+      pt="4"
       pb="12"
       maxW={{ base: "xl", md: "7xl" }}
       mx="auto"
       px={{ base: "6", md: "8" }}
     >
-      <Flex
-        align="flex-start"
-        direction={{ base: "column", lg: "row" }}
-        justify="space-between"
-        mb="20"
-      >
-        <Box flex="1" maxW={{ lg: "xl" }} pt="6">
-          <Heading as="h1" size="3xl" mt="8" fontWeight="extrabold">
-            Online Planning Poker with Github Integration
-          </Heading>
-          <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="xl">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua
-            adipiscing elit.
-          </Text>
-
-          <Button
-            mt="8"
-            minW="14rem"
-            colorScheme="blue"
-            size="lg"
-            height="14"
-            px="8"
-            fontSize="md"
-            fontWeight="bold"
-          >
-            do smth
-          </Button>
-        </Box>
-        <Box boxSize={{ base: "20", lg: "8" }} />
-      </Flex>
-      <Box>
-        <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="sm">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua adipiscing
-          elit.
-        </Text>
-      </Box>
+      {content}
     </Box>
   );
 }

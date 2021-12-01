@@ -3,7 +3,7 @@ from users.services import create_user
 from users.models import User
 
 
-class SimpleTestCase(TestCase):
+class TestService(TestCase):
 
     def test_create_user(self):
         email = 'user@example.com'
