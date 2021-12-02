@@ -29,7 +29,7 @@ function AuthenticatedApp({ user }: Props) {
           <NavTabLink isActive={path === "/"} to="/">
             Home
           </NavTabLink>
-          <NavTabLink isActive={path === "/play"} to="/play">
+          <NavTabLink isActive={path.startsWith("/play")} to="/play">
             Play
           </NavTabLink>
         </Navbar.Links>

@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels_presence.models import Room
 from django.utils.functional import cached_property
@@ -10,8 +11,13 @@ from .models import PlanningPokerSession
 class PlanningPokerConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.events = {
+        self.event_handlers = {
+            'vote': self.save_vote
         }
+
+    @property
+    def user(self):
+        return self.scope['user']
 
     def connect(self):
         try:
@@ -19,17 +25,24 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         except PlanningPokerSession.DoesNotExist:
             self.room_name = 'rejected'
             self.close(code=4004)
+            return
 
         Room.objects.add(
             self.room_name,
             self.channel_name,
-            self.scope['user']
+            self.user
         )
 
         self.accept()
+        self.send_current_task(to_everyone=False)
 
     def disconnect(self, _close_code):
         Room.objects.remove(self.room_name, self.channel_name)
+
+    def receive_json(self, content: dict):
+        kwargs = content['data']
+        handler = self.event_handlers[content.pop('event')]
+        handler(**kwargs)
 
     @cached_property
     def current_session(self) -> PlanningPokerSession:
@@ -39,9 +52,49 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             pk=self.scope['url_route']['kwargs']['game_id']
         )
 
-    def send_event(self, name: str, **data):
-        print(name, data)
+    def send_event(self, event: str, to_everyone=True, **data):
+        if to_everyone:
+            send_func = self.channel_layer.group_send
+            destination = self.room_name
+        else:
+            send_func = self.channel_layer.send
+            destination = self.channel_name
+
+        payload = {
+            "type": "send.json",
+            "event": event,
+            "data": data
+        }
+
+        send = async_to_sync(send_func)
+        send(destination, payload)
+
+    def send_current_task(self, to_everyone=True):
+        current_task = self.current_session.current_task
+        self.send_event(
+            event='new_task_to_estimate',
+            to_everyone=to_everyone,
+            id=current_task.id,
+            title=current_task.title,
+            description=current_task.description
+        )
 
     def participants_changed(self, message: Dict):
         participants: List[Dict] = message['data']['participants']
         self.send_event('participants_changed', participants=participants)
+
+    def save_vote(self, vote: int):
+
+        self.current_session.refresh_from_db()
+
+        current_task = self.current_session.current_task
+
+        if current_task is None:
+            return
+
+        v = current_task.votes.create(
+            task=current_task, user=self.user, estimate=vote
+        )
+
+        v.save()
+        current_task.save()

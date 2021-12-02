@@ -38,7 +38,7 @@ export const CreateSessionView = () => {
     try {
       const { id } = await api.createPokerSession(repoData, csrfToken);
       console.log(id);
-      history.push(`/poker/${id}`);
+      history.push(`/play/${id}`);
     } catch (err) {
       console.log(err);
     }

@@ -43,7 +43,8 @@ def get_github_user_info(access_token: str) -> Dict[str, str]:
         email_info = user.get_emails()[0]
         email_adr = email_info[0]
 
-    fullname = user.name
+    # users are not guaranteed to have a name
+    fullname = user.name or email_adr
     user_info = {
         "email": email_adr,
         "name": fullname,

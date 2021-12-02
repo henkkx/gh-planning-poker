@@ -1,20 +1,54 @@
+from typing import Tuple
+from django.db import connections
 import pytest
+from unittest import mock
+from channels.testing.websocket import WebsocketCommunicator
 
+from core.asgi import application
 from poker.models import PlanningPokerSession, Task
 from poker.consumers import PlanningPokerConsumer
 from users.services import create_user
 
 
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
+
+
 @pytest.fixture
-def task(db):
-    return Task.objects.create(title='title', description='description', is_imported=False)
+def task_factory(db):
+    def _factory(title='title', description='description', is_imported=True, **kwargs):
+        return Task.objects.create(title=title, description=description, is_imported=is_imported, **kwargs)
+    return _factory
+
+
+@pytest.fixture
+def task(db, task_factory):
+    t = task_factory()
+    return t
+
+
+@pytest.fixture
+def poker_factory(task_factory, user):
+    def _factory(moderator=user, tasks=2):
+        session = PlanningPokerSession.objects.create(moderator=moderator)
+        tasks = [task_factory(title=f"task-{i+1}") for i in range(tasks)]
+        for task in tasks:
+            task.planningpokersession = session
+            task.save()
+        session.current_task = tasks[0]
+        session.save()
+        return session
+    return _factory
 
 
 @pytest.fixture
 def planning_poker_session(db, task, user):
     session = PlanningPokerSession.objects.create(moderator=user)
+    session.current_task = task
     task.planningpokersession = session
     task.save()
+    session.save()
     return session
 
 
@@ -37,3 +71,30 @@ def user_factory():
 @pytest.fixture
 def user(user_factory, db):
     return user_factory('user@email.com', 'token', name='firstname lastname')
+
+
+@pytest.fixture
+def planning_poker_ws_client(db, planning_poker_session, user) -> Tuple[PlanningPokerSession, WebsocketCommunicator]:
+    game_id = planning_poker_session.id
+    ws_communicator = WebsocketCommunicator(
+        application=application,
+        path=f'ws/poker/{game_id}'
+    )
+    ws_communicator.scope['user'] = user
+    return planning_poker_session, ws_communicator
+
+
+@pytest.fixture
+def fix_async_db():
+    local = connections._connections
+    ctx = local._get_context_id()
+    for conn in connections.all():
+        conn.inc_thread_sharing()
+    conn = connections.all()[0]
+    old = local._get_context_id
+    try:
+        with mock.patch.object(conn, 'close'):
+            object.__setattr__(local, '_get_context_id', lambda: ctx)
+            yield
+    finally:
+        object.__setattr__(local, '_get_context_id', old)

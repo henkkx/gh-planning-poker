@@ -1,12 +1,9 @@
 import {
   Box,
   Button,
-  chakra,
   Divider,
   Heading,
   Stack,
-  useBoolean,
-  useColorModeValue,
   Img,
   Text,
   Center,
@@ -14,7 +11,7 @@ import {
 import * as React from "react";
 import { Card } from "../../components/Card";
 
-import NotFoundImg from "./not-found.svg";
+import ErrorImg from "./error.svg";
 import { Link } from "react-router-dom";
 
 const DEFAULT_MESSAGE = "We could not find the the page you're looking for.";
@@ -23,7 +20,7 @@ type Props = {
   message?: string;
 };
 
-export const NotFoundCard = ({ message }: Props) => {
+export const ErrorCard = ({ message }: Props) => {
   return (
     <Card>
       <Stack direction={["column", "row"]} spacing="24px">
@@ -39,7 +36,7 @@ export const NotFoundCard = ({ message }: Props) => {
             </Button>
           </Center>
         </Box>
-        <Img maxW="xs" src={NotFoundImg} />
+        <Img maxW="xs" src={ErrorImg} />
       </Stack>
     </Card>
   );

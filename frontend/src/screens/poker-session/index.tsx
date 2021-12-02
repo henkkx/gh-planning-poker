@@ -10,7 +10,7 @@ import * as React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FullPageProgress } from "../../components/Spinner";
-import { NotFoundCard } from "../not-found/not-found-card";
+import { ErrorCard } from "../error/";
 import Game from "./game";
 
 type PokerParams = {
@@ -54,17 +54,19 @@ function Poker(props: any) {
   const currentStatus = wsStates[readyState];
 
   React.useEffect(() => {
-    console.log(currentStatus);
-
     return () => {
       didUnmount.current = true;
     };
-  }, [readyState]);
+  }, []);
+
+  React.useEffect(() => {
+    console.log(lastJsonMessage);
+  }, [lastJsonMessage]);
 
   let content;
 
   const handleSendVote = React.useCallback((vote: number) => {
-    sendJsonMessage({ event: "vote", data: vote });
+    sendJsonMessage({ event: "vote", data: { vote } });
   }, []);
 
   switch (readyState) {
@@ -74,7 +76,7 @@ function Poker(props: any) {
     case ReadyState.CLOSED:
       content =
         closeCode === 1006 ? (
-          <NotFoundCard message={`Could not find a session with id: ${id}`} />
+          <ErrorCard message={`Could not find a session with id: ${id}`} />
         ) : (
           <p> something went wrong </p>
         );
