@@ -86,7 +86,7 @@ class TestWebSocket:
         mock_handler.assert_called_with(**data)
 
     @pytest.mark.django_db(transaction=True)
-    def test_vote_is_saved(self, settings, task, poker_consumer):
+    def test_vote_is_saved(self, task, poker_consumer):
         USER_VOTE = 40
         user = poker_consumer.scope['user']
 
