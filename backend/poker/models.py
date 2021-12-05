@@ -85,7 +85,7 @@ class Vote(models.Model):
         related_name='votes'
     )
 
-    estimate = models.PositiveSmallIntegerField(
+    value = models.PositiveSmallIntegerField(
         choices=HOURS_TO_COMPLETE_CHOICES
     )
 

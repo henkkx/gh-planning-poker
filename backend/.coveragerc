@@ -1,9 +1,14 @@
-[report]
+[run]
 omit=
     # virtual environment
-    ./venv/*
+    ./ve/*
     # static files
     ./static/*
     ./staticfiles/*
     # python files
     */migrations/*
+    ./manage.py
+
+[report]
+show_missing = True
+skip_covered = True

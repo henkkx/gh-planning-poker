@@ -1,10 +1,7 @@
-from github import Github
 from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
 from django.contrib.auth import login
-from rest_framework.views import APIView
-from rest_framework.response import Response
 
 
 from api.mixins import AuthRequiredMixin

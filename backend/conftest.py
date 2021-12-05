@@ -65,12 +65,14 @@ def poker_consumer(db, planning_poker_session, user):
 
 @pytest.fixture
 def user_factory():
-    return create_user
+    def _factory(email='user@email.com', access_token='token', **kwargs):
+        return create_user(email=email, access_token=access_token, **kwargs)
+    return _factory
 
 
 @pytest.fixture
 def user(user_factory, db):
-    return user_factory('user@email.com', 'token', name='firstname lastname')
+    return user_factory(name='firstname lastname')
 
 
 @pytest.fixture
@@ -85,16 +87,5 @@ def planning_poker_ws_client(db, planning_poker_session, user) -> Tuple[Planning
 
 
 @pytest.fixture
-def fix_async_db():
-    local = connections._connections
-    ctx = local._get_context_id()
-    for conn in connections.all():
-        conn.inc_thread_sharing()
-    conn = connections.all()[0]
-    old = local._get_context_id
-    try:
-        with mock.patch.object(conn, 'close'):
-            object.__setattr__(local, '_get_context_id', lambda: ctx)
-            yield
-    finally:
-        object.__setattr__(local, '_get_context_id', old)
+def mock_async_to_sync(monkeypatch):
+    monkeypatch.setattr('poker.consumers.async_to_sync', lambda args: args)

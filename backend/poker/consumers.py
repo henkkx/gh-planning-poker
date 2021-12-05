@@ -83,7 +83,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         participants: List[Dict] = message['data']['participants']
         self.send_event('participants_changed', participants=participants)
 
-    def save_vote(self, vote: int):
+    def save_vote(self, value: int):
 
         self.current_session.refresh_from_db()
 
@@ -92,9 +92,14 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         if current_task is None:
             return
 
-        v = current_task.votes.create(
-            task=current_task, user=self.user, estimate=vote
+        _, created = current_task.votes.update_or_create(
+            user=self.user, defaults={'value': value}
         )
 
-        v.save()
         current_task.save()
+        self.send_event(
+            'vote_cast',
+            to_everyone=False,
+            created=created,
+            value=value
+        )

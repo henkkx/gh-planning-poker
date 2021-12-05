@@ -65,8 +65,8 @@ function Poker(props: any) {
 
   let content;
 
-  const handleSendVote = React.useCallback((vote: number) => {
-    sendJsonMessage({ event: "vote", data: { vote } });
+  const handleSendVote = React.useCallback((value: number) => {
+    sendJsonMessage({ event: "vote", data: { value } });
   }, []);
 
   switch (readyState) {

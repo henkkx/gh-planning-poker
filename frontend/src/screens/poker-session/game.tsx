@@ -28,7 +28,7 @@ const VOTING_OPTIONS: VotingOptions = [
 const OTHER_OPTIONS = {};
 
 type Props = {
-  sendVote: (vote: number) => void;
+  sendVote: (value: number) => void;
 };
 
 function Game({ sendVote }: Props) {

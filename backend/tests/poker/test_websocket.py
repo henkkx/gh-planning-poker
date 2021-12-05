@@ -29,10 +29,8 @@ class TestWebSocket:
         assert code == 4004
         await ws.disconnect()
 
-    @patch('poker.consumers.async_to_sync')
     @pytest.mark.parametrize('to_everyone', [True, False])
-    def test_send_event(self, mock_async_to_sync, to_everyone, poker_consumer):
-        mock_async_to_sync.side_effect = lambda args: args
+    def test_send_event(self, to_everyone, mock_async_to_sync, poker_consumer):
 
         mock_group_send = Mock()
         mock_send = Mock()
@@ -85,10 +83,12 @@ class TestWebSocket:
 
         mock_handler.assert_called_with(**data)
 
-    @pytest.mark.django_db(transaction=True)
-    def test_vote_is_saved(self, task, poker_consumer):
+    @pytest.mark.django_db
+    def test_vote_is_saved(self, task, poker_consumer, mock_async_to_sync):
         USER_VOTE = 40
         user = poker_consumer.scope['user']
+
+        poker_consumer.channel_layer = Mock()
 
         current_session = poker_consumer.current_session
         current_session.current_task = task
@@ -96,4 +96,15 @@ class TestWebSocket:
 
         poker_consumer.save_vote(USER_VOTE)
 
-        assert task.votes.filter(user=user, estimate=USER_VOTE).exists()
+        assert task.votes.filter(user=user, value=USER_VOTE).exists()
+
+        PREV_VOTE = USER_VOTE
+        NEW_VOTE = 1
+        poker_consumer.save_vote(NEW_VOTE)
+
+        assert not task.votes.filter(user=user, value=PREV_VOTE).exists()
+        assert task.votes.filter(user=user, value=NEW_VOTE).exists()
+
+    @pytest.mark.django_db
+    def test_(self):
+        pass
