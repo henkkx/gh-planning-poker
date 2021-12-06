@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from channels.testing import WebsocketCommunicator
+from channels.db import database_sync_to_async
 from core.asgi import application
 
 
@@ -28,16 +29,10 @@ class TestPlanningPokerConsumer:
         await ws.disconnect()
 
     @pytest.mark.parametrize('to_everyone', [True, False])
-    def test_send_event(self, to_everyone, mock_async_to_sync, poker_consumer):
-
-        mock_group_send = Mock()
-        mock_send = Mock()
-
-        class MockChannelLayer:
-            group_send = mock_group_send
-            send = mock_send
-
-        poker_consumer.channel_layer = MockChannelLayer()
+    def test_send_event(self, to_everyone, mock_async_to_sync, mock_channel_layer, poker_consumer):
+        poker_consumer.channel_layer = mock_channel_layer
+        mock_send = mock_channel_layer.send
+        mock_group_send = mock_channel_layer.group_send
 
         EVENT = 'some_event'
         ROOM = 'room'
@@ -152,3 +147,32 @@ class TestPlanningPokerConsumer:
                 )
             else:
                 mock_send_event.assert_called_with(event='no_tasks_left')
+
+    def test_moderator_can_reveal_cards(self, poker_consumer, user_factory, mock_channel_layer, mock_async_to_sync,):
+        current_session = poker_consumer.current_session
+        poker_consumer.channel_layer = mock_channel_layer
+        user = user_factory(email='regular@email.com', name='regular user')
+        poker_consumer.scope['user'] = user
+        poker_consumer.save_vote(1)
+
+        with patch.object(poker_consumer, 'send_event', Mock()) as mock_send_event:
+            poker_consumer.reveal_cards()
+            mock_send_event.assert_not_called()
+
+        moderator = user_factory(
+            email='moderator@email.com', name='Moderator')
+        current_session.moderator = moderator
+        current_session.save()
+        poker_consumer.scope['user'] = moderator
+
+        poker_consumer.save_vote(40)
+
+        with patch.object(poker_consumer, 'send_event', Mock()) as mock_send_event:
+            poker_consumer.reveal_cards()
+            mock_send_event.assert_called_with(
+                'cards_revealed',
+                to_everyone=True,
+                votes=[
+                    (1, 'regular user voted 1 hour'),
+                    (40, 'Moderator voted 40 hours')]
+            )

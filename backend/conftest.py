@@ -1,3 +1,4 @@
+from unittest.mock import Mock
 import pytest
 from typing import Tuple
 from channels.testing.websocket import WebsocketCommunicator
@@ -96,3 +97,15 @@ def planning_poker_ws_client(planning_poker_ws_client_factory) -> Tuple[Planning
 @pytest.fixture
 def mock_async_to_sync(monkeypatch):
     monkeypatch.setattr('poker.consumers.async_to_sync', lambda args: args)
+
+
+@pytest.fixture
+def mock_channel_layer():
+    mock_group_send = Mock()
+    mock_send = Mock()
+
+    class MockChannelLayer:
+        group_send = mock_group_send
+        send = mock_send
+
+    return MockChannelLayer()

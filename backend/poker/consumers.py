@@ -12,7 +12,8 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.event_handlers = {
-            'vote': self.save_vote
+            'vote': self.save_vote,
+            'reveal_cards': self.reveal_cards
         }
 
     @property
@@ -110,4 +111,19 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             to_everyone=False,
             created=created,
             value=value
+        )
+
+    def reveal_cards(self):
+        if not self.user == self.current_session.moderator:
+            return
+
+        votes = [
+            (vote.value, str(vote))
+            for vote in self.current_session.current_task.votes.all()
+        ]
+
+        self.send_event(
+            'cards_revealed',
+            to_everyone=True,
+            votes=votes
         )
