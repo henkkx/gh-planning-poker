@@ -1,12 +1,13 @@
 import {
   Box,
-  Button,
   Divider,
   Heading,
   Stack,
   Img,
   Text,
   Center,
+  Button,
+  VStack,
 } from "@chakra-ui/react";
 import * as React from "react";
 import { Card } from "../../components/Card";
@@ -21,6 +22,9 @@ type Props = {
 };
 
 export const ErrorCard = ({ message }: Props) => {
+  const refreshPage = () => {
+    window.location.reload();
+  };
   return (
     <Card>
       <Stack direction={["column", "row"]} spacing="24px">
@@ -31,9 +35,12 @@ export const ErrorCard = ({ message }: Props) => {
           <Text> Error: 404 Not Found </Text>
           <Divider mb="6" />
           <Center>
-            <Button as={Link} to="/">
-              Take Me Back to the Home Page
-            </Button>
+            <VStack>
+              <Button onClick={refreshPage}> Try Again </Button>
+              <Button as={Link} to="/">
+                Take Me Back to the Home Page
+              </Button>
+            </VStack>
           </Center>
         </Box>
         <Img maxW="xs" src={ErrorImg} />
