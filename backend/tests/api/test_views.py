@@ -1,5 +1,6 @@
 import pytest
 
+from tests.utils import AnyInt
 from poker.models import PlanningPokerSession
 from .github_mocks import MockGithub
 
@@ -44,13 +45,13 @@ class TestPokerSessionViews:
         response = api_client.post('/api/poker', data, format='json')
         assert response.status_code == 201
         assert response.data == {
-            'id': 1,
-            'current_task': 1,
+            'id': AnyInt(),
+            'current_task': AnyInt(),
             'repo_name': REPO_NAME,
             'org_name': ORG_NAME if is_org_repo else None
         }
 
-        all_objs = PlanningPokerSession.objects.all()
+        all = PlanningPokerSession.objects.all()
 
-        assert len(all_objs) == 1
-        assert all_objs.first().repo_name == REPO_NAME
+        assert len(all) == 1
+        assert all.filter(repo_name=REPO_NAME).exists()

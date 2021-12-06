@@ -33,11 +33,11 @@ class TestPlanningPokerConsumer:
         mock_group_send = Mock()
         mock_send = Mock()
 
-        class ChannelLayer:
+        class MockChannelLayer:
             group_send = mock_group_send
             send = mock_send
 
-        poker_consumer.channel_layer = ChannelLayer()
+        poker_consumer.channel_layer = MockChannelLayer()
 
         EVENT = 'some_event'
         ROOM = 'room'

@@ -29,8 +29,7 @@ def task_factory():
 
 @pytest.fixture
 def task(task_factory):
-    t = task_factory()
-    return t
+    return task_factory()
 
 
 @pytest.fixture
