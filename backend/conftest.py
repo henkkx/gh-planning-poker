@@ -3,11 +3,18 @@ from django.db import connections
 import pytest
 from unittest import mock
 from channels.testing.websocket import WebsocketCommunicator
+from rest_framework.test import APIClient
+
 
 from core.asgi import application
 from poker.models import PlanningPokerSession, Task
 from poker.consumers import PlanningPokerConsumer
 from users.services import create_user
+
+
+@pytest.fixture
+def api_client():
+    return APIClient()
 
 
 @pytest.fixture(autouse=True)
@@ -76,14 +83,22 @@ def user(user_factory, db):
 
 
 @pytest.fixture
-def planning_poker_ws_client(db, planning_poker_session, user) -> Tuple[PlanningPokerSession, WebsocketCommunicator]:
-    game_id = planning_poker_session.id
-    ws_communicator = WebsocketCommunicator(
-        application=application,
-        path=f'ws/poker/{game_id}'
-    )
-    ws_communicator.scope['user'] = user
-    return planning_poker_session, ws_communicator
+def planning_poker_ws_client_factory(db, planning_poker_session, user):
+    def _factory(connected_user=user, session=planning_poker_session) -> Tuple[PlanningPokerSession, WebsocketCommunicator]:
+        game_id = session.id
+        ws_communicator = WebsocketCommunicator(
+            application=application,
+            path=f'ws/poker/{game_id}'
+        )
+        ws_communicator.scope['user'] = connected_user
+        return session, ws_communicator
+
+    return _factory
+
+
+@pytest.fixture
+def planning_poker_ws_client(db, planning_poker_ws_client_factory) -> Tuple[PlanningPokerSession, WebsocketCommunicator]:
+    return planning_poker_ws_client_factory()
 
 
 @pytest.fixture

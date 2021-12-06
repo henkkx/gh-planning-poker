@@ -9,13 +9,16 @@ from .utils import get_github_repo, get_github_user
 from poker.models import PlanningPokerSession
 from users.models import User
 from .serializers import PlanningPokerSessionSerializer, UserSearchSerializer
-from .mixins import AuthRequiredMixin
+from .mixins import AuthRequiredMixin, PublicApiMixin
 
 
-@api_view()
-def get_csrf(request):
-    csrf_token = csrf.get_token(request)
-    return Response({'detail': 'CSRF cookie set'}, headers={'X-CSRFToken': csrf_token})
+class CSRF(PublicApiMixin, APIView):
+    def get(self, request):
+        csrf_token = csrf.get_token(request)
+        return Response({'detail': 'CSRF cookie set'}, headers={'X-CSRFToken': csrf_token})
+
+
+get_csrf = CSRF.as_view()
 
 
 class UserInfo(AuthRequiredMixin, APIView):

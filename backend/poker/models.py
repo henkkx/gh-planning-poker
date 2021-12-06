@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 from users.models import User
 
 NOT_ESTIMATED = None
@@ -66,7 +65,7 @@ class Task(models.Model):
     )
 
     def __str__(self):
-        return f"title: {self.title}, estimate: {self.hours if self.is_decided else 'not yet decided'}"
+        return f"{self.title}: {self.hours if self.is_decided else 'not yet decided'}"
 
     class Meta:
         db_table = "task"
@@ -96,4 +95,4 @@ class Vote(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.user} voted {self.get_estimate_display()} for task {self.task}"
+        return f"{self.user} voted {self.get_value_display()} for task {self.task}"

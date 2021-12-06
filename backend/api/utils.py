@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 from github import Github
 from github.Repository import Repository
 from github.AuthenticatedUser import AuthenticatedUser
@@ -25,5 +25,5 @@ def get_github_repo(user, repo_name: str, org_name: Union[str, None]) -> Reposit
     return repo
 
 
-def create_tasks_from_github_issues(issues: Issue):
+def create_tasks_from_github_issues(issues: List[Issue]):
     pass

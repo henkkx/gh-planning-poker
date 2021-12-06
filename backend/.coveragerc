@@ -8,6 +8,7 @@ omit=
     # python files
     */migrations/*
     ./manage.py
+    ./core/settings/*
 
 [report]
 show_missing = True

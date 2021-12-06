@@ -132,16 +132,6 @@ TIME_ZONE = 'Europe/London'
 
 USE_TZ = True
 
-# Authentication
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        ('rest_framework.permissions.AllowAny',)
-    ),
-
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        ('rest_framework.authentication.TokenAuthentication',)
-    ),
-}
 
 AUHTENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend", ]
 AUTH_USER_MODEL = 'users.User'
