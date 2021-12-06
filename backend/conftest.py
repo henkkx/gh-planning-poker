@@ -23,14 +23,14 @@ def enable_db_access_for_all_tests(db):
 
 
 @pytest.fixture
-def task_factory(db):
+def task_factory():
     def _factory(title='title', description='description', is_imported=True, **kwargs):
         return Task.objects.create(title=title, description=description, is_imported=is_imported, **kwargs)
     return _factory
 
 
 @pytest.fixture
-def task(db, task_factory):
+def task(task_factory):
     t = task_factory()
     return t
 
@@ -50,17 +50,12 @@ def poker_factory(task_factory, user):
 
 
 @pytest.fixture
-def planning_poker_session(db, task, user):
-    session = PlanningPokerSession.objects.create(moderator=user)
-    session.current_task = task
-    task.planningpokersession = session
-    task.save()
-    session.save()
-    return session
+def planning_poker_session(poker_factory):
+    return poker_factory()
 
 
 @pytest.fixture
-def poker_consumer(db, planning_poker_session, user):
+def poker_consumer(planning_poker_session):
     consumer = PlanningPokerConsumer()
     consumer.scope = {
         'url_route': {'kwargs': {'game_id': planning_poker_session.id}},
@@ -78,12 +73,12 @@ def user_factory():
 
 
 @pytest.fixture
-def user(user_factory, db):
+def user(user_factory):
     return user_factory(name='firstname lastname')
 
 
 @pytest.fixture
-def planning_poker_ws_client_factory(db, planning_poker_session, user):
+def planning_poker_ws_client_factory(planning_poker_session, user):
     def _factory(connected_user=user, session=planning_poker_session) -> Tuple[PlanningPokerSession, WebsocketCommunicator]:
         game_id = session.id
         ws_communicator = WebsocketCommunicator(
@@ -97,7 +92,7 @@ def planning_poker_ws_client_factory(db, planning_poker_session, user):
 
 
 @pytest.fixture
-def planning_poker_ws_client(db, planning_poker_ws_client_factory) -> Tuple[PlanningPokerSession, WebsocketCommunicator]:
+def planning_poker_ws_client(planning_poker_ws_client_factory) -> Tuple[PlanningPokerSession, WebsocketCommunicator]:
     return planning_poker_ws_client_factory()
 
 

@@ -17,6 +17,7 @@ class MockRepo:
 
 
 class MockGithubUser:
+
     def get_repo(self, user):
         return MockRepo()
 

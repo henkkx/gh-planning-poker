@@ -36,26 +36,6 @@ class UserInfo(AuthRequiredMixin, APIView):
 user_info_view = UserInfo.as_view()
 
 
-class ChooseRepo(AuthRequiredMixin, APIView):
-    def get(self, request):
-        params = request.GET
-        repo = params.get('repo')
-        org = params.get('org')
-        if org is None:
-            pass
-        user = get_github_user(request.user)
-
-        return Response(repo.name for repo in user.get_repos())
-
-
-choose_repo_view = ChooseRepo.as_view()
-
-
-class Orgs(AuthRequiredMixin, APIView):
-    def get(self, request):
-        pass
-
-
 class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):
     queryset = PlanningPokerSession.objects.all()
     serializer_class = PlanningPokerSessionSerializer

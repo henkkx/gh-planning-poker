@@ -6,7 +6,7 @@ from poker.models import PlanningPokerSession, Vote
 from core.asgi import application
 
 
-class TestWebSocket:
+class TestPlanningPokerConsumer:
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
@@ -71,7 +71,6 @@ class TestWebSocket:
         assert title == expected_title
         await ws.disconnect()
 
-    @pytest.mark.django_db()
     def test_user_added_to_poker_session(self, poker_consumer, user, mock_async_to_sync):
 
         current_session = poker_consumer.current_session
@@ -95,7 +94,6 @@ class TestWebSocket:
 
         mock_handler.assert_called_with(**data)
 
-    @pytest.mark.django_db
     @pytest.mark.parametrize('has_current_task', [True, False])
     def test_vote_is_saved(self, has_current_task, task, poker_consumer, mock_async_to_sync):
         USER_VOTE = 40
@@ -122,16 +120,37 @@ class TestWebSocket:
         else:
             assert not task.votes.filter(user=user, value=USER_VOTE).exists()
 
-    @pytest.mark.django_db
     def test_participants_changed(self, poker_consumer):
         participants = ['user1', 'user2']
-        mock_send_event = Mock()
         message = {'data': {'participants': participants}}
 
-        with patch.object(poker_consumer, 'send_event', mock_send_event):
+        with patch.object(poker_consumer, 'send_event', Mock()) as mock_send_event:
             poker_consumer.participants_changed(
                 message
             )
 
         mock_send_event.assert_called_with(
-            'participants_changed', participants=participants)
+            'participants_changed', participants=participants
+        )
+
+    @pytest.mark.parametrize('has_current_task', [True, False])
+    def test_send_current_task(self, has_current_task, poker_consumer, task):
+        current_session = poker_consumer.current_session
+
+        current_session.current_task = task if has_current_task else None
+        current_session.save()
+
+        current_task = current_session.current_task
+
+        with patch.object(poker_consumer, 'send_event', Mock()) as mock_send_event:
+            poker_consumer.send_current_task()
+            if has_current_task:
+                mock_send_event.assert_called_with(
+                    event='new_task_to_estimate',
+                    to_everyone=True,
+                    id=current_task.id,
+                    title=current_task.title,
+                    description=current_task.description
+                )
+            else:
+                mock_send_event.assert_called_with(event='no_tasks_left')

@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth import login
 
 
-from api.mixins import AuthRequiredMixin
 from users.github_auth import GithubAuthException, get_github_access_token, get_github_user_info
 from users.services import get_or_create_user
 
@@ -20,7 +19,7 @@ def github_oauth_callback(request):
             )
         token = get_github_access_token(code)
     except GithubAuthException as e:
-        return HttpResponse(str(e), status=401)
+        return HttpResponse(str(e), status=403)
 
     user_info = get_github_user_info(token)
     user, _ = get_or_create_user(access_token=token, **user_info)

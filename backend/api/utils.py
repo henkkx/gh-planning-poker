@@ -23,7 +23,3 @@ def get_github_repo(user, repo_name: str, org_name: Union[str, None]) -> Reposit
         repo_owner = get_github_user(user)
     repo = repo_owner.get_repo(repo_name)
     return repo
-
-
-def create_tasks_from_github_issues(issues: List[Issue]):
-    pass

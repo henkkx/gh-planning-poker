@@ -75,6 +75,9 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
     def send_current_task(self, to_everyone=True):
         current_task = self.current_session.current_task
+        if current_task is None:
+            self.send_event(event='no_tasks_left')
+            return
         self.send_event(
             event='new_task_to_estimate',
             to_everyone=to_everyone,
