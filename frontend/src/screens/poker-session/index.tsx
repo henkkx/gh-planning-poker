@@ -10,6 +10,7 @@ import * as React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FullPageProgress } from "../../components/Spinner";
+import { refreshPage } from "../../utils/misc";
 import { ErrorCard } from "../error/";
 import Game from "./game";
 
@@ -76,7 +77,11 @@ function Poker(props: any) {
     case ReadyState.CLOSED:
       content =
         closeCode === 1006 ? (
-          <ErrorCard message={`Could not find a session with id: ${id}`} />
+          <ErrorCard
+            canTryAgain
+            onTryAgain={refreshPage}
+            message={`Could not find a session with id: ${id}`}
+          />
         ) : (
           <p> something went wrong </p>
         );

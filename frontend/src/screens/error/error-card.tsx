@@ -19,12 +19,11 @@ const DEFAULT_MESSAGE = "We could not find the the page you're looking for.";
 
 type Props = {
   message?: string;
+  canTryAgain?: boolean;
+  onTryAgain?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-export const ErrorCard = ({ message }: Props) => {
-  const refreshPage = () => {
-    window.location.reload();
-  };
+export const ErrorCard = ({ message, canTryAgain, onTryAgain }: Props) => {
   return (
     <Card>
       <Stack direction={["column", "row"]} spacing="24px">
@@ -36,7 +35,9 @@ export const ErrorCard = ({ message }: Props) => {
           <Divider mb="6" />
           <Center>
             <VStack>
-              <Button onClick={refreshPage}> Try Again </Button>
+              {canTryAgain ? (
+                <Button onClick={onTryAgain}> Try Again </Button>
+              ) : null}
               <Button as={Link} to="/">
                 Take Me Back to the Home Page
               </Button>
