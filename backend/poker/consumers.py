@@ -34,7 +34,11 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         )
 
         self.accept()
+        self.add_user_to_session()
         self.send_current_task(to_everyone=False)
+
+    def add_user_to_session(self):
+        self.current_session.voters.add(self.user)
 
     def disconnect(self, _close_code):
         Room.objects.remove(self.room_name, self.channel_name)
@@ -90,6 +94,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         current_task = self.current_session.current_task
 
         if current_task is None:
+            print('No current task')
             return
 
         _, created = current_task.votes.update_or_create(

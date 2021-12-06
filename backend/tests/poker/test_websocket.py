@@ -71,6 +71,18 @@ class TestWebSocket:
         assert title == expected_title
         await ws.disconnect()
 
+    @pytest.mark.django_db()
+    def test_user_added_to_poker_session(self, poker_consumer, user, mock_async_to_sync):
+
+        current_session = poker_consumer.current_session
+
+        assert len(current_session.voters.all()) == 0
+
+        poker_consumer.add_user_to_session()
+
+        assert len(current_session.voters.all()) == 1
+        assert current_session.voters.first() == user
+
     def test_receive_json(self, poker_consumer):
         EVENT = 'some_event'
         data = {'foo': 'bar'}
@@ -84,27 +96,42 @@ class TestWebSocket:
         mock_handler.assert_called_with(**data)
 
     @pytest.mark.django_db
-    def test_vote_is_saved(self, task, poker_consumer, mock_async_to_sync):
+    @pytest.mark.parametrize('has_current_task', [True, False])
+    def test_vote_is_saved(self, has_current_task, task, poker_consumer, mock_async_to_sync):
         USER_VOTE = 40
         user = poker_consumer.scope['user']
 
         poker_consumer.channel_layer = Mock()
 
         current_session = poker_consumer.current_session
-        current_session.current_task = task
+
+        current_session.current_task = task if has_current_task else None
         current_session.save()
 
         poker_consumer.save_vote(USER_VOTE)
 
-        assert task.votes.filter(user=user, value=USER_VOTE).exists()
+        if has_current_task:
+            assert task.votes.filter(user=user, value=USER_VOTE).exists()
 
-        PREV_VOTE = USER_VOTE
-        NEW_VOTE = 1
-        poker_consumer.save_vote(NEW_VOTE)
+            PREV_VOTE = USER_VOTE
+            NEW_VOTE = 1
+            poker_consumer.save_vote(NEW_VOTE)
 
-        assert not task.votes.filter(user=user, value=PREV_VOTE).exists()
-        assert task.votes.filter(user=user, value=NEW_VOTE).exists()
+            assert not task.votes.filter(user=user, value=PREV_VOTE).exists()
+            assert task.votes.filter(user=user, value=NEW_VOTE).exists()
+        else:
+            assert not task.votes.filter(user=user, value=USER_VOTE).exists()
 
     @pytest.mark.django_db
-    def test_(self):
-        pass
+    def test_participants_changed(self, poker_consumer):
+        participants = ['user1', 'user2']
+        mock_send_event = Mock()
+        message = {'data': {'participants': participants}}
+
+        with patch.object(poker_consumer, 'send_event', mock_send_event):
+            poker_consumer.participants_changed(
+                message
+            )
+
+        mock_send_event.assert_called_with(
+            'participants_changed', participants=participants)
