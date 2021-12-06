@@ -1,7 +1,5 @@
-from typing import Tuple
-from django.db import connections
 import pytest
-from unittest import mock
+from typing import Tuple
 from channels.testing.websocket import WebsocketCommunicator
 from rest_framework.test import APIClient
 

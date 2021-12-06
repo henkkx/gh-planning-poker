@@ -1,8 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
-from poker.models import PlanningPokerSession, Vote
 from core.asgi import application
 
 

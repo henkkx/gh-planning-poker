@@ -1,7 +1,6 @@
 import pytest
-from unittest.mock import Mock, patch
-from poker.models import PlanningPokerSession, Task
 
+from poker.models import PlanningPokerSession
 from .github_mocks import MockGithub
 
 

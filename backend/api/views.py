@@ -1,13 +1,12 @@
 from django.middleware import csrf
-from rest_framework import filters, mixins, status
+from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
 from rest_framework.generics import CreateAPIView, ListAPIView
-from .utils import get_github_repo, get_github_user
 
 from poker.models import PlanningPokerSession
 from users.models import User
+from .utils import get_github_repo
 from .serializers import PlanningPokerSessionSerializer, UserSearchSerializer
 from .mixins import AuthRequiredMixin, PublicApiMixin
 

@@ -1,8 +1,7 @@
-from typing import Union, List
+from typing import Union
 from github import Github
 from github.Repository import Repository
 from github.AuthenticatedUser import AuthenticatedUser
-from github.Issue import Issue
 from users import models
 
 

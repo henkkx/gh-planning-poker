@@ -1,11 +1,7 @@
-from unittest.mock import Mock, patch
-
-import pytest
+from unittest.mock import patch
 from channels_presence.models import Presence, Room
-from django.contrib.auth import get_user_model
 
 from poker.receivers import participant_changed
-from users.services import create_user
 
 
 def test_participants_changed(mock_async_to_sync, user_factory):
