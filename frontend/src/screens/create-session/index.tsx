@@ -34,7 +34,9 @@ export const CreateSessionView = () => {
     const { repoInput, orgInput } = e.currentTarget.elements;
 
     const repoData = { repo_name: repoInput.value, org_name: orgInput?.value };
+
     const csrfToken = await api.getCSRF();
+
     try {
       const { id } = await api.createPokerSession(repoData, csrfToken);
       console.log(id);

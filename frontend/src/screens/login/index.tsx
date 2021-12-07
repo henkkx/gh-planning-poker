@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Heading,
-  useColorModeValue,
-  Text,
-} from "@chakra-ui/react";
-import * as React from "react";
+import { Box, Button, Heading, useColorModeValue } from "@chakra-ui/react";
 import { FaGithub } from "react-icons/fa";
 import { openGithubLoginPage } from "../../auth/github";
 import { Card } from "../../components/Card";
@@ -55,7 +48,6 @@ function Login() {
           <GithubButton />
         </Card>
       </Box>
-      {/* <ColorModeSwitcher justifySelf="flex-end" /> */}
     </Box>
   );
 }

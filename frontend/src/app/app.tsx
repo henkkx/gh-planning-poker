@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useAuth, User } from "../auth";
+import { useAuth } from "../auth";
 import { FullPageProgress } from "../components/Spinner";
 
 const AuthenticatedApp = React.lazy(
