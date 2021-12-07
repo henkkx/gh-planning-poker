@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from channels.testing import WebsocketCommunicator
-from channels.db import database_sync_to_async
+
 from core.asgi import application
 
 
@@ -64,10 +64,10 @@ class TestPlanningPokerConsumer:
         assert title == expected_title
         await ws.disconnect()
 
-    def test_user_added_to_poker_session(self, poker_consumer, user, mock_async_to_sync):
+    def test_user_added_to_poker_session(self, poker_consumer, mock_async_to_sync):
 
         current_session = poker_consumer.current_session
-
+        user = poker_consumer.user
         assert len(current_session.voters.all()) == 0
 
         poker_consumer.add_user_to_session()
@@ -148,21 +148,27 @@ class TestPlanningPokerConsumer:
             else:
                 mock_send_event.assert_called_with(event='no_tasks_left')
 
-    def test_moderator_can_reveal_cards(self, poker_consumer, user_factory, mock_channel_layer, mock_async_to_sync,):
+    def test_moderator_can_reveal_cards(self, poker_consumer, user_factory, create_moderator_for_poker, mock_channel_layer, mock_async_to_sync,):
+        NAME = 'just regular guy'
+        MODERATOR_NAME = 'Mod McModerator'
+
         current_session = poker_consumer.current_session
         poker_consumer.channel_layer = mock_channel_layer
-        user = user_factory(email='regular@email.com', name='regular user')
-        poker_consumer.scope['user'] = user
+        poker_consumer.scope['user'] = user_factory(
+            name=NAME,
+            email='regular@email.com'
+        )
         poker_consumer.save_vote(1)
 
         with patch.object(poker_consumer, 'send_event', Mock()) as mock_send_event:
             poker_consumer.reveal_cards()
             mock_send_event.assert_not_called()
 
-        moderator = user_factory(
-            email='moderator@email.com', name='Moderator')
-        current_session.moderator = moderator
-        current_session.save()
+        moderator = create_moderator_for_poker(
+            current_session,
+            name=MODERATOR_NAME
+        )
+
         poker_consumer.scope['user'] = moderator
 
         poker_consumer.save_vote(40)
@@ -173,6 +179,27 @@ class TestPlanningPokerConsumer:
                 'cards_revealed',
                 to_everyone=True,
                 votes=[
-                    (1, 'regular user voted 1 hour'),
-                    (40, 'Moderator voted 40 hours')]
+                    (1, f'{NAME} voted 1 hour'),
+                    (40, f'{MODERATOR_NAME} voted 40 hours')
+                ]
+            )
+
+    def test_moderator_can_request_next_round(self, poker_consumer, mock_async_to_sync, user, create_moderator_for_poker, mock_channel_layer):
+        current_session = poker_consumer.current_session
+        moderator = create_moderator_for_poker(current_session)
+
+        poker_consumer.channel_layer = mock_channel_layer
+        poker_consumer.scope['user'] = user
+
+        with patch.object(poker_consumer, 'send_current_task', Mock()) as mock_send_current_task:
+            poker_consumer.next_round()
+            mock_send_current_task.assert_not_called()
+
+        poker_consumer.scope['user'] = moderator
+
+        with patch.object(poker_consumer, 'send_current_task', Mock()) as mock_send_current_task:
+            poker_consumer.next_round()
+
+            mock_send_current_task.assert_called_with(
+                to_everyone=True,
             )

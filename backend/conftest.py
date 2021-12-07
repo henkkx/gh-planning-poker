@@ -53,11 +53,11 @@ def planning_poker_session(poker_factory):
 
 
 @pytest.fixture
-def poker_consumer(planning_poker_session):
+def poker_consumer(planning_poker_session, user_factory):
     consumer = PlanningPokerConsumer()
     consumer.scope = {
         'url_route': {'kwargs': {'game_id': planning_poker_session.id}},
-        'user': planning_poker_session.moderator
+        'user': user_factory(name='Poker User', email='random@email.com')
     }
     consumer.channel_name = 'poker_session_1'
     return consumer
@@ -72,7 +72,17 @@ def user_factory():
 
 @pytest.fixture
 def user(user_factory):
-    return user_factory(name='firstname lastname')
+    return user_factory(email='user@email.com', name='firstname lastname')
+
+
+@pytest.fixture
+def create_moderator_for_poker(user_factory):
+    def _create(session, email='moderator@email.com', name='Moderator', **kwargs):
+        moderator = user_factory(email=email, name=name, **kwargs)
+        session.moderator = moderator
+        session.save()
+        return moderator
+    return _create
 
 
 @pytest.fixture

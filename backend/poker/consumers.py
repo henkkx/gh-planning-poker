@@ -13,12 +13,16 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         super().__init__(*args, **kwargs)
         self.event_handlers = {
             'vote': self.save_vote,
-            'reveal_cards': self.reveal_cards
+            'reveal_cards': self.reveal_cards,
+            'next_round': self.next_round
         }
 
     @property
     def user(self):
         return self.scope['user']
+
+    def _is_moderator(self):
+        return self.user == self.current_session.moderator
 
     def connect(self):
         try:
@@ -114,9 +118,8 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         )
 
     def reveal_cards(self):
-        if not self.user == self.current_session.moderator:
+        if not self._is_moderator():
             return
-
         votes = [
             (vote.value, str(vote))
             for vote in self.current_session.current_task.votes.all()
@@ -127,3 +130,16 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             to_everyone=True,
             votes=votes
         )
+
+    def next_round(self):
+        if not self._is_moderator():
+            return
+
+        self.current_session.refresh_from_db()
+
+        self.current_session.current_task.is_decided = True
+
+        next_task = self.current_session.tasks.filter(is_decided=False).first()
+        self.current_session.current_task = next_task
+        self.current_session.save()
+        self.send_current_task(to_everyone=True)
