@@ -2,11 +2,34 @@ import {
   screen,
   waitFor,
   render,
-  server,
   user,
-  POKER_SESSION_ID,
+  defaultHandlers,
+  setupServer,
+  rest,
 } from "../../utils/test-utils";
 import { CreateSessionView } from "../create-session";
+
+type PostBody = {
+  repo_name: string;
+  org_name?: string;
+};
+
+export const POKER_SESSION_ID = 42;
+
+const handlers = [
+  rest.post<PostBody>("/api/poker", (req, res, ctx) => {
+    const { repo_name, org_name } = req.body;
+    return res(
+      ctx.json({
+        id: POKER_SESSION_ID,
+        current_task: 1,
+        repo_name,
+        org_name,
+      })
+    );
+  }),
+];
+const server = setupServer(...handlers.concat(defaultHandlers));
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
