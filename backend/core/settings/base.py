@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'development_without_docker')
+SECRET_KEY = os.environ.get("SECRET_KEY", "development_without_docker")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -29,72 +29,70 @@ ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1"]
 # Application definition
 INSTALLED_APPS = [
     # django stuff
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
-
-    # 3rd party
-    'corsheaders',
-    'channels',
-    # have to extend channels_presence app config due to the following issue
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    # 3rd party
+    "corsheaders",
+    "channels",
+    "rest_framework",
+    "rest_framework.authtoken",
+    # have to extend channels_presence app config due to the following issue
     # https://github.com/mitmedialab/django-channels-presence/issues/19
-    'poker.apps.ChannelsPresenceConfig',
-    'rest_framework',
-    'rest_framework.authtoken',
-
+    "poker.apps.ChannelsPresenceConfig",
     # project specific apps
-    'api',
-    'users',
-    'poker'
+    "api",
+    "users",
+    "poker",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
+WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 # Github actions database
-if os.environ.get('GITHUB_WORKFLOW'):
+if os.environ.get("GITHUB_WORKFLOW"):
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'github_actions',
-            'USER': 'postgres',
-            'PASSWORD': 'postgres',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "github_actions",
+            "USER": "postgres",
+            "PASSWORD": "postgres",
+            "HOST": "127.0.0.1",
+            "PORT": "5432",
         }
     }
 # SQLite database if not using Docker for development
@@ -110,37 +108,39 @@ else:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'Europe/London'
+TIME_ZONE = "Europe/London"
 
 USE_TZ = True
 
 
-AUHTENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend", ]
-AUTH_USER_MODEL = 'users.User'
+AUHTENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+AUTH_USER_MODEL = "users.User"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS headers
 CORS_ALLOW_ALL_ORIGINS = False
@@ -150,19 +150,18 @@ CORS_ALLOW_ALL_ORIGINS = False
 SITE_ID = 1
 
 # github oauth
-CLIENT_ID = os.environ.get('CLIENT_ID', 'no_github_client_id_set')
-CLIENT_SECRET = os.environ.get('CLIENT_SECRET', 'no_github_secret_set')
+CLIENT_ID = os.environ.get("CLIENT_ID", "no_github_client_id_set")
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "no_github_secret_set")
 
-REACT_APP_BASE_URL = os.environ.get(
-    'REACT_APP_BASE_URL', 'http://127.0.0.1:3000/')
+REACT_APP_BASE_URL = os.environ.get("REACT_APP_BASE_URL", "http://127.0.0.1:3000/")
 
-SUPER_USER_EMAIL = os.environ.get('SUPER_USER_EMAIL')
+SUPER_USER_EMAIL = os.environ.get("SUPER_USER_EMAIL")
 ASGI_THREADS = 5
 
-ASGI_APPLICATION = 'core.asgi.application'
+ASGI_APPLICATION = "core.asgi.application"
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }

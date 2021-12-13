@@ -27,9 +27,8 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         return self.user == self.current_session.moderator
 
     def _get_participants(self):
-        room = Room.objects.get(channel_name=self.room_name)
         participants = [
-            {"id": u.id, "name": u.name} for u in room.get_users().order_by("email")
+            {"id": p.id, "name": p.name} for p in self.current_session.voters.all()
         ]
         return participants
 
@@ -42,7 +41,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             self.room_name = f"planning_poker_session_{self.current_session.id}"
         except PlanningPokerSession.DoesNotExist:
             self.room_name = "rejected"
-            self.close(code=4004)
+            self.close()
             return
 
         Room.objects.add(self.room_name, self.channel_name, self.user)
@@ -54,9 +53,13 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     def add_user_to_session(self):
         self.current_session.voters.add(self.user)
         self.broadcast_participants()
+        self.touch_presence()
 
-    def disconnect(self, _close_code):
-        Room.objects.remove(self.room_name, self.channel_name)
+    def disconnect(self, close_code):
+        if self.room_name == "rejected":
+            return
+        self.current_session.voters.remove(self.user)
+        self.broadcast_participants()
 
     def receive_json(self, content: dict):
         kwargs = content["data"]

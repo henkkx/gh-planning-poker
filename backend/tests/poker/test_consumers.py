@@ -20,9 +20,8 @@ class TestPlanningPokerConsumer:
     async def test_rejects_if_no_pokersession_exists(self):
         ws = WebsocketCommunicator(application=application, path=f"ws/poker/{42}")
 
-        is_connected, code = await ws.connect()
+        is_connected, _ = await ws.connect()
         assert not is_connected
-        assert code == 4004
         await ws.disconnect()
 
     @pytest.mark.parametrize("to_everyone", [True, False])
