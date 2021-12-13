@@ -9,17 +9,12 @@ channel_layer = get_channel_layer()
 
 
 @receiver(presence_changed)
-def participant_changed(room: Room, **_):
+def participants_changed(sender, room: Room, **_):
 
-    users = room.get_users().order_by('email')
-    participants = [{'id': u.id, 'name': u.name} for u in users]
+    users = room.get_users().order_by("email")
+    participants = [{"id": u.id, "name": u.name} for u in users]
 
-    message = {
-        'type': 'participants.changed',
-        'data': {
-            'participants': participants
-        }
-    }
+    message = {"type": "participants.changed", "data": {"participants": participants}}
 
     send_func = channel_layer.group_send
     send_message_to_room = async_to_sync(send_func)
