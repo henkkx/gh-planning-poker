@@ -12,6 +12,7 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
+    "@xstate/react": "^1.6.3",
     "downshift": "^6.1.7",
     "formik": "^2.2.9",
     "framer-motion": "^4.0.0",
@@ -25,6 +26,7 @@
     "typescript": "^4.5.2",
     "use-debounce": "^7.0.1",
     "web-vitals": "^0.2.2",
+    "xstate": "^4.26.1",
     "yup": "^0.32.11"
   },
   "scripts": {
@@ -60,4 +62,5 @@
   "msw": {
     "workerDirectory": "public"
   }
+  
 }

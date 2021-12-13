@@ -8,6 +8,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import * as React from "react";
+import { Player, Task } from "./machine";
 
 const NOT_DOABLE = 100;
 const UNSURE = 99;
@@ -29,6 +30,10 @@ const OTHER_OPTIONS = {};
 
 type Props = {
   sendVote: (value: number) => void;
+  stage: "voting" | "review" | "loading" | "finished";
+  currentTask: Task;
+  players: Array<Player>;
+  send: any;
 };
 
 function Game({ sendVote }: Props) {

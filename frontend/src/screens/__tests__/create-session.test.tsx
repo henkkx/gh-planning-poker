@@ -6,7 +6,7 @@ import {
   defaultHandlers,
   setupServer,
   rest,
-} from "../../utils/test-utils";
+} from "../../test/utils";
 import { CreateSessionView } from "../create-session";
 
 type PostBody = {
