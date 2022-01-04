@@ -5,10 +5,12 @@ import {
   Heading,
   Text,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import { EventObject } from "xstate";
 import { useMachine } from "@xstate/react";
 
 import { FullPageProgress } from "../../components/Spinner";
@@ -16,7 +18,7 @@ import { refreshPage } from "../../utils/misc";
 import { ErrorCard } from "../error/";
 import Game from "./game";
 import PokerMachine, { Player, PokerContextType, Task } from "./machine";
-import { EventObject } from "xstate";
+import { BASE_SOCKET_URL, CODE_CLOSED_UNEXPECTEDLY } from "./constants";
 
 type PokerParams = {
   id: string;
@@ -26,55 +28,40 @@ type GameEvent =
   | "new_task_to_estimate"
   | "participants_changed"
   | "vote_cast"
-  | "cards_revealed";
+  | "cards_revealed"
+  | "no_tasks_left";
 
 type GameMessage = {
   event: GameEvent;
   data: any;
 };
 
-const wsStates = {
-  [ReadyState.CONNECTING]: "Connecting",
-  [ReadyState.OPEN]: "Open",
-  [ReadyState.CLOSING]: "Closing",
-  [ReadyState.CLOSED]: "Closed",
-  [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-};
-
-const WS_PREFIX = window.location.protocol === "https:" ? "wss://" : "ws://";
-const isDev = process.env.NODE_ENV === "development";
-// on development react runs on port 3000 whereas django runs at 8000
-const HOST = isDev ? "127.0.0.1:8000" : window.location.host;
-const BASE_PATH = "/ws/poker/";
-const BASE_SOCKET_URL = WS_PREFIX + HOST + BASE_PATH;
-const CODE_CLOSED_UNEXPECTEDLY = 1006;
-const CODE_SESSION_ENDED = 4000;
-
 function Poker() {
   const didUnmount = React.useRef(false);
-  const { id } = useParams<PokerParams>();
-  const textColor = useColorModeValue("gray.600", "gray.400");
-  const [closeCode, setCloseCode] = React.useState<number>();
-  const [currentTask, setCurrentTask] = React.useState<Task>();
-  const [players, setPlayers] = React.useState<Array<Player>>([]);
 
+  const toast = useToast();
+  const [closeCode, setCloseCode] = React.useState<number>();
+  const [players, setPlayers] = React.useState<Array<Player>>([]);
   const [gameState, send] = useMachine<PokerContextType, EventObject>(
     PokerMachine
   );
 
+  const { id } = useParams<PokerParams>();
   const planningPokerUrl = BASE_SOCKET_URL + id;
 
-  const { sendJsonMessage, lastJsonMessage, readyState, getWebSocket } =
-    useWebSocket(planningPokerUrl, {
-      onClose: (e: CloseEvent) => {
-        setCloseCode(e.code);
-      },
-      shouldReconnect: (_) => !didUnmount.current,
-      reconnectAttempts: 1,
-      reconnectInterval: 3000,
-    });
+  const wsOptions = {
+    onClose: (e: CloseEvent) => setCloseCode(e.code),
+    shouldReconnect: (_: any) => !didUnmount.current,
+    reconnectAttempts: 2,
+    reconnectInterval: 2000,
+  };
 
-  const currentStatus = wsStates[readyState];
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(
+    planningPokerUrl,
+    wsOptions
+  );
+
+  const { currentTask } = gameState.context;
 
   React.useEffect(() => {
     return () => {
@@ -93,20 +80,26 @@ function Poker() {
         send("NEXT_ROUND", data);
         break;
       case "participants_changed":
-        setPlayers(data);
+        setPlayers(data.participants);
         break;
       case "vote_cast":
+        const { created, value } = data;
+        toast({
+          title: created ? "Vote cast" : "Vote updated",
+          description: `Your vote (${value}) was successfully saved`,
+          status: "success",
+          isClosable: true,
+        });
         break;
+      case "cards_revealed":
+        send("REVEAL", data);
+        break;
+      case "no_tasks_left":
+        send("FINISH");
     }
 
     console.log(lastJsonMessage);
-  }, [lastJsonMessage]);
-
-  React.useEffect(() => {
-    console.log(gameState.value);
-  }, [gameState.value]);
-
-  let content;
+  }, [lastJsonMessage, send, toast]);
 
   const handleSendVote = React.useCallback(
     (value: number) => {
@@ -114,6 +107,19 @@ function Poker() {
     },
     [sendJsonMessage]
   );
+
+  const handleRevealCards = React.useCallback(
+    () => sendJsonMessage({ event: "reveal_cards", data: {} }),
+    [sendJsonMessage]
+  );
+
+  const handleNextRound = React.useCallback(
+    () => sendJsonMessage({ event: "next_round", data: {} }),
+    [sendJsonMessage]
+  );
+  const handleReplayRound = React.useCallback(() => send("REPLAY"), [send]);
+
+  let content;
 
   switch (readyState) {
     case ReadyState.CONNECTING:
@@ -134,11 +140,14 @@ function Poker() {
     default:
       content = (
         <Game
-          currentTask={currentTask as Task}
+          currentTask={currentTask as any}
           players={players}
-          send={send}
           sendVote={handleSendVote}
-          stage="voting"
+          revealCards={handleRevealCards}
+          stage={gameState.value as any}
+          votes={currentTask?.votes}
+          nextRound={handleNextRound}
+          replayRound={handleReplayRound}
         />
       );
   }

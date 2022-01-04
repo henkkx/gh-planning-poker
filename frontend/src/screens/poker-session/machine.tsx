@@ -1,8 +1,9 @@
-import { createMachine } from "xstate";
+import { createMachine, assign } from "xstate";
 
 type Vote = number;
 
 export type Player = {
+  id: number;
   name: string;
   isModerator: boolean;
   hasVoted: boolean;
@@ -16,47 +17,69 @@ export type Task = {
 };
 
 export type PokerContextType = {
-  you: Player;
+  you?: Player;
   // participants: Array<Player>;
   currentTask?: Task;
 };
 
-const you: Player = {
-  name: "name",
-  isModerator: true,
-  hasVoted: false,
-};
+export type GameState = "voting" | "discussing" | "loading" | "finished";
 
-const PokerMachine = createMachine<PokerContextType>({
-  id: "poker",
-  initial: "idle",
-  context: {
-    you,
-  },
-  states: {
-    idle: {
-      on: {
-        NEXT_ROUND: "voting",
+const PokerMachine = createMachine<PokerContextType, any, any>(
+  {
+    id: "poker",
+    initial: "idle",
+    context: {},
+    states: {
+      idle: {
+        on: {
+          NEXT_ROUND: { target: "voting", actions: "displayTaskInfo" },
+        },
       },
-    },
 
-    voting: {
-      on: {
-        REVEAL: "discussing",
+      voting: {
+        on: {
+          REVEAL: { target: "discussing", actions: "revealVotes" },
+        },
       },
-    },
 
-    discussing: {
-      on: {
-        REPLAY: "voting",
-        NEXT_ROUND: "voting",
-        FINISH: "finished",
+      discussing: {
+        on: {
+          REPLAY: "voting",
+          NEXT_ROUND: { target: "voting", actions: "displayTaskInfo" },
+          FINISH: "finished",
+        },
       },
-    },
-    finished: {
-      type: "final",
+      finished: {
+        type: "final",
+      },
     },
   },
-});
+  {
+    actions: {
+      displayTaskInfo: assign({
+        currentTask: (context, event) => {
+          const { title, description } = event;
+          return {
+            title,
+            description,
+          };
+        },
+      }),
+      revealVotes: assign({
+        currentTask: (context, event) => {
+          const { votes } = event;
+          const { currentTask } = context;
+
+          console.log(event);
+
+          return {
+            ...currentTask!,
+            votes,
+          };
+        },
+      }),
+    },
+  }
+);
 
 export default PokerMachine;

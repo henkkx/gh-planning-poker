@@ -3,81 +3,147 @@ import {
   Button,
   Flex,
   Heading,
+  ListItem,
+  OrderedList,
   SimpleGrid,
+  SkeletonText,
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
 import * as React from "react";
-import { Player, Task } from "./machine";
-
-const NOT_DOABLE = 100;
-const UNSURE = 99;
-type VotingOptions = Array<[number, string]>;
-const VOTING_OPTIONS: VotingOptions = [
-  [1, "1 hour"],
-  [2, "2 hours"],
-  [3, "3 hours"],
-  [5, "5 hours"],
-  [8, "8 hours"],
-  [13, "13 hours"],
-  [20, "20 hours"],
-  [40, "40 hours"],
-  [UNSURE, "?"],
-  [NOT_DOABLE, "∞"],
-];
-
-const OTHER_OPTIONS = {};
+import { Card } from "../../components/Card";
+import { FullPageProgress } from "../../components/Spinner";
+import { ErrorCard } from "../error";
+import { VOTING_OPTIONS, UNSURE } from "./constants";
+import { GameState, Player, Task } from "./machine";
 
 type Props = {
   sendVote: (value: number) => void;
-  stage: "voting" | "review" | "loading" | "finished";
+  stage: GameState;
   currentTask: Task;
   players: Array<Player>;
-  send: any;
+  replayRound: any;
+  revealCards: any;
+  votes: any;
+  nextRound: any;
 };
 
-function Game({ sendVote }: Props) {
+function Game({
+  sendVote,
+  stage,
+  currentTask,
+  revealCards,
+  players,
+  replayRound,
+  votes,
+  nextRound,
+}: Props) {
   const textColor = useColorModeValue("gray.600", "gray.400");
+
+  const isReady = stage === "voting" || stage === "discussing";
+  const isDiscussing = stage === "discussing";
+  const isFinished = stage == "finished";
+
+  if (!isReady) {
+    return <FullPageProgress />;
+  }
+
+  if (isFinished) {
+    return (
+      <ErrorCard
+        message="Game finished!"
+        errorText="No more tasks left to estimate"
+      />
+    );
+  }
+
+  const pokerButtons = VOTING_OPTIONS.map(([id, label]) => (
+    <Button
+      key={id}
+      mt="8"
+      mx="2"
+      minH="6rem"
+      colorScheme="green"
+      size="sm"
+      fontSize="3xl"
+      fontWeight="bold"
+      onClick={(_) => sendVote(id)}
+    >
+      {id < UNSURE ? id : label}
+    </Button>
+  ));
 
   return (
     <SimpleGrid>
       <Flex
         align="center"
-        justifyContent="center"
-        direction={{ base: "column", lg: "row" }}
-        justify="space-between"
+        justifyContent="space-around"
+        direction={{ md: "row", base: "column" }}
         mb="20"
       >
-        <Box flex="1" maxW={{ lg: "lg" }} pt="6">
-          <Heading as="h1" size="xl" mt="8" fontWeight="extrabold">
-            Online Planning Poker with Github Integration
-          </Heading>
-          <Text color={textColor} mt="5" fontSize="xl">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua
-            adipiscing elit.
-          </Text>
+        <Box maxW={{ lg: "lg" }} pt="6">
+          <Card>
+            <Heading as="h2" size="xl" fontWeight="extrabold">
+              {currentTask.title}
+            </Heading>
+            <Text color={textColor} mt="5" fontSize="xl">
+              {currentTask.description}
+            </Text>
+          </Card>
+        </Box>
+        <Box maxW={{ lg: "lg" }} pt="6">
+          <Card maxH="200" maxW={{ base: "200", lg: "300" }} overflowY="auto">
+            <Heading as="h3" size="sm" mt="-4" mb="4" fontWeight="bold">
+              Participants
+            </Heading>
+            <OrderedList>
+              {isDiscussing
+                ? votes.map(([_, desc]: any) => (
+                    <ListItem key={desc}> {desc} </ListItem>
+                  ))
+                : players.map(({ id, name }) => (
+                    <ListItem key={id}>{name}</ListItem>
+                  ))}
+            </OrderedList>
+          </Card>
         </Box>
       </Flex>
-      <Box>
-        {VOTING_OPTIONS.map(([id, label]) => (
+
+      {isDiscussing ? (
+        <SimpleGrid columns={[2, 2, 1]}>
           <Button
-            key={id}
             mt="8"
-            mx="2"
-            minW="6rem"
-            minH="8rem"
-            colorScheme="green"
-            size="md"
-            height="14"
-            fontSize="3xl"
-            fontWeight="bold"
-            onClick={(e) => sendVote(id)}
+            w="60%"
+            justifySelf="center"
+            colorScheme="blue"
+            onClick={replayRound}
           >
-            {id < UNSURE ? id : label}
+            Replay round
           </Button>
-        ))}
-      </Box>
+          <Button
+            mt="8"
+            w="60%"
+            justifySelf="center"
+            colorScheme="blue"
+            onClick={nextRound}
+          >
+            Next round
+          </Button>
+        </SimpleGrid>
+      ) : (
+        <>
+          <SimpleGrid columns={[5, 5, 10]}>{pokerButtons}</SimpleGrid>
+          <Button
+            mt="8"
+            w="60%"
+            justifySelf="center"
+            colorScheme="blue"
+            onClick={revealCards}
+          >
+            Reveal cards
+          </Button>
+        </>
+      )}
     </SimpleGrid>
   );
 }

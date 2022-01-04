@@ -21,9 +21,15 @@ type Props = {
   message?: string;
   canTryAgain?: boolean;
   onTryAgain?: React.MouseEventHandler<HTMLButtonElement>;
+  errorText?: string;
 };
 
-export const ErrorCard = ({ message, canTryAgain, onTryAgain }: Props) => {
+export const ErrorCard = ({
+  message,
+  canTryAgain,
+  onTryAgain,
+  errorText,
+}: Props) => {
   return (
     <Card>
       <Stack direction={["column", "row"]} spacing="24px">
@@ -31,7 +37,7 @@ export const ErrorCard = ({ message, canTryAgain, onTryAgain }: Props) => {
           <Heading size="3xl" mb="4">
             {message ?? DEFAULT_MESSAGE}
           </Heading>
-          <Text> Error: 404 Not Found </Text>
+          <Text> {errorText ?? "Error: 404 Not Found"} </Text>
           <Divider mb="6" />
           <Center>
             <VStack>

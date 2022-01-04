@@ -20,6 +20,9 @@ export const Template: React.FC = (props) => {
     isValidElement
   );
   const mobileNav = useDisclosure();
+
+  const links = children.find((child) => child.type === Links)?.props.children;
+
   return (
     <Flex
       py={4}
@@ -31,9 +34,7 @@ export const Template: React.FC = (props) => {
       {children.find((child) => child.type === Brand)?.props.children}
       <HStack display={{ base: "none", md: "flex" }} marginStart={4}>
         <Tabs colorScheme="blue" variant="unstyled" isFitted>
-          <TabList>
-            {children.find((child) => child.type === Links)?.props.children}
-          </TabList>
+          <TabList>{links}</TabList>
           <TabIndicator
             mt="13px"
             height={1}
@@ -64,7 +65,9 @@ export const Template: React.FC = (props) => {
           </Flex>
           <Tabs orientation="vertical" variant="unstyled">
             <TabList>
-              {children.find((child) => child.type === Links)?.props.children}
+              {React.Children.map(links, (child) =>
+                React.cloneElement(child, { onClick: mobileNav.onClose })
+              )}
             </TabList>
             <TabIndicator
               marginStart="-3"

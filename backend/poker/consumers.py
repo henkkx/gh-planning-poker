@@ -137,7 +137,9 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
         self.current_session.refresh_from_db()
 
-        self.current_session.current_task.is_decided = True
+        current_task = self.current_session.current_task
+        current_task.is_decided = True
+        current_task.save()
 
         next_task = self.current_session.tasks.filter(is_decided=False).first()
         self.current_session.current_task = next_task
