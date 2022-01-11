@@ -14,6 +14,8 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
+jest.setTimeout(30000);
+
 describe("the app", () => {
   it("renders authenticated content if user is authenticated", async () => {
     render(<App />);
