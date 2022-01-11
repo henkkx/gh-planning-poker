@@ -45,8 +45,8 @@ class PlanningPokerSession(models.Model):
 class Task(models.Model):
 
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=60)
-    description = models.CharField(max_length=5000, null=True, default="")
+    title = models.CharField(max_length=256)
+    description = models.CharField(max_length=65536, null=True, default="")
     hours = models.PositiveSmallIntegerField(
         null=True, choices=HOURS_TO_COMPLETE_CHOICES
     )
@@ -61,7 +61,7 @@ class Task(models.Model):
     )
 
     def __str__(self):
-        return f"{self.title}: {self.hours if self.is_decided else 'not yet decided'}"
+        return self.title
 
     class Meta:
         db_table = "task"
