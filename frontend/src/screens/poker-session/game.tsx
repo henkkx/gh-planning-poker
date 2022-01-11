@@ -5,12 +5,15 @@ import {
   Heading,
   ListItem,
   OrderedList,
+  Select,
   SimpleGrid,
-  SkeletonText,
-  Text,
+  useBreakpointValue,
   useColorModeValue,
 } from "@chakra-ui/react";
 import * as React from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import { Card } from "../../components/Card";
 import { FullPageProgress } from "../../components/Spinner";
 import { ErrorCard } from "../error";
@@ -20,8 +23,7 @@ import { GameState, Player, Task } from "./machine";
 type Props = {
   sendVote: (value: number) => void;
   stage: GameState;
-  currentTask: Task;
-  players: Array<Player>;
+  currentTask?: Task;
   replayRound: any;
   revealCards: any;
   votes: any;
@@ -33,18 +35,19 @@ function Game({
   stage,
   currentTask,
   revealCards,
-  players,
   replayRound,
   votes,
   nextRound,
 }: Props) {
-  const textColor = useColorModeValue("gray.600", "gray.400");
+  const bgColor = useColorModeValue("gray.50", "gray.800");
+  const isMobile = useBreakpointValue({ base: true, lg: false });
+  const [selectedValue, setSelectedValue] = React.useState<any>();
 
-  const isReady = stage === "voting" || stage === "discussing";
+  const isConnecting = stage === "connecting";
   const isDiscussing = stage === "discussing";
   const isFinished = stage == "finished";
 
-  if (!isReady) {
+  if (isConnecting) {
     return <FullPageProgress />;
   }
 
@@ -57,21 +60,45 @@ function Game({
     );
   }
 
-  const pokerButtons = VOTING_OPTIONS.map(([id, label]) => (
-    <Button
-      key={id}
-      mt="8"
-      mx="2"
-      minH="6rem"
-      colorScheme="green"
-      size="sm"
-      fontSize="3xl"
-      fontWeight="bold"
-      onClick={(_) => sendVote(id)}
-    >
-      {id < UNSURE ? id : label}
-    </Button>
-  ));
+  const taskDescriptionMarkdown =
+    currentTask?.description ?? "no description provided.";
+
+  const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
+    setSelectedValue(e.target.value);
+
+  const pokerButtons = isMobile ? (
+    <>
+      <Select size="lg" onChange={handleSelectionChange}>
+        {VOTING_OPTIONS.map(([id, label]) => (
+          <option key={id} value={id}>
+            {label}
+          </option>
+        ))}
+      </Select>
+      <Button
+        mt="2"
+        colorScheme="blue"
+        onClick={(_) => sendVote(selectedValue)}
+      >
+        Send Vote
+      </Button>
+    </>
+  ) : (
+    VOTING_OPTIONS.map(([id, label]) => (
+      <Button
+        key={id}
+        mt="20"
+        mx="2"
+        minH="6rem"
+        colorScheme="green"
+        fontSize="3xl"
+        fontWeight="bold"
+        onClick={(_) => sendVote(id)}
+      >
+        {id < UNSURE ? id : label}
+      </Button>
+    ))
+  );
 
   return (
     <SimpleGrid>
@@ -79,34 +106,32 @@ function Game({
         align="center"
         justifyContent="space-around"
         direction={{ md: "row", base: "column" }}
-        mb="20"
       >
-        <Box maxW={{ lg: "lg" }} pt="6">
-          <Card>
-            <Heading as="h2" size="xl" fontWeight="extrabold">
-              {currentTask.title}
+        <Box maxW="90%">
+          <Card bg={bgColor} overflowY="auto" maxH="sm">
+            <Heading as="h4" mt="0" mb="4" size="md">
+              Description
             </Heading>
-            <Text color={textColor} mt="5" fontSize="xl">
-              {currentTask.description}
-            </Text>
+            <ReactMarkdown
+              children={taskDescriptionMarkdown}
+              remarkPlugins={[remarkGfm]}
+            ></ReactMarkdown>
           </Card>
         </Box>
-        <Box maxW={{ lg: "lg" }} pt="6">
-          <Card maxH="200" maxW={{ base: "200", lg: "300" }} overflowY="auto">
-            <Heading as="h3" size="sm" mt="-4" mb="4" fontWeight="bold">
-              Participants
-            </Heading>
-            <OrderedList>
-              {isDiscussing
-                ? votes.map(([_, desc]: any) => (
-                    <ListItem key={desc}> {desc} </ListItem>
-                  ))
-                : players.map(({ id, name }) => (
-                    <ListItem key={id}>{name}</ListItem>
-                  ))}
-            </OrderedList>
-          </Card>
-        </Box>
+        {isDiscussing ? (
+          <Box maxW={{ lg: "lg" }} pt="6">
+            <Card maxH="200" maxW={{ base: "200", lg: "300" }} overflowY="auto">
+              <Heading as="h3" size="sm" mt="-4" mb="4" fontWeight="bold">
+                Votes
+              </Heading>
+              <OrderedList>
+                {votes.map(([_, desc]: any) => (
+                  <ListItem key={desc}> {desc} </ListItem>
+                ))}
+              </OrderedList>
+            </Card>
+          </Box>
+        ) : null}
       </Flex>
 
       {isDiscussing ? (
@@ -132,7 +157,7 @@ function Game({
         </SimpleGrid>
       ) : (
         <>
-          <SimpleGrid columns={[5, 5, 10]}>{pokerButtons}</SimpleGrid>
+          <SimpleGrid columns={[1, 5, 5, 10]}>{pokerButtons}</SimpleGrid>
           <Button
             mt="8"
             w="60%"

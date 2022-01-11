@@ -1,8 +1,16 @@
 from typing import Union
-from github import Github
+from github import Github, GithubException
 from github.Repository import Repository
 from github.AuthenticatedUser import AuthenticatedUser
 from users import models
+
+
+class RepoNotFound(Exception):
+    pass
+
+
+class OrgNotFound(Exception):
+    pass
 
 
 def build_authenticated_github_client(user: models.User) -> Github:
@@ -17,8 +25,14 @@ def get_github_user(user: models.User) -> AuthenticatedUser:
 def get_github_repo(user, repo_name: str, org_name: Union[str, None]) -> Repository:
     if org_name is not None and org_name != "":
         github = build_authenticated_github_client(user)
-        repo_owner = github.get_organization(org_name)
+        try:
+            repo_owner = github.get_organization(org_name)
+        except GithubException:
+            raise OrgNotFound
     else:
         repo_owner = get_github_user(user)
-    repo = repo_owner.get_repo(repo_name)
+    try:
+        repo = repo_owner.get_repo(repo_name)
+    except GithubException:
+        raise RepoNotFound
     return repo

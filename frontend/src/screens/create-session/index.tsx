@@ -7,6 +7,7 @@ import {
   Stack,
   useBoolean,
   Img,
+  useToast,
 } from "@chakra-ui/react";
 import * as React from "react";
 import { Card } from "../../components/Card";
@@ -27,21 +28,32 @@ interface GithubFormElement extends HTMLFormElement {
 
 export const CreateSessionView = () => {
   const [isOrgRepoSelected, orgRepo] = useBoolean(false);
+  const toast = useToast();
   const history = useHistory();
 
   async function handleSubmit(e: React.FormEvent<GithubFormElement>) {
     e.preventDefault();
     const { repoInput, orgInput } = e.currentTarget.elements;
 
-    const repoData = { repo_name: repoInput.value, org_name: orgInput?.value };
-
     const csrfToken = await api.getCSRF();
 
+    const repo_name = repoInput.value;
+    const org_name = orgInput?.value;
     try {
-      const { id } = await api.createPokerSession(repoData, csrfToken);
+      const { id } = await api.createPokerSession(
+        { repo_name, org_name },
+        csrfToken
+      );
       history.push(`/play/${id}`);
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      toast({
+        title: `Unable to create session - ${err}`,
+        description: `No repository with the name "${repo_name}" was found in your ${
+          org_name ? "organization's" : ""
+        } Github Account`,
+        status: "error",
+        isClosable: true,
+      });
     }
   }
 

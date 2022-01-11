@@ -8,6 +8,8 @@ from django.utils.functional import cached_property
 
 from .models import PlanningPokerSession
 
+CODE_SESSION_ENDED = 4000
+
 
 class PlanningPokerConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -22,6 +24,18 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     @property
     def user(self):
         return self.scope["user"]
+
+    @cached_property
+    def current_session(self) -> PlanningPokerSession:
+        # additionally select the related current task object from db so that later use of
+        # PlanningPokerSession.current_task does not require hitting the database again
+        return PlanningPokerSession.objects.select_related("current_task").get(
+            pk=self.scope["url_route"]["kwargs"]["game_id"]
+        )
+
+    @cached_property
+    def tasks(self) -> List[str]:
+        return [task.title for task in self.current_session.tasks]
 
     def _is_moderator(self):
         return self.user == self.current_session.moderator
@@ -48,6 +62,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
         self.accept()
         self.send_current_task(to_everyone=False)
+
         self.add_user_to_session()
 
     def add_user_to_session(self):
@@ -66,14 +81,6 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         handler = self.event_handlers[content.pop("event")]
         handler(**kwargs)
 
-    @cached_property
-    def current_session(self) -> PlanningPokerSession:
-        # additionally select the related current task object from db so that later use of
-        # PlanningPokerSession.current_task does not require hitting the database again
-        return PlanningPokerSession.objects.select_related("current_task").get(
-            pk=self.scope["url_route"]["kwargs"]["game_id"]
-        )
-
     def send_event(self, event: str, to_everyone=True, **data):
         if to_everyone:
             send_func = self.channel_layer.group_send
@@ -90,7 +97,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     def send_current_task(self, to_everyone=True):
         current_task = self.current_session.current_task
         if current_task is None:
-            self.send_event(event="no_tasks_left")
+            self.close(4000)
             return
         self.send_event(
             event="new_task_to_estimate",

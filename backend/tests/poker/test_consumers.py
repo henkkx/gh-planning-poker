@@ -2,6 +2,7 @@ from channels_presence.models import Room
 import pytest
 from unittest.mock import Mock, patch
 from channels.testing import WebsocketCommunicator
+from poker.consumers import CODE_SESSION_ENDED
 
 from core.asgi import application
 
@@ -60,6 +61,7 @@ class TestPlanningPokerConsumer:
         title = current_task_info["data"]["title"]
 
         assert title == expected_title
+
         await ws.disconnect()
 
     def test_user_added_to_poker_session(
@@ -136,9 +138,9 @@ class TestPlanningPokerConsumer:
 
         current_task = current_session.current_task
 
-        with patch.object(poker_consumer, "send_event", Mock()) as mock_send_event:
-            poker_consumer.send_current_task()
-            if has_current_task:
+        if has_current_task:
+            with patch.object(poker_consumer, "send_event", Mock()) as mock_send_event:
+                poker_consumer.send_current_task()
                 mock_send_event.assert_called_with(
                     event="new_task_to_estimate",
                     to_everyone=True,
@@ -146,8 +148,10 @@ class TestPlanningPokerConsumer:
                     title=current_task.title,
                     description=current_task.description,
                 )
-            else:
-                mock_send_event.assert_called_with(event="no_tasks_left")
+        else:
+            with patch.object(poker_consumer, "close", Mock()) as mock_close:
+                poker_consumer.send_current_task()
+                mock_close.assert_called_with(CODE_SESSION_ENDED)
 
     def test_moderator_can_reveal_cards(
         self,
@@ -157,7 +161,7 @@ class TestPlanningPokerConsumer:
         mock_channel_layer,
         mock_async_to_sync,
     ):
-        NAME = "just regular guy"
+        NAME = "just a regular guy"
         MODERATOR_NAME = "Mod McModerator"
 
         current_session = poker_consumer.current_session

@@ -1,4 +1,4 @@
-import { createMachine, assign } from "xstate";
+import { createMachine, assign, Typestate } from "xstate";
 
 type Vote = number;
 
@@ -18,19 +18,22 @@ export type Task = {
 
 export type PokerContextType = {
   you?: Player;
-  // participants: Array<Player>;
   currentTask?: Task;
 };
 
-export type GameState = "voting" | "discussing" | "loading" | "finished";
+export type GameState = "connecting" | "voting" | "discussing" | "finished";
 
-const PokerMachine = createMachine<PokerContextType, any, any>(
+const PokerMachine = createMachine<
+  PokerContextType,
+  any,
+  Typestate<PokerContextType>
+>(
   {
-    id: "poker",
-    initial: "idle",
+    id: "poker_machine",
+    initial: "connecting",
     context: {},
     states: {
-      idle: {
+      connecting: {
         on: {
           NEXT_ROUND: { target: "voting", actions: "displayTaskInfo" },
         },

@@ -18,6 +18,8 @@ function isResponseOk(response: Response) {
   if (200 <= response.status && response.status <= 299) {
     return response.json();
   }
+  console.log(response);
+
   throw Error(response.statusText);
 }
 
