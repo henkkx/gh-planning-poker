@@ -15,10 +15,6 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 describe("the app", () => {
-  it("renders", async () => {
-    render(<App />);
-  });
-
   it("renders authenticated content if user is authenticated", async () => {
     render(<App />);
     await screen.findByText(/welcome firstname lastname/i);
