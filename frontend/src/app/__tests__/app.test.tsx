@@ -14,6 +14,8 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
+// github actions started mysteriously timing out recently
+// this fixes it for now
 jest.setTimeout(30000);
 
 describe("the app", () => {
