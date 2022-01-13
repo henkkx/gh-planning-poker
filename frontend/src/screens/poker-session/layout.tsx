@@ -12,7 +12,7 @@ import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
 import { SidebarLink } from "../../components/SidebarMenu/SidebarLink";
 import { useMobileMenuState } from "../../components/SidebarMenu/useMobileMenuState";
 
-function PokerGameLayout({ players, repo, title, children }: any) {
+function PokerGameLayout({ players, title, children }: any) {
   const { isOpen, toggle } = useMobileMenuState();
   const sidebarBg = useColorModeValue("blue.800", "gray.800");
   const contentBg = useColorModeValue("white", "gray.700");

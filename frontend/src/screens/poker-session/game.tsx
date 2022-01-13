@@ -129,10 +129,9 @@ function Game({
       </SimpleGrid>
 
       {isDiscussing && isModerator ? (
-        <>
+        <SimpleGrid p={1} columns={[1, 1, 2, 2]}>
           <Button
-            mt="8"
-            w="60%"
+            w="80%"
             justifySelf="center"
             colorScheme="blue"
             onClick={replayRound}
@@ -140,15 +139,14 @@ function Game({
             Replay round
           </Button>
           <Button
-            mt="8"
-            w="60%"
+            w="80%"
             justifySelf="center"
             colorScheme="blue"
             onClick={nextRound}
           >
             Next round
           </Button>
-        </>
+        </SimpleGrid>
       ) : (
         <>
           {pokerButtons}

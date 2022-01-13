@@ -1,14 +1,4 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Text,
-  useColorModeValue,
-  useToast,
-  Avatar,
-  Stack,
-} from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket, { ReadyState } from "react-use-websocket";
@@ -20,11 +10,7 @@ import { refreshPage } from "../../utils/misc";
 import { ErrorCard } from "../error/";
 import Game from "./game";
 import PokerMachine, { GameState, Player, PokerContextType } from "./machine";
-import {
-  BASE_SOCKET_URL,
-  CODE_CLOSED_UNEXPECTEDLY,
-  CODE_SESSION_ENDED,
-} from "./constants";
+import { BASE_SOCKET_URL, CODE_SESSION_ENDED } from "./constants";
 import PokerGameLayout from "./layout";
 
 type PokerParams = {
@@ -133,7 +119,7 @@ function Poker() {
 
       console.log(lastJsonMessage);
     },
-    [lastJsonMessage, send, toast]
+    [lastJsonMessage, send, toast, isModerator]
   );
 
   const handleSendVote = React.useCallback(
