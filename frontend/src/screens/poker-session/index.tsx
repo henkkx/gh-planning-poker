@@ -119,7 +119,7 @@ function Poker() {
 
       console.log(lastJsonMessage);
     },
-    [lastJsonMessage, send, toast, isModerator]
+    [lastJsonMessage, send, isModerator]
   );
 
   const handleSendVote = React.useCallback(
