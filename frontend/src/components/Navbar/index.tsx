@@ -25,7 +25,7 @@ export const Template: React.FC = (props) => {
 
   return (
     <Flex
-      py={4}
+      py="2vh"
       px={{ base: 4, md: 6, lg: 8 }}
       bg={mode("white", "gray.800")}
       boxShadow="none"

@@ -42,6 +42,7 @@ type GameEvent =
 type GameMessage = {
   event: GameEvent;
   data: any;
+  is_moderator: boolean;
 };
 
 function Poker() {
@@ -51,6 +52,7 @@ function Poker() {
 
   const [closeCode, setCloseCode] = React.useState<number>();
   const [players, setPlayers] = React.useState<Array<Player>>([]);
+  const [isModerator, setIsModerator] = React.useState(false);
   const [tasks, setTasks] = React.useState<Array<string>>();
   const [gameState, send] = useMachine<PokerContextType, EventObject>(
     PokerMachine
@@ -93,7 +95,15 @@ function Poker() {
       if (!lastJsonMessage) {
         return;
       }
-      const { event, data } = lastJsonMessage as GameMessage;
+      const {
+        event,
+        data,
+        is_moderator: playerShouldBeModerator,
+      } = lastJsonMessage as GameMessage;
+
+      if (!isModerator && playerShouldBeModerator) {
+        setIsModerator(true);
+      }
 
       switch (event) {
         case "new_task_to_estimate":
@@ -177,6 +187,7 @@ function Poker() {
           nextRound={handleNextRound}
           replayRound={handleReplayRound}
           votes={currentTask?.votes}
+          isModerator={isModerator}
         />
       );
   }

@@ -37,7 +37,8 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     def tasks(self) -> List[str]:
         return [task.title for task in self.current_session.tasks]
 
-    def _is_moderator(self):
+    @property
+    def _is_moderator(self) -> bool:
         return self.user == self.current_session.moderator
 
     def _get_participants(self):
@@ -89,7 +90,12 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             send_func = self.channel_layer.send
             destination = self.channel_name
 
-        payload = {"type": "send.json", "event": event, "data": data}
+        payload = {
+            "type": "send.json",
+            "event": event,
+            "data": data,
+            "is_moderator": self._is_moderator
+        }
 
         send = async_to_sync(send_func)
         send(destination, payload)
@@ -126,10 +132,11 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         )
 
         current_task.save()
-        self.send_event("vote_cast", to_everyone=False, created=created, value=value)
+        self.send_event("vote_cast", to_everyone=False,
+                        created=created, value=value)
 
     def reveal_cards(self):
-        if not self._is_moderator():
+        if not self._is_moderator:
             return
         votes = [
             (vote.value, str(vote))
@@ -139,7 +146,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         self.send_event("cards_revealed", to_everyone=True, votes=votes)
 
     def next_round(self):
-        if not self._is_moderator():
+        if not self._is_moderator:
             return
 
         self.current_session.refresh_from_db()

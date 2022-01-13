@@ -46,7 +46,7 @@ function AuthenticatedApp({ user }: Props) {
         as="section"
         bg={useColorModeValue("gray.50", "gray.800")}
         overflow="hidden"
-        minH="100vh"
+        minH="90vh"
       >
         <AppRoutes />
       </Box>
