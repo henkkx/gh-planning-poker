@@ -19,7 +19,8 @@ class TestPlanningPokerConsumer:
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
     async def test_rejects_if_no_pokersession_exists(self):
-        ws = WebsocketCommunicator(application=application, path=f"ws/poker/{42}")
+        ws = WebsocketCommunicator(
+            application=application, path=f"ws/poker/{42}")
 
         is_connected, _ = await ws.connect()
         assert not is_connected
@@ -37,7 +38,8 @@ class TestPlanningPokerConsumer:
         ROOM = "room"
         CHANNEL = "channel"
         data = {"foo": "bar"}
-        expected_kwargs = {"event": EVENT, "type": "send.json", "data": data}
+        expected_kwargs = {"event": EVENT, "type": "send.json",
+                           "data": data,  'is_moderator': False}
 
         poker_consumer.room_name = ROOM
         poker_consumer.channel_name = CHANNEL
@@ -175,7 +177,8 @@ class TestPlanningPokerConsumer:
             poker_consumer.reveal_cards()
             mock_send_event.assert_not_called()
 
-        moderator = create_moderator_for_poker(current_session, name=MODERATOR_NAME)
+        moderator = create_moderator_for_poker(
+            current_session, name=MODERATOR_NAME)
 
         poker_consumer.scope["user"] = moderator
 
