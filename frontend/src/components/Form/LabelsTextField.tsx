@@ -5,10 +5,10 @@ export const LabelsTextField = (props: InputProps) => {
   return (
     <FormControl id="labelsInput">
       <FormLabel>
-        Enter the labels, separated by commas, by which the issues will be
-        filtered (leave empty to choose all issues)
+        Type here, separated by commas, the labels by which issues will be
+        filtered (or leave empty to choose all)
       </FormLabel>
-      <Input type="text" {...props} placeholder="label1,label2 " />
+      <Input type="text" {...props} placeholder="label1,label2,...,labelN" />
     </FormControl>
   );
 };

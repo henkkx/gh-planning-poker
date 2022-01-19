@@ -18,7 +18,6 @@ function isResponseOk(response: Response) {
   if (200 <= response.status && response.status <= 299) {
     return response.json();
   }
-  console.log(response);
 
   throw Error(response.statusText);
 }
@@ -30,7 +29,6 @@ type PokerSessionData = {
 };
 function createPokerSession(data: PokerSessionData, crsfToken: string) {
   const body = JSON.stringify(data);
-  console.log(body);
 
   return fetch("/api/poker", {
     method: "POST",

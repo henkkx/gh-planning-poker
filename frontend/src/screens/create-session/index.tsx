@@ -29,32 +29,32 @@ interface GithubFormElement extends HTMLFormElement {
   readonly elements: FormElements;
 }
 
+interface FormValues {
+  repo_name: string;
+  org_name?: string;
+  labels?: string;
+}
+
 export const CreateSessionView = () => {
   const [isOrgRepoSelected, orgRepo] = useBoolean(false);
   const toast = useToast();
   const history = useHistory();
   const [isLoading, setIsLoading] = React.useState(false);
 
-  async function handleSubmit(e: React.FormEvent<GithubFormElement>) {
+  function handleSubmit(e: React.FormEvent<GithubFormElement>) {
     e.preventDefault();
     setIsLoading(true);
-    const { elements } = e.currentTarget;
-    await createSession(elements);
-    setIsLoading(false);
-  }
-
-  async function createSession({
-    repoInput,
-    orgInput,
-    labelsInput,
-  }: FormElements) {
-    const csrfToken = await api.getCSRF();
+    const { repoInput, orgInput, labelsInput } = e.currentTarget.elements;
 
     const repo_name = repoInput.value;
     const org_name = orgInput?.value;
     const labels = labelsInput?.value;
+    createSession({ repo_name, org_name, labels });
+  }
 
+  async function createSession({ repo_name, org_name, labels }: FormValues) {
     try {
+      const csrfToken = await api.getCSRF();
       const { id } = await api.createPokerSession(
         { repo_name, org_name, labels },
         csrfToken
@@ -72,6 +72,7 @@ export const CreateSessionView = () => {
           org_name ? "organization's" : ""
         } Github Account`;
       }
+      setIsLoading(false);
       toast({
         title,
         description,

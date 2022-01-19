@@ -134,6 +134,7 @@ function Game({
               <TabPanel>
                 <Card bg={bgColor} mt="2" maxH="300">
                   <ScrollArea h="250">
+                    {votes.length ? null : "No votes were cast..."}
                     <OrderedList>
                       {votes.map(([_, desc]: any) => (
                         <ListItem key={desc}> {desc} </ListItem>

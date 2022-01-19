@@ -50,7 +50,7 @@ function Poker() {
     initialStep: 0,
   });
   const [gameState, send] = useMachine<PokerContextType, EventObject>(
-    PokerMachine
+    () => PokerMachine
   );
 
   const { id } = useParams<PokerParams>();

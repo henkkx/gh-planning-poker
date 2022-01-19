@@ -60,7 +60,7 @@ const PokerMachine = createMachine<
   {
     actions: {
       displayTaskInfo: assign({
-        currentTask: (context, event) => {
+        currentTask: (_, event) => {
           const { title, description } = event;
           return {
             title,
@@ -72,9 +72,6 @@ const PokerMachine = createMachine<
         currentTask: (context, event) => {
           const { votes } = event;
           const { currentTask } = context;
-
-          console.log(event);
-
           return {
             ...currentTask!,
             votes,
