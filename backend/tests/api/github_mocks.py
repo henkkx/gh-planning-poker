@@ -9,7 +9,7 @@ class MockIssue:
 
 
 class MockRepo:
-    def get_issues(self, state='open'):
+    def get_issues(self, state='open', labels=[]):
         return [
             MockIssue(id=1, title='pr', pull_request=True),
             MockIssue(id=2)

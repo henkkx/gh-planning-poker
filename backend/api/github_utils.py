@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 from github import Github, GithubException
 from github.Repository import Repository
 from github.AuthenticatedUser import AuthenticatedUser
@@ -10,6 +10,10 @@ class RepoNotFound(Exception):
 
 
 class OrgNotFound(Exception):
+    pass
+
+
+class NoIssuesFoundException(Exception):
     pass
 
 
@@ -36,3 +40,16 @@ def get_github_repo(user, repo_name: str, org_name: Union[str, None]) -> Reposit
     except GithubException:
         raise RepoNotFound
     return repo
+
+
+def get_issues_from_repo(repo: Repository, labels: List[str]):
+    pr_and_regular_issues = repo.get_issues(state="open", labels=labels)
+    # pull requests are considered issues by github but we only want to keep regular issues and discard PRs
+    regular_issues = [
+        i for i in pr_and_regular_issues if i.pull_request is None
+    ]
+
+    if not regular_issues:
+        raise NoIssuesFoundException()
+
+    return regular_issues

@@ -5,9 +5,9 @@ import {
   Divider,
   Heading,
   Stack,
-  useBoolean,
   Img,
   useToast,
+  useBoolean,
 } from "@chakra-ui/react";
 import * as React from "react";
 import { Card } from "../../components/Card";
@@ -17,10 +17,13 @@ import { RepoTextField } from "../../components/Form/RepoTextField";
 import CreateSessionImg from "./new_game.svg";
 import * as api from "../../api";
 import { useHistory } from "react-router-dom";
+import { LabelsTextField } from "../../components/Form/LabelsTextField";
+import { FullPageProgress } from "../../components/Spinner";
 
 interface FormElements extends HTMLFormControlsCollection {
-  orgInput?: HTMLInputElement;
   repoInput: HTMLInputElement;
+  orgInput?: HTMLInputElement;
+  labelsInput?: HTMLInputElement;
 }
 interface GithubFormElement extends HTMLFormElement {
   readonly elements: FormElements;
@@ -30,31 +33,56 @@ export const CreateSessionView = () => {
   const [isOrgRepoSelected, orgRepo] = useBoolean(false);
   const toast = useToast();
   const history = useHistory();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   async function handleSubmit(e: React.FormEvent<GithubFormElement>) {
     e.preventDefault();
-    const { repoInput, orgInput } = e.currentTarget.elements;
+    setIsLoading(true);
+    const { elements } = e.currentTarget;
+    await createSession(elements);
+    setIsLoading(false);
+  }
 
+  async function createSession({
+    repoInput,
+    orgInput,
+    labelsInput,
+  }: FormElements) {
     const csrfToken = await api.getCSRF();
 
     const repo_name = repoInput.value;
     const org_name = orgInput?.value;
+    const labels = labelsInput?.value;
+
     try {
       const { id } = await api.createPokerSession(
-        { repo_name, org_name },
+        { repo_name, org_name, labels },
         csrfToken
       );
       history.push(`/play/${id}`);
     } catch (err: any) {
-      toast({
-        title: `Unable to create session - ${err}`,
-        description: `No repository with the name "${repo_name}" was found in your ${
+      let title, description;
+
+      if (err.toString() === "Error: Not Found") {
+        title = `No issues matching all the following labels: [${labels}]`;
+        description = "Remember to enter the labels separated by a comma";
+      } else {
+        title = `Unable to create session - ${err}`;
+        description = `No repository with the name "${repo_name}" was found in your ${
           org_name ? "organization's" : ""
-        } Github Account`,
+        } Github Account`;
+      }
+      toast({
+        title,
+        description,
         status: "error",
         isClosable: true,
       });
     }
+  }
+
+  if (isLoading) {
+    return <FullPageProgress text="Creating Planning Poker Session..." />;
   }
 
   return (
@@ -77,6 +105,7 @@ export const CreateSessionView = () => {
                   </>
                 ) : null}
                 <RepoTextField />
+                <LabelsTextField />
               </Stack>
               <Button type="submit" colorScheme="blue" mt="8">
                 Create a session

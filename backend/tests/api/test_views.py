@@ -31,6 +31,7 @@ class TestPokerSessionViews:
 
         REPO_NAME = "test_repo"
         ORG_NAME = "kaiba corp"
+
         monkeypatch.setattr("api.github_utils.Github", MockGithub)
         api_client.force_login(user=user)
         data = {"repo_name": REPO_NAME}
@@ -47,7 +48,7 @@ class TestPokerSessionViews:
             "org_name": ORG_NAME if is_org_repo else None,
         }
 
-        all = PlanningPokerSession.objects.all()
+        sessions = PlanningPokerSession.objects.all()
 
-        assert len(all) == 1
-        assert all.filter(repo_name=REPO_NAME).exists()
+        assert len(sessions) == 1
+        assert sessions.filter(repo_name=REPO_NAME).exists()

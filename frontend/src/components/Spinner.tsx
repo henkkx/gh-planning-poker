@@ -1,8 +1,7 @@
-import { Box } from "@chakra-ui/layout";
+import { Box, Heading } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/react";
-import * as React from "react";
 
-const FullPageProgress = () => (
+const FullPageProgress = ({ text }: any) => (
   <Box
     fontSize="4em"
     height="100vh"
@@ -11,6 +10,11 @@ const FullPageProgress = () => (
     justifyContent="center"
     alignItems="center"
   >
+    {text ? (
+      <Heading as="h3" size="lg" mb="2">
+        {text}
+      </Heading>
+    ) : null}
     <Spinner size="xl" />
   </Box>
 );

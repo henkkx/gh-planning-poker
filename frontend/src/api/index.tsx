@@ -23,15 +23,22 @@ function isResponseOk(response: Response) {
   throw Error(response.statusText);
 }
 
-type PokerSessionData = { repo_name: string; org_name?: string };
+type PokerSessionData = {
+  repo_name: string;
+  org_name?: string;
+  labels?: string;
+};
 function createPokerSession(data: PokerSessionData, crsfToken: string) {
+  const body = JSON.stringify(data);
+  console.log(body);
+
   return fetch("/api/poker", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": crsfToken,
     },
-    body: JSON.stringify(data),
+    body,
   }).then(isResponseOk);
 }
 

@@ -1,24 +1,24 @@
 from rest_framework import serializers
 from users.models import User
-
 from poker.models import PlanningPokerSession, Task
+from .github_utils import NoIssuesFoundException
 
 
 class PlanningPokerSessionSerializer(serializers.ModelSerializer):
     repo_name = serializers.CharField(max_length=100)
     org_name = serializers.CharField(max_length=40, required=False)
+    labels = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = PlanningPokerSession
-        fields = ["id", "current_task", "repo_name", "org_name"]
+        fields = ["id", "current_task", "repo_name", "org_name", "labels"]
 
     def create(self, validated_data):
         github_issues = validated_data.pop("issues")
+        validated_data.pop("labels", None)
 
         poker_session = PlanningPokerSession.objects.create(**validated_data)
 
-        # pull requests are considered issues by github but we only want to keep regular issues and discard PRs
-        filtered_github_issues = [i for i in github_issues if i.pull_request is None]
         tasks = [
             Task(
                 title=issue.title,
@@ -27,13 +27,13 @@ class PlanningPokerSessionSerializer(serializers.ModelSerializer):
                 planningpokersession=poker_session,
                 is_imported=True,
             )
-            for issue in filtered_github_issues
+            for issue in github_issues
         ]
+
         Task.objects.bulk_create(tasks)
 
-        if tasks:
-            poker_session.current_task = poker_session.tasks.first()
-            poker_session.save(update_fields=["current_task"])
+        poker_session.current_task = poker_session.tasks.first()
+        poker_session.save(update_fields=["current_task"])
         return poker_session
 
 

@@ -6,7 +6,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView
 
 from poker.models import PlanningPokerSession
 from users.models import User
-from .github_utils import OrgNotFound, RepoNotFound, get_github_repo
+from .github_utils import NoIssuesFoundException, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
 from .serializers import PlanningPokerSessionSerializer, UserSearchSerializer
 from .mixins import AuthRequiredMixin, PublicApiMixin
 
@@ -45,9 +45,12 @@ class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):
         post_data = self.request.data
         repo_name = post_data.get("repo_name")
         org_name = post_data.get("org_name")
+        labels_string = post_data.get("labels")
+        labels = labels_string.split(',') if labels_string else []
 
         try:
             repo = get_github_repo(user, repo_name, org_name)
+            issues = get_issues_from_repo(repo, labels)
         except OrgNotFound:
             raise exceptions.ParseError(
                 f"No organization with the name {org_name} was found in your Github Account",
@@ -58,8 +61,11 @@ class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):
                 f"No repository with the name {repo_name} was found in your {org_name if org_name else user.name}'s Github Account",
                 code=400,
             )
-
-        issues = repo.get_issues(state="open")
+        except NoIssuesFoundException:
+            raise exceptions.NotFound(
+                f"No issues were found matching the labels: {labels}",
+                code=404,
+            )
 
         fields = {
             "repo_name": repo_name,
