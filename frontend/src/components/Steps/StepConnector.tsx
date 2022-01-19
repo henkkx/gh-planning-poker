@@ -8,7 +8,7 @@ function StepConnector() {
   return (
     <Box
       borderStartWidth="1px"
-      borderStartColor={isCompleted ? accentColor : "inherit"}
+      borderStartColor={isCompleted ? accentColor : "whiteAlpha.400"}
       height="6"
       mt={isActive ? "0" : "2"}
       mb="2"

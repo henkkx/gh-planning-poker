@@ -13,6 +13,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { Card } from "../../components/Card";
+import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
 import { FullPageProgress } from "../../components/Spinner";
 import { ErrorCard } from "../error";
 import { VOTING_OPTIONS, UNSURE } from "./constants";
@@ -117,14 +118,16 @@ function Game({
             </OrderedList>
           </Card>
         ) : null}
-        <Card bg={bgColor} mt="2" overflowY="auto" maxH="300">
-          <Heading as="h4" mb="4" size="md">
-            Description
-          </Heading>
-          <ReactMarkdown
-            children={taskDescriptionMarkdown}
-            remarkPlugins={[remarkGfm]}
-          ></ReactMarkdown>
+        <Card bg={bgColor} mt="2" maxH="300">
+          <ScrollArea>
+            <Heading as="h4" mb="4" size="md">
+              Description
+            </Heading>
+            <ReactMarkdown
+              children={taskDescriptionMarkdown}
+              remarkPlugins={[remarkGfm]}
+            ></ReactMarkdown>
+          </ScrollArea>
         </Card>
       </SimpleGrid>
 

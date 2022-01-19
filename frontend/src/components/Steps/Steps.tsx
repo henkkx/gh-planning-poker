@@ -7,7 +7,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-function Steps({ activeStep, children }: Props) {
+export function Steps({ activeStep, children }: Props) {
   const steps = React.useMemo(
     () =>
       React.Children.toArray(children).map((step, i, arr) => (
@@ -28,5 +28,3 @@ function Steps({ activeStep, children }: Props) {
   );
   return <>{steps}</>;
 }
-
-export default Steps;

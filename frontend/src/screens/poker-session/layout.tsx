@@ -5,17 +5,23 @@ import {
   Stack,
   Heading,
   Avatar,
+  Tooltip,
 } from "@chakra-ui/react";
 import { MobileMenuButton } from "../../components/SidebarMenu/MobileMenuButton";
 import { NavSectionTitle } from "../../components/SidebarMenu/NavSectionTitle";
 import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
 import { SidebarLink } from "../../components/SidebarMenu/SidebarLink";
 import { useMobileMenuState } from "../../components/SidebarMenu/useMobileMenuState";
+import { Steps, useSteps, Step } from "../../components/Steps";
 
 function PokerGameLayout({ players, title, children }: any) {
   const { isOpen, toggle } = useMobileMenuState();
   const sidebarBg = useColorModeValue("blue.800", "gray.800");
   const contentBg = useColorModeValue("white", "gray.700");
+
+  const { nextStep, prevStep, reset, activeStep } = useSteps({
+    initialStep: 0,
+  });
 
   return (
     <Flex
@@ -39,6 +45,30 @@ function PokerGameLayout({ players, title, children }: any) {
           <ScrollArea pt="5" pb="6">
             <Stack pb="6">
               <NavSectionTitle>Tasks to estimate</NavSectionTitle>
+              <Box
+                mx="auto"
+                maxW="2xl"
+                py="4"
+                px={{ base: "6", md: "8" }}
+                minH="400px"
+              >
+                <Steps activeStep={activeStep}>
+                  {[
+                    "test",
+                    "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis,",
+                    "task",
+                  ].map((step) => (
+                    <Step
+                      key={step}
+                      title={
+                        step.length < 20 ? step : step.substring(0, 20) + "..."
+                      }
+                      tooltip={Tooltip}
+                      tooltipProps={{ placement: "right-start", label: step }}
+                    />
+                  ))}
+                </Steps>
+              </Box>
             </Stack>
             <Stack>
               <NavSectionTitle>Participants</NavSectionTitle>
@@ -71,7 +101,7 @@ function PokerGameLayout({ players, title, children }: any) {
             >
               <Flex align="center" minH="8">
                 <MobileMenuButton onClick={toggle} isOpen={isOpen} />
-                <Heading size="md" as="h2" maxH="100" overflowY="auto">
+                <Heading size="md" as="h2">
                   {title}
                 </Heading>
               </Flex>
