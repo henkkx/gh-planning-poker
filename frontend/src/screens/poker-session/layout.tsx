@@ -12,16 +12,27 @@ import { NavSectionTitle } from "../../components/SidebarMenu/NavSectionTitle";
 import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
 import { SidebarLink } from "../../components/SidebarMenu/SidebarLink";
 import { useMobileMenuState } from "../../components/SidebarMenu/useMobileMenuState";
-import { Steps, useSteps, Step } from "../../components/Steps";
+import { Steps, Step } from "../../components/Steps";
+import { Player } from "./machine";
 
-function PokerGameLayout({ players, title, children }: any) {
+type Props = {
+  players: Array<Player>;
+  title: string;
+  tasks: Array<string>;
+  children: React.ReactNode;
+  activeTaskIdx: number;
+};
+
+function PokerGameLayout({
+  players,
+  title,
+  children,
+  tasks,
+  activeTaskIdx,
+}: Props) {
   const { isOpen, toggle } = useMobileMenuState();
   const sidebarBg = useColorModeValue("blue.800", "gray.800");
   const contentBg = useColorModeValue("white", "gray.700");
-
-  const { nextStep, prevStep, reset, activeStep } = useSteps({
-    initialStep: 0,
-  });
 
   return (
     <Flex
@@ -50,21 +61,19 @@ function PokerGameLayout({ players, title, children }: any) {
                 maxW="2xl"
                 py="4"
                 px={{ base: "6", md: "8" }}
-                minH="400px"
+                minH="100px"
               >
-                <Steps activeStep={activeStep}>
-                  {[
-                    "test",
-                    "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis,",
-                    "task",
-                  ].map((step) => (
+                <Steps activeStep={activeTaskIdx}>
+                  {tasks.map((title) => (
                     <Step
-                      key={step}
+                      key={title}
                       title={
-                        step.length < 20 ? step : step.substring(0, 20) + "..."
+                        title.length < 20
+                          ? title
+                          : title.substring(0, 20) + "..."
                       }
                       tooltip={Tooltip}
-                      tooltipProps={{ placement: "right-start", label: step }}
+                      tooltipProps={{ placement: "right-start", label: title }}
                     />
                   ))}
                 </Steps>

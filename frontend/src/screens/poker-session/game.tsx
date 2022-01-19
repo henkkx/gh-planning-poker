@@ -7,6 +7,11 @@ import {
   SimpleGrid,
   useBreakpointValue,
   useColorModeValue,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
 } from "@chakra-ui/react";
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
@@ -103,32 +108,46 @@ function Game({
     </SimpleGrid>
   );
 
+  const taskDescription = (
+    <Card bg={bgColor} mt="2" maxH="300">
+      <ScrollArea h="250">
+        <Heading as="h4" mb="4" size="md">
+          Description
+        </Heading>
+        <ReactMarkdown
+          children={taskDescriptionMarkdown}
+          remarkPlugins={[remarkGfm]}
+        ></ReactMarkdown>
+      </ScrollArea>
+    </Card>
+  );
   return (
-    <SimpleGrid>
+    <SimpleGrid w="100%">
       <SimpleGrid columns={1} px={["1%", "2%", "5%", "10%"]}>
         {isDiscussing ? (
-          <Card bg={bgColor} mt="2" overflowY="auto">
-            <Heading as="h3" size="sm" mt="-4" mb="4" fontWeight="bold">
-              Votes
-            </Heading>
-            <OrderedList>
-              {votes.map(([_, desc]: any) => (
-                <ListItem key={desc}> {desc} </ListItem>
-              ))}
-            </OrderedList>
-          </Card>
-        ) : null}
-        <Card bg={bgColor} mt="2" maxH="300">
-          <ScrollArea>
-            <Heading as="h4" mb="4" size="md">
-              Description
-            </Heading>
-            <ReactMarkdown
-              children={taskDescriptionMarkdown}
-              remarkPlugins={[remarkGfm]}
-            ></ReactMarkdown>
-          </ScrollArea>
-        </Card>
+          <Tabs variant="enclosed" mt="2" isFitted w="100%">
+            <TabList>
+              <Tab>Player Votes</Tab>
+              <Tab>Task Description</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <Card bg={bgColor} mt="2" maxH="300">
+                  <ScrollArea h="250">
+                    <OrderedList>
+                      {votes.map(([_, desc]: any) => (
+                        <ListItem key={desc}> {desc} </ListItem>
+                      ))}
+                    </OrderedList>
+                  </ScrollArea>
+                </Card>
+              </TabPanel>
+              <TabPanel>{taskDescription}</TabPanel>
+            </TabPanels>
+          </Tabs>
+        ) : (
+          taskDescription
+        )}
       </SimpleGrid>
 
       {isDiscussing && isModerator ? (

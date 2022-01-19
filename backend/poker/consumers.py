@@ -35,7 +35,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
     @cached_property
     def tasks(self) -> List[str]:
-        return [task.title for task in self.current_session.tasks]
+        return [task.title for task in self.current_session.tasks.all()]
 
     @property
     def _is_moderator(self) -> bool:
@@ -63,7 +63,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
         self.accept()
         self.send_current_task(to_everyone=False)
-
+        self.send_task_list()
         self.add_user_to_session()
 
     def add_user_to_session(self):
@@ -111,6 +111,13 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             id=current_task.id,
             title=current_task.title,
             description=current_task.description,
+        )
+
+    def send_task_list(self):
+        self.send_event(
+            event="task_list_received",
+            to_everyone=False,
+            tasks=self.tasks
         )
 
     def participants_changed(self, message: Dict):

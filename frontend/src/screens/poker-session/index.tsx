@@ -9,9 +9,15 @@ import { FullPageProgress } from "../../components/Spinner";
 import { refreshPage } from "../../utils/misc";
 import { ErrorCard } from "../error/";
 import Game from "./game";
-import PokerMachine, { GameState, Player, PokerContextType } from "./machine";
+import PokerMachine, {
+  GameState,
+  Player,
+  PokerContextType,
+  Task,
+} from "./machine";
 import { BASE_SOCKET_URL, CODE_SESSION_ENDED } from "./constants";
 import PokerGameLayout from "./layout";
+import { useSteps } from "../../components/Steps";
 
 type PokerParams = {
   id: string;
@@ -23,7 +29,7 @@ type GameEvent =
   | "vote_cast"
   | "cards_revealed"
   | "no_tasks_left"
-  | "tasks_received";
+  | "task_list_received";
 
 type GameMessage = {
   event: GameEvent;
@@ -39,7 +45,10 @@ function Poker() {
   const [closeCode, setCloseCode] = React.useState<number>();
   const [players, setPlayers] = React.useState<Array<Player>>([]);
   const [isModerator, setIsModerator] = React.useState(false);
-  const [tasks, setTasks] = React.useState<Array<string>>();
+  const [tasks, setTasks] = React.useState<Array<string>>(["loading tasks..."]);
+  const { nextStep, activeStep: activeTaskIdx } = useSteps({
+    initialStep: 0,
+  });
   const [gameState, send] = useMachine<PokerContextType, EventObject>(
     PokerMachine
   );
@@ -68,6 +77,7 @@ function Poker() {
   } = useWebSocket(planningPokerUrl, wsOptions, shouldConnect);
 
   const { currentTask } = gameState.context;
+  const currentTaskTitle = currentTask?.title ?? "loading the title...";
   const currentStage = gameState.value as GameState;
 
   React.useEffect(() => {
@@ -95,7 +105,7 @@ function Poker() {
         case "new_task_to_estimate":
           send("NEXT_ROUND", data);
           break;
-        case "tasks_received":
+        case "task_list_received":
           setTasks(data.tasks);
           break;
         case "participants_changed":
@@ -134,10 +144,10 @@ function Poker() {
     [sendJsonMessage]
   );
 
-  const handleNextRound = React.useCallback(
-    () => sendJsonMessage({ event: "next_round", data: {} }),
-    [sendJsonMessage]
-  );
+  const handleNextRound = React.useCallback(() => {
+    sendJsonMessage({ event: "next_round", data: {} });
+    nextStep();
+  }, [sendJsonMessage, nextStep]);
   const handleReplayRound = React.useCallback(() => send("REPLAY"), [send]);
 
   let pokerGameContent;
@@ -180,10 +190,10 @@ function Poker() {
 
   return (
     <PokerGameLayout
-      repo="test"
-      title={currentTask?.title}
+      title={currentTaskTitle}
       players={players}
       tasks={tasks}
+      activeTaskIdx={activeTaskIdx}
     >
       {pokerGameContent}
     </PokerGameLayout>
