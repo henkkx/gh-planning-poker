@@ -19,6 +19,7 @@ import { chakraMarkdownComponents } from "./utils";
 
 function SaveNoteForm({ saveRound }: any) {
   const [textNote, setTextNote] = React.useState<string>("");
+  const isTextOverLimit = textNote.length > 4000;
 
   let handleInputChange = (e: any) => {
     let inputValue = e.currentTarget.value;
@@ -41,7 +42,11 @@ function SaveNoteForm({ saveRound }: any) {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <NoteTextArea value={textNote} onChange={handleInputChange} />
+            <NoteTextArea
+              value={textNote}
+              isInvalid={isTextOverLimit}
+              onChange={handleInputChange}
+            />
           </TabPanel>
           <TabPanel>
             <Card mt="2" maxH="300" minH="300">
@@ -70,6 +75,7 @@ function SaveNoteForm({ saveRound }: any) {
           w="80%"
           mt="2"
           justifySelf="center"
+          isDisabled={isTextOverLimit}
         >
           Save and export to Github
         </Button>
