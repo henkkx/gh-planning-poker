@@ -13,7 +13,7 @@ import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
 import { SidebarLink } from "../../components/SidebarMenu/SidebarLink";
 import { useMobileMenuState } from "../../components/SidebarMenu/useMobileMenuState";
 import { Steps, Step } from "../../components/Steps";
-import { Player } from "./machine";
+import { Player } from "./game/machine";
 
 type Props = {
   players: Array<Player>;

@@ -21,7 +21,12 @@ export type PokerContextType = {
   currentTask: Task;
 };
 
-export type GameState = "connecting" | "voting" | "discussing" | "finished";
+export type GameState =
+  | "connecting"
+  | "voting"
+  | "discussing"
+  | "saving"
+  | "finished";
 
 const PokerMachine = createMachine<
   PokerContextType,
@@ -48,17 +53,25 @@ const PokerMachine = createMachine<
 
       voting: {
         on: {
-          REVEAL: { target: "discussing", actions: "revealVotes" },
+          REVEAL_CARDS: { target: "discussing", actions: "revealVotes" },
         },
       },
 
       discussing: {
         on: {
-          REPLAY: "voting",
+          REPLAY_ROUND: "voting",
+          FINISH_ROUND: "saving",
           NEXT_ROUND: { target: "voting", actions: "displayTaskInfo" },
-          FINISH: "finished",
         },
       },
+
+      saving: {
+        on: {
+          NEXT_ROUND: { target: "voting", actions: "displayTaskInfo" },
+          FINISH_SESSION: "finished",
+        },
+      },
+
       finished: {
         type: "final",
       },

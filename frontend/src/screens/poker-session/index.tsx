@@ -6,18 +6,17 @@ import { EventObject } from "xstate";
 import { useMachine } from "@xstate/react";
 
 import { FullPageProgress } from "../../components/Spinner";
-import { refreshPage } from "../../utils/misc";
-import { ErrorCard } from "../error/";
+
 import Game from "./game";
 import PokerMachine, {
   GameState,
   Player,
   PokerContextType,
-  Task,
-} from "./machine";
+} from "./game/machine";
 import { BASE_SOCKET_URL, CODE_SESSION_ENDED } from "./constants";
 import PokerGameLayout from "./layout";
 import { useSteps } from "../../components/Steps";
+import PokerErrorScreen from "./error-screen";
 
 type PokerParams = {
   id: string;
@@ -29,12 +28,13 @@ type GameEvent =
   | "vote_cast"
   | "cards_revealed"
   | "no_tasks_left"
-  | "task_list_received";
+  | "task_list_received"
+  | "role_updated"
+  | "replay_round";
 
 type GameMessage = {
   event: GameEvent;
   data: any;
-  is_moderator: boolean;
 };
 
 function Poker() {
@@ -61,7 +61,7 @@ function Poker() {
   const wsOptions = {
     onClose: (e: CloseEvent) => {
       setCloseCode(e.code);
-      if (e.code == CODE_SESSION_ENDED) {
+      if (e.code === CODE_SESSION_ENDED) {
         setShouldConnect(false);
       }
     },
@@ -91,19 +91,14 @@ function Poker() {
       if (!lastJsonMessage) {
         return;
       }
-      const {
-        event,
-        data,
-        is_moderator: playerShouldBeModerator,
-      } = lastJsonMessage as GameMessage;
-
-      if (!isModerator && playerShouldBeModerator) {
-        setIsModerator(true);
-      }
+      const { event, data } = lastJsonMessage as GameMessage;
 
       switch (event) {
         case "new_task_to_estimate":
           send("NEXT_ROUND", data);
+          break;
+        case "role_updated":
+          setIsModerator(data.is_moderator);
           break;
         case "task_list_received":
           setTasks(data.tasks);
@@ -112,24 +107,26 @@ function Poker() {
           setPlayers(data.participants);
           break;
         case "vote_cast":
-          const { created, value } = data;
           toast({
-            title: created ? "Vote cast" : "Vote updated",
-            description: `Your vote (${value}) was successfully saved`,
+            title: "Vote cast succesfully",
+            description: `${data.vote}`,
             status: "success",
             isClosable: true,
           });
           break;
         case "cards_revealed":
-          send("REVEAL", data);
+          send("REVEAL_CARDS", data);
+          break;
+        case "replay_round":
+          send("REPLAY_ROUND");
           break;
         case "no_tasks_left":
-          send("FINISH");
+          send("FINISH_SESSION");
       }
 
       console.log(lastJsonMessage);
     },
-    [lastJsonMessage, send, isModerator]
+    [lastJsonMessage, send]
   );
 
   const handleSendVote = React.useCallback(
@@ -144,11 +141,24 @@ function Poker() {
     [sendJsonMessage]
   );
 
-  const handleNextRound = React.useCallback(() => {
-    sendJsonMessage({ event: "next_round", data: {} });
+  const handleFinishRound = React.useCallback(() => {
     nextStep();
+    send("FINISH_ROUND");
   }, [sendJsonMessage, nextStep]);
-  const handleReplayRound = React.useCallback(() => send("REPLAY"), [send]);
+
+  const handleReplayRound = React.useCallback(() => {
+    sendJsonMessage({ event: "replay_round", data: {} });
+  }, [send, sendJsonMessage]);
+
+  const handleSaveRound = React.useCallback(
+    (shouldSaveRound: boolean, note: string) => {
+      sendJsonMessage({
+        event: "finish_round",
+        data: { should_save_round: shouldSaveRound, note },
+      });
+    },
+    [sendJsonMessage]
+  );
 
   let pokerGameContent;
 
@@ -159,19 +169,7 @@ function Poker() {
       pokerGameContent = <FullPageProgress />;
       break;
     case ReadyState.CLOSED:
-      const sessionFinished = closeCode === CODE_SESSION_ENDED;
-      pokerGameContent = sessionFinished ? (
-        <ErrorCard
-          message={`This session has finished`}
-          errorText="No more tasks left to estimate"
-        />
-      ) : (
-        <ErrorCard
-          canTryAgain
-          onTryAgain={refreshPage}
-          message={`Could not find a session with id: ${id}`}
-        />
-      );
+      pokerGameContent = <PokerErrorScreen closeCode={closeCode} />;
       break;
     case ReadyState.OPEN:
       pokerGameContent = (
@@ -180,7 +178,8 @@ function Poker() {
           stage={currentStage}
           sendVote={handleSendVote}
           revealCards={handleRevealCards}
-          nextRound={handleNextRound}
+          finishRound={handleFinishRound}
+          saveRound={handleSaveRound}
           replayRound={handleReplayRound}
           isModerator={isModerator}
         />

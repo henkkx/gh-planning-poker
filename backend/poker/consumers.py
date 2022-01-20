@@ -17,8 +17,10 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         self.event_handlers = {
             "vote": self.save_vote,
             "reveal_cards": self.reveal_cards,
-            "next_round": self.next_round,
+            "finish_round": self.finish_round,
+            "replay_round": self.replay_round,
             "participants_changed": self.participants_changed,
+
         }
 
     @property
@@ -39,7 +41,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
     @property
     def _is_moderator(self) -> bool:
-        return self.user == self.current_session.moderator
+        return self.user.email == self.current_session.moderator.email
 
     def _get_participants(self):
         participants = [
@@ -63,6 +65,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
         self.accept()
         self.send_current_task(to_everyone=False)
+        self.send_role()
         self.send_task_list()
         self.add_user_to_session()
 
@@ -70,6 +73,12 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         self.current_session.voters.add(self.user)
         self.broadcast_participants()
         self.touch_presence()
+
+    def send_role(self):
+        self.send_event(
+            event='role_updated',
+            to_everyone=False,
+            is_moderator=self._is_moderator)
 
     def disconnect(self, close_code):
         if self.room_name == "rejected":
@@ -94,7 +103,6 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             "type": "send.json",
             "event": event,
             "data": data,
-            "is_moderator": self._is_moderator
         }
 
         send = async_to_sync(send_func)
@@ -134,13 +142,17 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             print("No current task")
             return
 
-        _, created = current_task.votes.update_or_create(
+        vote, created = current_task.votes.update_or_create(
             user=self.user, defaults={"value": value}
         )
 
         current_task.save()
-        self.send_event("vote_cast", to_everyone=False,
-                        created=created, value=value)
+        self.send_event(
+            "vote_cast",
+            to_everyone=False,
+            created=created,
+            vote=str(vote)
+        )
 
     def reveal_cards(self):
         if not self._is_moderator:
@@ -163,10 +175,9 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         stats = {
             "total_vote_count": total_vote_count,
             "undecided_count": total_vote_count - numeric_vote_count,
-            "mean": statistics.mean(numeric_votes) if numeric_vote_count >= 1 else "not enough votes",
-            "median": statistics.median(numeric_votes) if numeric_vote_count >= 1 else "not enough votes",
-            "std_dev": statistics.stdev(numeric_votes) if numeric_vote_count >= 2 else "not enough votes",
-
+            "mean": round(statistics.mean(numeric_votes), 3) if numeric_vote_count >= 1 else "not enough votes",
+            "median": round(statistics.median(numeric_votes), 3) if numeric_vote_count >= 1 else "not enough votes",
+            "std_dev": round(statistics.stdev(numeric_votes), 3)if numeric_vote_count >= 2 else "not enough votes",
         }
 
         self.send_event(
@@ -176,7 +187,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             stats=stats
         )
 
-    def next_round(self):
+    def finish_round(self, should_save_round: bool, note: str):
         if not self._is_moderator:
             return
 
@@ -184,12 +195,17 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
         current_task = self.current_session.current_task
         current_task.is_decided = True
+        if should_save_round:
+            current_task.note = note
         current_task.save()
 
         next_task = self.current_session.tasks.filter(is_decided=False).first()
         self.current_session.current_task = next_task
         self.current_session.save()
         self.send_current_task(to_everyone=True)
+
+    def replay_round(self):
+        self.send_event("replay_round")
 
     def touch_presence(self):
         Presence.objects.touch(self.channel_name)

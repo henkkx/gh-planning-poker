@@ -1,8 +1,6 @@
 import {
   Button,
   Heading,
-  ListItem,
-  OrderedList,
   Select,
   SimpleGrid,
   useBreakpointValue,
@@ -12,32 +10,29 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
-  Table,
-  Tbody,
-  Td,
-  Tfoot,
-  Th,
-  Thead,
-  Tr,
 } from "@chakra-ui/react";
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { Card } from "../../components/Card";
-import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
-import { FullPageProgress } from "../../components/Spinner";
-import { ErrorCard } from "../error";
-import { VOTING_OPTIONS, UNSURE } from "./constants";
+import { Card } from "../../../components/Card";
+import { ScrollArea } from "../../../components/SidebarMenu/ScrollArea";
+import { FullPageProgress } from "../../../components/Spinner";
+import { ErrorCard } from "../../error";
+import { VOTING_OPTIONS, UNSURE } from "../constants";
 import { GameState, Task } from "./machine";
+import SaveNoteForm from "./save-note-form";
+import { chakraMarkdownComponents } from "./utils";
+import Votes from "./votes";
 
 type Props = {
   sendVote: (value: number) => void;
   stage: GameState;
   currentTask?: Task;
-  replayRound: any;
-  revealCards: any;
-  nextRound: any;
+  replayRound: () => void;
+  revealCards: () => void;
+  finishRound: () => void;
+  saveRound: (shouldSaveRound: boolean, note: string) => void;
   isModerator: boolean;
 };
 
@@ -47,7 +42,8 @@ function Game({
   currentTask,
   revealCards,
   replayRound,
-  nextRound,
+  finishRound,
+  saveRound,
   isModerator,
 }: Props) {
   const bgColor = useColorModeValue("gray.50", "gray.600");
@@ -55,8 +51,10 @@ function Game({
   const [selectedValue, setSelectedValue] = React.useState<number>(1);
 
   const isConnecting = stage === "connecting";
+  const isVoting = stage === "voting";
   const isDiscussing = stage === "discussing";
-  const isFinished = stage == "finished";
+  const isFinished = stage === "finished";
+  const isSavingResults = stage === "saving";
 
   if (isConnecting) {
     return <FullPageProgress />;
@@ -107,7 +105,7 @@ function Game({
           colorScheme="green"
           fontSize="3xl"
           fontWeight="bold"
-          onClick={(_) => sendVote(id)}
+          onClick={() => sendVote(id)}
         >
           {id < UNSURE ? id : label}
         </Button>
@@ -124,6 +122,8 @@ function Game({
         <ReactMarkdown
           children={taskDescriptionMarkdown}
           remarkPlugins={[remarkGfm]}
+          components={chakraMarkdownComponents}
+          skipHtml
         ></ReactMarkdown>
       </ScrollArea>
     </Card>
@@ -139,47 +139,18 @@ function Game({
             </TabList>
             <TabPanels>
               <TabPanel>
-                <Card bg={bgColor} mt="2" maxH="300">
-                  <ScrollArea h="250">
-                    {votes.length ? (
-                      <Table size="sm" mb="5">
-                        <Thead>
-                          <Tr>
-                            <Th isNumeric>Total Votes</Th>
-                            <Th isNumeric>Unsure votes</Th>
-                            <Th isNumeric>Mean (h)</Th>
-                            <Th isNumeric>Median (h)</Th>
-                            <Th isNumeric>Standard Deviation (h)</Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                          <Tr>
-                            <Td isNumeric> {stats.total_vote_count} </Td>
-                            <Td isNumeric> {stats.undecided_count} </Td>
-                            <Td isNumeric> {stats.mean} </Td>
-                            <Td isNumeric> {stats.median} </Td>
-                            <Td isNumeric>{stats.std_dev}</Td>
-                          </Tr>
-                        </Tbody>
-                      </Table>
-                    ) : (
-                      "No votes were cast..."
-                    )}
-
-                    <OrderedList>
-                      {votes.map((description: string) => (
-                        <ListItem key={description}> {description} </ListItem>
-                      ))}
-                    </OrderedList>
-                  </ScrollArea>
-                </Card>
+                <Votes votes={votes} stats={stats} bgColor={bgColor} />
               </TabPanel>
               <TabPanel>{taskDescription}</TabPanel>
             </TabPanels>
           </Tabs>
-        ) : (
-          taskDescription
-        )}
+        ) : null}
+
+        {isSavingResults && isModerator ? (
+          <SaveNoteForm saveRound={saveRound} />
+        ) : null}
+
+        {isVoting ? taskDescription : null}
       </SimpleGrid>
 
       {isDiscussing && isModerator ? (
@@ -196,15 +167,15 @@ function Game({
             w="80%"
             justifySelf="center"
             colorScheme="blue"
-            onClick={nextRound}
+            onClick={finishRound}
           >
-            Next round
+            Finish this round
           </Button>
         </SimpleGrid>
       ) : (
         <>
-          {pokerButtons}
-          {isModerator ? (
+          {isVoting ? pokerButtons : null}
+          {isModerator && isVoting ? (
             <Button
               w="60%"
               justifySelf="center"
