@@ -13,12 +13,12 @@ export type Player = {
 export type Task = {
   title: string;
   description: string;
-  votes?: Array<string>;
+  votes: Array<string>;
+  stats: Record<string, string>;
 };
 
 export type PokerContextType = {
-  you?: Player;
-  currentTask?: Task;
+  currentTask: Task;
 };
 
 export type GameState = "connecting" | "voting" | "discussing" | "finished";
@@ -31,7 +31,14 @@ const PokerMachine = createMachine<
   {
     id: "poker_machine",
     initial: "connecting",
-    context: {},
+    context: {
+      currentTask: {
+        title: "loading...",
+        description: "loading...",
+        votes: [],
+        stats: {},
+      },
+    },
     states: {
       connecting: {
         on: {
@@ -60,9 +67,12 @@ const PokerMachine = createMachine<
   {
     actions: {
       displayTaskInfo: assign({
-        currentTask: (_, event) => {
+        currentTask: (context, event) => {
+          const { currentTask } = context;
+
           const { title, description } = event;
           return {
+            ...currentTask,
             title,
             description,
           };
@@ -70,11 +80,12 @@ const PokerMachine = createMachine<
       }),
       revealVotes: assign({
         currentTask: (context, event) => {
-          const { votes } = event;
+          const { votes, stats } = event;
           const { currentTask } = context;
           return {
             ...currentTask!,
             votes,
+            stats,
           };
         },
       }),

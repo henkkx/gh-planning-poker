@@ -4,7 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels_presence.models import Room, Presence
 from django.utils.functional import cached_property
-
+import statistics
 
 from .models import PlanningPokerSession
 
@@ -145,12 +145,36 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     def reveal_cards(self):
         if not self._is_moderator:
             return
-        votes = [
-            (vote.value, str(vote))
-            for vote in self.current_session.current_task.votes.all()
+
+        vote_values = self.current_session.current_task.votes.all()
+        vote_descriptions = [
+            str(vote)
+            for vote in vote_values
         ]
 
-        self.send_event("cards_revealed", to_everyone=True, votes=votes)
+        total_vote_count = len(vote_values)
+        # filter unsure and unclear options and only keep regular i.e ones from 1 to 40hours
+        numeric_votes = [
+            vote.value for vote in vote_values if vote.value <= 40
+        ]
+
+        numeric_vote_count = len(numeric_votes)
+
+        stats = {
+            "total_vote_count": total_vote_count,
+            "undecided_count": total_vote_count - numeric_vote_count,
+            "mean": statistics.mean(numeric_votes) if numeric_vote_count >= 1 else "not enough votes",
+            "median": statistics.median(numeric_votes) if numeric_vote_count >= 1 else "not enough votes",
+            "std_dev": statistics.stdev(numeric_votes) if numeric_vote_count >= 2 else "not enough votes",
+
+        }
+
+        self.send_event(
+            "cards_revealed",
+            to_everyone=True,
+            votes=vote_descriptions,
+            stats=stats
+        )
 
     def next_round(self):
         if not self._is_moderator:

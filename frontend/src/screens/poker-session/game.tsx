@@ -12,6 +12,13 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Table,
+  Tbody,
+  Td,
+  Tfoot,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react";
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
@@ -30,7 +37,6 @@ type Props = {
   currentTask?: Task;
   replayRound: any;
   revealCards: any;
-  votes: any;
   nextRound: any;
   isModerator: boolean;
 };
@@ -41,7 +47,6 @@ function Game({
   currentTask,
   revealCards,
   replayRound,
-  votes,
   nextRound,
   isModerator,
 }: Props) {
@@ -65,6 +70,8 @@ function Game({
       />
     );
   }
+
+  const { votes, stats } = currentTask as Task;
 
   const taskDescriptionMarkdown =
     currentTask?.description ?? "no description provided.";
@@ -134,10 +141,34 @@ function Game({
               <TabPanel>
                 <Card bg={bgColor} mt="2" maxH="300">
                   <ScrollArea h="250">
-                    {votes.length ? null : "No votes were cast..."}
+                    {votes.length ? (
+                      <Table size="sm" mb="5">
+                        <Thead>
+                          <Tr>
+                            <Th isNumeric>Total Votes</Th>
+                            <Th isNumeric>Unsure votes</Th>
+                            <Th isNumeric>Mean (h)</Th>
+                            <Th isNumeric>Median (h)</Th>
+                            <Th isNumeric>Standard Deviation (h)</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          <Tr>
+                            <Td isNumeric> {stats.total_vote_count} </Td>
+                            <Td isNumeric> {stats.undecided_count} </Td>
+                            <Td isNumeric> {stats.mean} </Td>
+                            <Td isNumeric> {stats.median} </Td>
+                            <Td isNumeric>{stats.std_dev}</Td>
+                          </Tr>
+                        </Tbody>
+                      </Table>
+                    ) : (
+                      "No votes were cast..."
+                    )}
+
                     <OrderedList>
-                      {votes.map(([_, desc]: any) => (
-                        <ListItem key={desc}> {desc} </ListItem>
+                      {votes.map((description: string) => (
+                        <ListItem key={description}> {description} </ListItem>
                       ))}
                     </OrderedList>
                   </ScrollArea>

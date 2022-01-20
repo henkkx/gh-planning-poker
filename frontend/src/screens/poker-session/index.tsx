@@ -182,7 +182,6 @@ function Poker() {
           revealCards={handleRevealCards}
           nextRound={handleNextRound}
           replayRound={handleReplayRound}
-          votes={currentTask?.votes}
           isModerator={isModerator}
         />
       );

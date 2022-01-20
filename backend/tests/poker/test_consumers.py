@@ -1,3 +1,4 @@
+import statistics
 from channels_presence.models import Room
 import pytest
 from unittest.mock import Mock, patch
@@ -171,7 +172,10 @@ class TestPlanningPokerConsumer:
         poker_consumer.scope["user"] = user_factory(
             name=NAME, email="regular@email.com"
         )
-        poker_consumer.save_vote(1)
+
+        VOTE_1, VOTE_2 = 1, 3
+
+        poker_consumer.save_vote(VOTE_1)
 
         with patch.object(poker_consumer, "send_event", Mock()) as mock_send_event:
             poker_consumer.reveal_cards()
@@ -182,7 +186,7 @@ class TestPlanningPokerConsumer:
 
         poker_consumer.scope["user"] = moderator
 
-        poker_consumer.save_vote(40)
+        poker_consumer.save_vote(VOTE_2)
 
         with patch.object(poker_consumer, "send_event", Mock()) as mock_send_event:
             poker_consumer.reveal_cards()
@@ -190,9 +194,16 @@ class TestPlanningPokerConsumer:
                 "cards_revealed",
                 to_everyone=True,
                 votes=[
-                    (1, f"{NAME} voted 1 hour"),
-                    (40, f"{MODERATOR_NAME} voted 40 hours"),
+                    (f"{NAME} voted 1 hour"),
+                    (f"{MODERATOR_NAME} voted 3 hours"),
                 ],
+                stats={
+                    'total_vote_count': 2,
+                    'undecided_count': 0,
+                    'mean': 2,
+                    'median': 2,
+                    'std_dev': statistics.stdev([VOTE_1, VOTE_2])
+                }
             )
 
     def test_moderator_can_request_next_round(
