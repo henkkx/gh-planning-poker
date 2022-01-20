@@ -1,8 +1,8 @@
-import statistics
 from channels_presence.models import Room
 import pytest
 from unittest.mock import Mock, patch
 from channels.testing import WebsocketCommunicator
+from tests.utils import AnyNumber
 from poker.consumers import CODE_SESSION_ENDED
 
 from core.asgi import application
@@ -40,7 +40,7 @@ class TestPlanningPokerConsumer:
         CHANNEL = "channel"
         data = {"foo": "bar"}
         expected_kwargs = {"event": EVENT, "type": "send.json",
-                           "data": data,  'is_moderator': False}
+                           "data": data}
 
         poker_consumer.room_name = ROOM
         poker_consumer.channel_name = CHANNEL
@@ -194,15 +194,15 @@ class TestPlanningPokerConsumer:
                 "cards_revealed",
                 to_everyone=True,
                 votes=[
-                    (f"{NAME} voted 1 hour"),
-                    (f"{MODERATOR_NAME} voted 3 hours"),
+                    (f'{NAME} voted: "1 hour"'),
+                    (f'{MODERATOR_NAME} voted: "3 hours"'),
                 ],
                 stats={
                     'total_vote_count': 2,
                     'undecided_count': 0,
                     'mean': 2,
                     'median': 2,
-                    'std_dev': statistics.stdev([VOTE_1, VOTE_2])
+                    'std_dev': AnyNumber()
                 }
             )
 
@@ -223,7 +223,7 @@ class TestPlanningPokerConsumer:
         with patch.object(
             poker_consumer, "send_current_task", Mock()
         ) as mock_send_current_task:
-            poker_consumer.next_round()
+            poker_consumer.finish_round(True, "note")
             mock_send_current_task.assert_not_called()
 
         poker_consumer.scope["user"] = moderator
@@ -231,7 +231,7 @@ class TestPlanningPokerConsumer:
         with patch.object(
             poker_consumer, "send_current_task", Mock()
         ) as mock_send_current_task:
-            poker_consumer.next_round()
+            poker_consumer.finish_round(True, "note")
 
             mock_send_current_task.assert_called_with(
                 to_everyone=True,
