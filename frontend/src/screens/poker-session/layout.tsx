@@ -6,13 +6,18 @@ import {
   Heading,
   Avatar,
   Tooltip,
+  Button,
+  useToast,
 } from "@chakra-ui/react";
+import { HiClipboardCopy } from "react-icons/hi";
+
 import { MobileMenuButton } from "../../components/SidebarMenu/MobileMenuButton";
 import { NavSectionTitle } from "../../components/SidebarMenu/NavSectionTitle";
 import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
 import { SidebarLink } from "../../components/SidebarMenu/SidebarLink";
 import { useMobileMenuState } from "../../components/SidebarMenu/useMobileMenuState";
 import { Steps, Step } from "../../components/Steps";
+import { copyLinkToGameToClipboard } from "../../utils/misc";
 import { Player } from "./game/machine";
 
 type Props = {
@@ -21,6 +26,7 @@ type Props = {
   tasks: Array<string>;
   children: React.ReactNode;
   activeTaskIdx: number;
+  sessionIsInactive: boolean;
 };
 
 function PokerGameLayout({
@@ -29,10 +35,19 @@ function PokerGameLayout({
   children,
   tasks,
   activeTaskIdx,
+  sessionIsInactive,
 }: Props) {
   const { isOpen, toggle } = useMobileMenuState();
+  const toast = useToast();
   const sidebarBg = useColorModeValue("blue.800", "gray.800");
   const contentBg = useColorModeValue("white", "gray.700");
+
+  const handleCopyLink = () => {
+    copyLinkToGameToClipboard();
+    toast({
+      title: "Link copied!",
+    });
+  };
 
   return (
     <Flex
@@ -53,42 +68,70 @@ function PokerGameLayout({
         position="fixed"
       >
         <Box fontSize="sm" lineHeight="tall">
-          <ScrollArea pt="5" pb="6">
-            <Stack pb="6">
-              <NavSectionTitle>Tasks to estimate</NavSectionTitle>
-              <Box
-                mx="auto"
-                maxW="2xl"
-                py="4"
-                px={{ base: "6", md: "8" }}
-                minH="100px"
-              >
-                <Steps activeStep={activeTaskIdx}>
-                  {tasks.map((title) => (
-                    <Step
-                      key={title}
-                      title={
-                        title.length < 20
-                          ? title
-                          : title.substring(0, 20) + "..."
-                      }
-                      tooltip={Tooltip}
-                      tooltipProps={{ placement: "right-start", label: title }}
-                    />
-                  ))}
-                </Steps>
-              </Box>
-            </Stack>
-            <Stack>
-              <NavSectionTitle>Participants</NavSectionTitle>
+          {!sessionIsInactive ? (
+            <ScrollArea pt="5" pb="6">
+              <Stack pb="2">
+                <NavSectionTitle>Invite Players</NavSectionTitle>
+                <Box
+                  mx="auto"
+                  maxW="lg"
+                  py="4"
+                  px={{ base: "2", md: "2" }}
+                  minH="50px"
+                >
+                  <Button
+                    aria-label="Copy Invite Link"
+                    colorScheme="blue"
+                    leftIcon={<HiClipboardCopy />}
+                    onClick={handleCopyLink}
+                    size="sm"
+                  >
+                    Copy link to the game
+                  </Button>
+                </Box>
+              </Stack>
+              <Stack pb="6">
+                <NavSectionTitle>Participants</NavSectionTitle>
 
-              {players.map(({ id, name }: any) => (
-                <SidebarLink key={id} avatar={<Avatar size="xs" name={name} />}>
-                  {name}
-                </SidebarLink>
-              ))}
-            </Stack>
-          </ScrollArea>
+                {players.map(({ id, name }: any) => (
+                  <SidebarLink
+                    key={id}
+                    avatar={<Avatar size="xs" name={name} />}
+                  >
+                    {name}
+                  </SidebarLink>
+                ))}
+              </Stack>
+              <Stack pb="6">
+                <NavSectionTitle>Tasks to estimate</NavSectionTitle>
+                <Box
+                  mx="auto"
+                  maxW="2xl"
+                  py="4"
+                  px={{ base: "6", md: "8" }}
+                  minH="100px"
+                >
+                  <Steps activeStep={activeTaskIdx}>
+                    {tasks.map((title) => (
+                      <Step
+                        key={title}
+                        title={
+                          title.length < 20
+                            ? title
+                            : title.substring(0, 20) + "..."
+                        }
+                        tooltip={Tooltip}
+                        tooltipProps={{
+                          placement: "right-start",
+                          label: title,
+                        }}
+                      />
+                    ))}
+                  </Steps>
+                </Box>
+              </Stack>
+            </ScrollArea>
+          ) : null}
         </Box>
       </Box>
       <Box
@@ -108,12 +151,14 @@ function PokerGameLayout({
               align="center"
               px="10"
             >
-              <Flex align="center" minH="8">
-                <MobileMenuButton onClick={toggle} isOpen={isOpen} />
-                <Heading size="md" as="h2">
-                  {title}
-                </Heading>
-              </Flex>
+              {!sessionIsInactive ? (
+                <Flex align="center" minH="8">
+                  <MobileMenuButton onClick={toggle} isOpen={isOpen} />
+                  <Heading size="md" as="h2">
+                    {title}
+                  </Heading>
+                </Flex>
+              ) : null}
             </Flex>
             <Flex direction="column" flex="1" px={[1, 1, 2, 4]} py="2">
               <Flex

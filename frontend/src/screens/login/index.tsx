@@ -6,7 +6,11 @@ import { Card } from "../../components/Card";
 export function GithubButton() {
   return (
     <Box mt="8" align="center" justify="center">
-      <Button size="lg" leftIcon={<FaGithub />} onClick={openGithubLoginPage}>
+      <Button
+        size="lg"
+        leftIcon={<FaGithub />}
+        onClick={() => openGithubLoginPage({ state: window.location.href })}
+      >
         Login with Github
       </Button>
     </Box>

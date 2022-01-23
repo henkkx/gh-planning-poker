@@ -3,3 +3,9 @@ export function redirect(url: string, params?: URLSearchParams) {
 }
 
 export const refreshPage = () => window.location.reload();
+
+export const copyToClipboard = (text: string) =>
+  navigator.clipboard.writeText(text);
+
+export const copyLinkToGameToClipboard = () =>
+  copyToClipboard(window.location.href);

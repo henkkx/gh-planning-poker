@@ -192,6 +192,7 @@ function Poker() {
       players={players}
       tasks={tasks}
       activeTaskIdx={activeTaskIdx}
+      sessionIsInactive={wsConnectionState !== ReadyState.OPEN}
     >
       {pokerGameContent}
     </PokerGameLayout>
