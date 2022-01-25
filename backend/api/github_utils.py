@@ -13,7 +13,7 @@ class OrgNotFound(Exception):
     pass
 
 
-class NoIssuesFoundException(Exception):
+class IssuesNotFound(Exception):
     pass
 
 
@@ -50,6 +50,6 @@ def get_issues_from_repo(repo: Repository, labels: List[str]):
     ]
 
     if not regular_issues:
-        raise NoIssuesFoundException()
+        raise IssuesNotFound
 
     return regular_issues
