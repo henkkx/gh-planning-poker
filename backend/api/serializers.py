@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from users.models import User
+
 from poker.models import PlanningPokerSession, Task
-from .github_utils import NoIssuesFoundException
 
 
 class PlanningPokerSessionSerializer(serializers.ModelSerializer):
@@ -35,28 +34,3 @@ class PlanningPokerSessionSerializer(serializers.ModelSerializer):
         poker_session.current_task = poker_session.tasks.first()
         poker_session.save(update_fields=["current_task"])
         return poker_session
-
-
-class TaskSerializer(serializers.ModelSerializer):
-    planningpokersession = serializers.PrimaryKeyRelatedField(
-        queryset=PlanningPokerSession.objects.all(),
-    )
-
-    class Meta:
-        model = Task
-        fields = [
-            "id",
-            "title",
-            "description",
-            "hours",
-            "is_decided",
-            "github_issue_number",
-            "is_imported",
-            "planningpokersession",
-        ]
-
-
-class UserSearchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "email", "name", "votes", "poker_sessions"]
