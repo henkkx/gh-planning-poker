@@ -14,10 +14,6 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-// github actions started mysteriously timing out recently
-// this fixes it for now
-jest.setTimeout(30000);
-
 describe("the app", () => {
   it("renders authenticated content if user is authenticated", async () => {
     render(<App />);
@@ -36,7 +32,7 @@ describe("the app", () => {
     );
 
     expect(userGreeting).not.toBeInTheDocument();
-    const genericGreeting = await screen.findByText(/online planning poker/i);
-    expect(genericGreeting).toBeInTheDocument();
+    const loginText = await screen.findByText(/login to get started/i);
+    expect(loginText).toBeInTheDocument();
   });
 });
