@@ -19,14 +19,7 @@ export function GithubButton() {
 
 function Login() {
   return (
-    <Box
-      display="flex"
-      bg={useColorModeValue("gray.50", "inherit")}
-      minH="100vh"
-      mawW="500px"
-      py="12"
-      px={{ base: "4", lg: "8" }}
-    >
+    <Box display="flex" minH="100vh" py="12" px={{ base: "4", lg: "8" }}>
       <Box mx="auto" align="center">
         <Heading
           color="teal"
@@ -40,12 +33,7 @@ function Login() {
         </Heading>
 
         <Card>
-          <Heading
-            textAlign="center"
-            color="gray.700"
-            size="xl"
-            fontWeight="extrabold"
-          >
+          <Heading textAlign="center" size="xl" fontWeight="extrabold">
             Login to Get Started
           </Heading>
 
