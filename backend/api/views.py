@@ -6,7 +6,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView
 
 from poker.models import PlanningPokerSession
 from users.models import User
-from .github_utils import NoIssuesFoundException, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
+from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
 from .serializers import PlanningPokerSessionSerializer, UserSearchSerializer
 from .mixins import AuthRequiredMixin, PublicApiMixin
 
@@ -61,7 +61,7 @@ class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):
                 f"No repository with the name {repo_name} was found in your {org_name if org_name else user.name}'s Github Account",
                 code=400,
             )
-        except NoIssuesFoundException:
+        except IssuesNotFound:
             raise exceptions.NotFound(
                 f"No issues were found matching the labels: {labels}",
                 code=404,
