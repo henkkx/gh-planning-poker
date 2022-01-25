@@ -1,13 +1,12 @@
 from django.middleware import csrf
-from rest_framework import filters, status, exceptions
+from rest_framework import exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView
 
 from poker.models import PlanningPokerSession
-from users.models import User
 from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
-from .serializers import PlanningPokerSessionSerializer, UserSearchSerializer
+from .serializers import PlanningPokerSessionSerializer
 from .mixins import AuthRequiredMixin, PublicApiMixin
 
 
@@ -78,26 +77,3 @@ class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):
 
 
 planning_poker_session_view = PlanningPokerSessionView.as_view()
-
-
-class UserSearchView(AuthRequiredMixin, ListAPIView):
-    queryset = User.objects.filter(is_active=True).all()
-    serializer_class = UserSearchSerializer
-    filter_backends = [
-        filters.SearchFilter,
-    ]
-    search_fields = ["email"]
-
-    def get(self, request, *args, **kwargs):
-        params = request.query_params
-        poker_session_id = params.get("poker_session", "")
-        search = params.get("search", "")
-        if (
-            not poker_session_id.isdigit()
-            or not PlanningPokerSession.objects.filter(id=poker_session_id).exists()
-        ):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        if len(search) < 3:
-            return Response([])
-
-        return super().get(request, *args, **kwargs)
