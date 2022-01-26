@@ -1,6 +1,7 @@
-import { Box, Button, Heading, useColorModeValue } from "@chakra-ui/react";
+import { Box, Button, Heading } from "@chakra-ui/react";
 import { FaGithub } from "react-icons/fa";
 import { openGithubLoginPage } from "../../auth/github";
+
 import { Card } from "../../components/Card";
 
 export function GithubButton() {

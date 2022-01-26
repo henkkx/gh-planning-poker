@@ -144,11 +144,11 @@ function Poker() {
   const handleFinishRound = React.useCallback(() => {
     nextStep();
     send("FINISH_ROUND");
-  }, [sendJsonMessage, nextStep]);
+  }, [send, nextStep]);
 
   const handleReplayRound = React.useCallback(() => {
     sendJsonMessage({ event: "replay_round", data: {} });
-  }, [send, sendJsonMessage]);
+  }, [sendJsonMessage]);
 
   const handleSaveRound = React.useCallback(
     (shouldSaveRound: boolean, note: string) => {
