@@ -23,14 +23,16 @@ class PlanningPokerSessionSerializer(serializers.ModelSerializer):
                 title=issue.title,
                 description=issue.body,
                 github_issue_number=issue.id,
-                planningpokersession=poker_session,
-                is_imported=True,
+                planning_poker_session=poker_session,
             )
             for issue in github_issues
         ]
 
         Task.objects.bulk_create(tasks)
 
-        poker_session.current_task = poker_session.tasks.first()
+        current_task = poker_session.tasks.first()
+        current_task.start_round()
+        current_task.save()
+        poker_session.current_task = current_task
         poker_session.save(update_fields=["current_task"])
         return poker_session

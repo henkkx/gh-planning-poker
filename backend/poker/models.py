@@ -1,22 +1,10 @@
+import statistics
 from django.db import models
-from users.models import User
+from django_fsm import FSMField, transition
 
-NOT_ESTIMATED = None
-NOT_DOABLE = 100
-UNSURE = 99
-HOURS_TO_COMPLETE_CHOICES = (
-    (NOT_ESTIMATED, "not estimated"),
-    (1, "1 hour"),
-    (2, "2 hours"),
-    (3, "3 hours"),
-    (5, "5 hours"),
-    (8, "8 hours"),
-    (13, "13 hours"),
-    (20, "20 hours"),
-    (40, "40 hours"),
-    (NOT_DOABLE, "the task is too large or complex, we need to reconsider it"),
-    (UNSURE, "I'm unsure, we might need to clarify the requirements"),
-)
+
+from users.models import User
+from .constants import HOURS_TO_COMPLETE_CHOICES, UNSURE, TaskState
 
 
 class PlanningPokerSession(models.Model):
@@ -45,15 +33,19 @@ class PlanningPokerSession(models.Model):
 class Task(models.Model):
 
     id = models.AutoField(primary_key=True)
+    state = FSMField(
+        default=TaskState.NOT_STARTED,
+        verbose_name='State of the current round in the Planning Poker Session',
+        choices=TaskState.CHOICES,
+        protected=True,
+    )
     title = models.CharField(max_length=256)
     description = models.CharField(max_length=65536, null=True, default="")
     hours = models.PositiveSmallIntegerField(
         null=True, choices=HOURS_TO_COMPLETE_CHOICES
     )
-    is_decided = models.BooleanField(null=True, default=False)
     github_issue_number = models.IntegerField(null=True)
-    is_imported = models.BooleanField()
-    planningpokersession = models.ForeignKey(
+    planning_poker_session = models.ForeignKey(
         "PlanningPokerSession",
         null=True,
         on_delete=models.CASCADE,
@@ -61,6 +53,58 @@ class Task(models.Model):
     )
 
     note = models.CharField(max_length=4000, null=True, blank=True)
+
+    def get_vote_info(self):
+        vote_values = self.votes.all()
+        vote_descriptions = [
+            str(vote)
+            for vote in vote_values
+        ]
+        return vote_descriptions
+
+    def get_stats(self):
+        votes = self.votes.all()
+        total_vote_count = len(votes)
+        # filter unsure and unclear options and only keep regular i.e ones from 1 to 40hours
+        numeric_votes = [
+            vote.value for vote in votes if vote.value < UNSURE
+        ]
+
+        numeric_vote_count = len(numeric_votes)
+
+        stats = {
+            "total_vote_count": total_vote_count,
+            "undecided_count": total_vote_count - numeric_vote_count,
+            "mean": round(statistics.mean(numeric_votes), 3) if numeric_vote_count >= 1 else "not enough votes",
+            "median": round(statistics.median(numeric_votes), 3) if numeric_vote_count >= 1 else "not enough votes",
+            "std_dev": round(statistics.stdev(numeric_votes), 3)if numeric_vote_count >= 2 else "not enough votes",
+        }
+
+        return stats
+
+    @transition(field=state, source=TaskState.NOT_STARTED, target=TaskState.VOTING)
+    def start_round(self):
+        pass
+
+    @transition(field=state, source=TaskState.VOTING, target=TaskState.DISCUSSING)
+    def start_discussion(self):
+        pass
+
+    @transition(field=state, source=TaskState.DISCUSSING, target=TaskState.VOTING)
+    def replay_round(self):
+        pass
+
+    @transition(field=state, source=TaskState.DISCUSSING, target=TaskState.SAVING)
+    def finish_discussion(self):
+        pass
+
+    @transition(field=state, source=TaskState.SAVING, target=TaskState.FINISHED)
+    def save_round(self, note: str):
+        self.note = note
+
+    @transition(field=state, source=TaskState.SAVING, target=TaskState.FINISHED)
+    def skip_saving(self):
+        pass
 
     def __str__(self):
         return self.title

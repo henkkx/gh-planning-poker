@@ -1,26 +1,24 @@
+import statistics
 from typing import Dict, List
-
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels_presence.models import Room, Presence
 from django.utils.functional import cached_property
-import statistics
 
-from .models import PlanningPokerSession
-
-CODE_SESSION_ENDED = 4000
+from .constants import CODE_SESSION_ENDED, UNSURE, GameEvent, TaskState
+from .models import PlanningPokerSession, Task
 
 
 class PlanningPokerConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.event_handlers = {
-            "vote": self.save_vote,
-            "reveal_cards": self.reveal_cards,
-            "finish_round": self.finish_round,
-            "replay_round": self.replay_round,
-            "participants_changed": self.participants_changed,
-
+            GameEvent.VOTE: self.save_vote,
+            GameEvent.REVEAL_CARDS: self.reveal_cards,
+            GameEvent.FINISH_ROUND: self.finish_round,
+            GameEvent.FINISH_DISCUSSION: self.finish_discussion,
+            GameEvent.REPLAY_ROUND: self.replay_round,
+            GameEvent.PARTICIPANTS_CHANGED: self.participants_changed,
         }
 
     @property
@@ -35,23 +33,30 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             pk=self.scope["url_route"]["kwargs"]["game_id"]
         )
 
+    @property
+    def current_task(self) -> Task:
+        return self.current_session.current_task
+
     @cached_property
     def tasks(self) -> List[str]:
         return [task.title for task in self.current_session.tasks.all()]
 
     @property
     def _is_moderator(self) -> bool:
-        return self.user.email == self.current_session.moderator.email
+        return self.user == self.current_session.moderator
 
-    def _get_participants(self):
+    @property
+    def _participants(self):
         participants = [
             {"id": p.id, "name": p.name} for p in self.current_session.voters.all()
         ]
         return participants
 
     def broadcast_participants(self):
-        participants = self._get_participants()
-        self.send_event("participants_changed", participants=participants)
+        self.send_event(
+            GameEvent.PARTICIPANTS_CHANGED,
+            participants=self._participants
+        )
 
     def connect(self):
         try:
@@ -64,21 +69,58 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         Room.objects.add(self.room_name, self.channel_name, self.user)
 
         self.accept()
-        self.send_current_task(to_everyone=False)
+        self.send_game_info()
+        self.add_user_to_session()
+
+    def send_game_info(self):
+        if not self._has_task():
+            self.close(CODE_SESSION_ENDED)
+
         self.send_role()
         self.send_task_list()
-        self.add_user_to_session()
+        current_state = self.current_session.current_task.state
+
+        next_action_by = {
+            TaskState.NOT_STARTED: self.wait_for_next_round,
+            TaskState.VOTING: self.send_current_task,
+            TaskState.DISCUSSING: self.send_vote_stats,
+            TaskState.SAVING: self.wait_for_next_round,
+            TaskState.FINISHED: self.wait_for_next_round,
+        }
+
+        next_action_by[current_state]()
 
     def add_user_to_session(self):
         self.current_session.voters.add(self.user)
         self.broadcast_participants()
         self.touch_presence()
 
+    def send_vote_stats(self, to_everyone=False):
+        vote_descriptions = self.current_task.get_vote_info()
+        stats = self.current_task.get_stats()
+
+        self.send_event(
+            GameEvent.CARDS_REVEALED,
+            to_everyone=to_everyone,
+            votes=vote_descriptions,
+            stats=stats,
+            title=self.current_task.title,
+            description=self.current_task.description,
+        )
+
     def send_role(self):
         self.send_event(
-            event='role_updated',
+            event=GameEvent.ROLE_UPDATED,
             to_everyone=False,
-            is_moderator=self._is_moderator)
+            is_moderator=self._is_moderator
+        )
+
+    def wait_for_next_round(self):
+        self.send_event(
+            event=GameEvent.WAIT_FOR_NEXT_ROUND,
+            title=self.current_task.title,
+            to_everyone=False,
+        )
 
     def disconnect(self, close_code):
         if self.room_name == "rejected":
@@ -87,7 +129,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         self.broadcast_participants()
 
     def receive_json(self, content: dict):
-        kwargs = content["data"]
+        kwargs = content.get("data", {})
         handler = self.event_handlers[content.pop("event")]
         handler(**kwargs)
 
@@ -109,12 +151,17 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         send(destination, payload)
 
     def send_current_task(self, to_everyone=True):
-        current_task = self.current_session.current_task
-        if current_task is None:
-            self.close(4000)
+        if not self._has_task():
+            self.close(CODE_SESSION_ENDED)
             return
+
+        current_task = self.current_task
+        if current_task.state == TaskState.NOT_STARTED:
+            current_task.start_round()
+            current_task.save()
+
         self.send_event(
-            event="new_task_to_estimate",
+            event=GameEvent.NEW_TASK_TO_ESTIMATE,
             to_everyone=to_everyone,
             id=current_task.id,
             title=current_task.title,
@@ -122,69 +169,50 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         )
 
     def send_task_list(self):
+        current_idx = self.tasks.index(self.current_task.title)
         self.send_event(
-            event="task_list_received",
+            event=GameEvent.TASK_LIST_RECEIVED,
             to_everyone=False,
-            tasks=self.tasks
+            tasks=self.tasks,
+            current_idx=current_idx
         )
 
     def participants_changed(self, message: Dict):
         participants: List[Dict] = message["data"]["participants"]
-        self.send_event("participants_changed", participants=participants)
+        self.send_event(GameEvent.PARTICIPANTS_CHANGED,
+                        participants=participants)
 
     def save_vote(self, value: int):
 
         self.current_session.refresh_from_db()
 
-        current_task = self.current_session.current_task
-
-        if current_task is None:
-            print("No current task")
-            return
-
-        vote, created = current_task.votes.update_or_create(
+        vote, created = self.current_task.votes.update_or_create(
             user=self.user, defaults={"value": value}
         )
 
-        current_task.save()
+        self.current_task.save()
         self.send_event(
-            "vote_cast",
+            GameEvent.VOTE_CAST,
             to_everyone=False,
             created=created,
             vote=str(vote)
         )
 
-    def reveal_cards(self):
-        if not self._is_moderator:
+    def reveal_cards(self, to_everyone=True):
+        if not self._is_moderator and to_everyone:
             return
 
-        vote_values = self.current_session.current_task.votes.all()
-        vote_descriptions = [
-            str(vote)
-            for vote in vote_values
-        ]
+        self.current_task.start_discussion()
+        self.current_task.save()
 
-        total_vote_count = len(vote_values)
-        # filter unsure and unclear options and only keep regular i.e ones from 1 to 40hours
-        numeric_votes = [
-            vote.value for vote in vote_values if vote.value <= 40
-        ]
+        self.send_vote_stats(to_everyone=to_everyone)
 
-        numeric_vote_count = len(numeric_votes)
-
-        stats = {
-            "total_vote_count": total_vote_count,
-            "undecided_count": total_vote_count - numeric_vote_count,
-            "mean": round(statistics.mean(numeric_votes), 3) if numeric_vote_count >= 1 else "not enough votes",
-            "median": round(statistics.median(numeric_votes), 3) if numeric_vote_count >= 1 else "not enough votes",
-            "std_dev": round(statistics.stdev(numeric_votes), 3)if numeric_vote_count >= 2 else "not enough votes",
-        }
-
+    def finish_discussion(self):
+        self.current_task.finish_discussion()
+        self.current_task.save()
         self.send_event(
-            "cards_revealed",
+            event=GameEvent.START_SAVING,
             to_everyone=True,
-            votes=vote_descriptions,
-            stats=stats
         )
 
     def finish_round(self, should_save_round: bool, note: str):
@@ -193,19 +221,32 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
         self.current_session.refresh_from_db()
 
-        current_task = self.current_session.current_task
-        current_task.is_decided = True
+        current_task = self.current_task
         if should_save_round:
-            current_task.note = note
+            current_task.save_round(note)
+        else:
+            current_task.skip_saving()
         current_task.save()
 
-        next_task = self.current_session.tasks.filter(is_decided=False).first()
+        next_task = self.current_session.tasks.filter(
+            state=TaskState.NOT_STARTED
+        ).first()
+
+        if next_task:
+            next_task.start_round()
+            next_task.save()
+
         self.current_session.current_task = next_task
         self.current_session.save()
         self.send_current_task(to_everyone=True)
 
     def replay_round(self):
-        self.send_event("replay_round")
+        self.current_task.replay_round()
+        self.current_task.save()
+        self.send_event(GameEvent.REPLAY_ROUND)
 
     def touch_presence(self):
         Presence.objects.touch(self.channel_name)
+
+    def _has_task(self):
+        return self.current_task is not None

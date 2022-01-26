@@ -29,7 +29,7 @@ function Votes({ votes, stats, bgColor }: Props) {
                 <Th isNumeric>Unsure votes</Th>
                 <Th isNumeric>Mean (h)</Th>
                 <Th isNumeric>Median (h)</Th>
-                <Th isNumeric>Standard Deviation (h)</Th>
+                <Th isNumeric>Standard Deviation (h) </Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -38,7 +38,7 @@ function Votes({ votes, stats, bgColor }: Props) {
                 <Td isNumeric> {stats.undecided_count} </Td>
                 <Td isNumeric> {stats.mean} </Td>
                 <Td isNumeric> {stats.median} </Td>
-                <Td isNumeric>{stats.std_dev}</Td>
+                <Td isNumeric> {stats.std_dev}</Td>
               </Tr>
             </Tbody>
           </Table>

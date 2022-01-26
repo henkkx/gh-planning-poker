@@ -11,5 +11,5 @@ export const useSteps = ({ initialStep }: Options) => {
   const prevStep = () => setActiveStep(activeStep - 1);
   const reset = () => setActiveStep(0);
 
-  return { nextStep, prevStep, reset, activeStep };
+  return { nextStep, prevStep, reset, activeStep, setActiveStep };
 };

@@ -1,5 +1,9 @@
 import { createMachine, assign, Typestate } from "xstate";
 
+const updateCurrentTask: any = assign({
+  currentTask: (_, event) => event,
+});
+
 type Vote = number;
 
 export type Player = {
@@ -11,8 +15,8 @@ export type Player = {
 };
 
 export type Task = {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   votes: Array<string>;
   stats: Record<string, string>;
 };
@@ -38,8 +42,6 @@ const PokerMachine = createMachine<
     initial: "connecting",
     context: {
       currentTask: {
-        title: "loading...",
-        description: "loading...",
         votes: [],
         stats: {},
       },
@@ -48,6 +50,8 @@ const PokerMachine = createMachine<
       connecting: {
         on: {
           NEXT_ROUND: { target: "voting", actions: "displayTaskInfo" },
+          REVEAL_CARDS: { target: "discussing", actions: "revealVotes" },
+          START_SAVING: { target: "saving", actions: "updateCurrentTask" },
         },
       },
 
@@ -60,7 +64,7 @@ const PokerMachine = createMachine<
       discussing: {
         on: {
           REPLAY_ROUND: "voting",
-          FINISH_ROUND: "saving",
+          START_SAVING: "saving",
           NEXT_ROUND: { target: "voting", actions: "displayTaskInfo" },
         },
       },
@@ -91,17 +95,8 @@ const PokerMachine = createMachine<
           };
         },
       }),
-      revealVotes: assign({
-        currentTask: (context, event) => {
-          const { votes, stats } = event;
-          const { currentTask } = context;
-          return {
-            ...currentTask!,
-            votes,
-            stats,
-          };
-        },
-      }),
+      revealVotes: updateCurrentTask,
+      updateCurrentTask,
     },
   }
 );

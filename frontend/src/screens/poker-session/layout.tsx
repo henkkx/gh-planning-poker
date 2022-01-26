@@ -22,7 +22,7 @@ import { Player } from "./game/machine";
 
 type Props = {
   players: Array<Player>;
-  title: string;
+  title?: string;
   tasks: Array<string>;
   children: React.ReactNode;
   activeTaskIdx: number;
@@ -46,8 +46,7 @@ function PokerGameLayout({
     copyLinkToGameToClipboard();
     toast({
       title: "Link copied!",
-      duration: 2000,
-      isClosable: true,
+      duration: 1000,
     });
   };
 
@@ -157,7 +156,7 @@ function PokerGameLayout({
                 <Flex align="center" minH="8">
                   <MobileMenuButton onClick={toggle} isOpen={isOpen} />
                   <Heading size="md" as="h2">
-                    {title}
+                    {title ?? "loading the title ..."}
                   </Heading>
                 </Flex>
               ) : null}

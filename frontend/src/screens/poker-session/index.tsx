@@ -30,7 +30,9 @@ type GameEvent =
   | "no_tasks_left"
   | "task_list_received"
   | "role_updated"
-  | "replay_round";
+  | "replay_round"
+  | "wait_for_next_round"
+  | "start_saving";
 
 type GameMessage = {
   event: GameEvent;
@@ -46,7 +48,11 @@ function Poker() {
   const [players, setPlayers] = React.useState<Array<Player>>([]);
   const [isModerator, setIsModerator] = React.useState(false);
   const [tasks, setTasks] = React.useState<Array<string>>(["loading tasks..."]);
-  const { nextStep, activeStep: activeTaskIdx } = useSteps({
+  const {
+    nextStep,
+    activeStep: activeTaskIdx,
+    setActiveStep,
+  } = useSteps({
     initialStep: 0,
   });
   const [gameState, send] = useMachine<PokerContextType, EventObject>(
@@ -77,7 +83,6 @@ function Poker() {
   } = useWebSocket(planningPokerUrl, wsOptions, shouldConnect);
 
   const { currentTask } = gameState.context;
-  const currentTaskTitle = currentTask?.title ?? "loading the title...";
   const currentStage = gameState.value as GameState;
 
   React.useEffect(() => {
@@ -102,6 +107,7 @@ function Poker() {
           break;
         case "task_list_received":
           setTasks(data.tasks);
+          setActiveStep(data.current_idx);
           break;
         case "participants_changed":
           setPlayers(data.participants);
@@ -112,6 +118,7 @@ function Poker() {
             description: `${data.vote}`,
             status: "success",
             isClosable: true,
+            duration: 3000,
           });
           break;
         case "cards_revealed":
@@ -120,13 +127,17 @@ function Poker() {
         case "replay_round":
           send("REPLAY_ROUND");
           break;
+        case "wait_for_next_round":
+        case "start_saving":
+          send("START_SAVING", data);
+          break;
         case "no_tasks_left":
           send("FINISH_SESSION");
       }
 
       console.log(lastJsonMessage);
     },
-    [lastJsonMessage, send]
+    [lastJsonMessage, send, setTasks, setActiveStep, setIsModerator, setPlayers]
   );
 
   const handleSendVote = React.useCallback(
@@ -137,20 +148,20 @@ function Poker() {
   );
 
   const handleRevealCards = React.useCallback(
-    () => sendJsonMessage({ event: "reveal_cards", data: {} }),
+    () => sendJsonMessage({ event: "reveal_cards" }),
     [sendJsonMessage]
   );
 
-  const handleFinishRound = React.useCallback(() => {
+  const handleFinishDiscussion = React.useCallback(() => {
     nextStep();
-    send("FINISH_ROUND");
-  }, [send, nextStep]);
+    sendJsonMessage({ event: "finish_discussion" });
+  }, [sendJsonMessage, nextStep]);
 
   const handleReplayRound = React.useCallback(() => {
-    sendJsonMessage({ event: "replay_round", data: {} });
+    sendJsonMessage({ event: "replay_round" });
   }, [sendJsonMessage]);
 
-  const handleSaveRound = React.useCallback(
+  const handleFinishRound = React.useCallback(
     (shouldSaveRound: boolean, note: string) => {
       sendJsonMessage({
         event: "finish_round",
@@ -178,8 +189,8 @@ function Poker() {
           stage={currentStage}
           sendVote={handleSendVote}
           revealCards={handleRevealCards}
+          finishDiscussion={handleFinishDiscussion}
           finishRound={handleFinishRound}
-          saveRound={handleSaveRound}
           replayRound={handleReplayRound}
           isModerator={isModerator}
         />
@@ -188,7 +199,7 @@ function Poker() {
 
   return (
     <PokerGameLayout
-      title={currentTaskTitle}
+      title={currentTask?.title}
       players={players}
       tasks={tasks}
       activeTaskIdx={activeTaskIdx}

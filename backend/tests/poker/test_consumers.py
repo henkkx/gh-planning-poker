@@ -1,11 +1,11 @@
-from channels_presence.models import Room
 import pytest
+from core.asgi import application
+from channels_presence.models import Room
 from unittest.mock import Mock, patch
 from channels.testing import WebsocketCommunicator
-from tests.utils import AnyNumber
-from poker.consumers import CODE_SESSION_ENDED
 
-from core.asgi import application
+from tests.utils import AnyNumber
+from poker.constants import CODE_SESSION_ENDED
 
 
 class TestPlanningPokerConsumer:
@@ -57,13 +57,86 @@ class TestPlanningPokerConsumer:
     @pytest.mark.django_db(transaction=True)
     async def test_get_info_when_joining_session(self, planning_poker_ws_client):
         poker_session, ws = planning_poker_ws_client
+
         expected_title = poker_session.current_task.title
 
         await ws.connect()
-        current_task_info = await ws.receive_json_from()
-        title = current_task_info["data"]["title"]
+        role_info = await ws.receive_json_from()
 
-        assert title == expected_title
+        assert role_info == {
+            'data': {'is_moderator': True},
+            'event': 'role_updated',
+            'type': 'send.json'}
+
+        task_list = await ws.receive_json_from()
+
+        assert task_list == {
+            'data': {
+                'current_idx': 0,
+                'tasks': ['task-1', 'task-2']
+            },
+            'event': 'task_list_received',
+            'type': 'send.json'
+        }
+
+        current_task = await ws.receive_json_from()
+
+        assert current_task['data']['title'] == expected_title
+
+        await ws.send_json_to({"event": "vote", "data": {"value": 1}})
+
+        await ws.disconnect()
+
+    @pytest.mark.asyncio
+    @pytest.mark.django_db(transaction=True)
+    async def test_play_one_round(self, planning_poker_ws_client):
+        _, ws = planning_poker_ws_client
+
+        await ws.connect()
+
+        # ignore initial data
+        await ws.receive_json_from()
+        await ws.receive_json_from()
+        await ws.receive_json_from()
+        await ws.receive_json_from()
+
+        # send vote
+        await ws.send_json_to({"event": "vote", "data": {"value": 1}})
+        resp = await ws.receive_json_from()
+        assert resp['data'] == {'created': True,
+                                'vote': 'firstname lastname voted: "1 hour"'}
+
+        # get votes and start discussion
+        await ws.send_json_to({"event": "reveal_cards"})
+        resp = await ws.receive_json_from()
+
+        assert resp['data']['stats'] == {
+            'mean': 1,
+            'median': 1,
+            'std_dev': 'not enough votes',
+            'total_vote_count': 1,
+            'undecided_count': 0
+        }
+
+        # replay round and send a different vote
+        await ws.send_json_to({"event": "replay_round"})
+        await ws.receive_json_from()
+        await ws.send_json_to({"event": "vote", "data": {"value": 40}})
+        await ws.receive_json_from()
+        await ws.send_json_to({"event": "reveal_cards"})
+        resp = await ws.receive_json_from()
+        assert resp['data']['stats']['mean'] == 40
+
+        # finish discussion phase
+        await ws.send_json_to({"event": "finish_discussion"})
+        resp = await ws.receive_json_from()
+        assert resp['event'] == "start_saving"
+
+        # finish round and save a note about the results
+        await ws.send_json_to({"event": "finish_round", "data": {"should_save_round": True, "note": "foo bar"}})
+        resp = await ws.receive_json_from()
+        # moving on to the next round
+        assert resp['event'] == "new_task_to_estimate"
 
         await ws.disconnect()
 
@@ -93,9 +166,8 @@ class TestPlanningPokerConsumer:
 
         mock_handler.assert_called_with(**data)
 
-    @pytest.mark.parametrize("has_current_task", [True, False])
     def test_vote_is_saved(
-        self, has_current_task, task, poker_consumer, mock_async_to_sync
+        self, task, poker_consumer, mock_async_to_sync
     ):
         USER_VOTE = 40
         user = poker_consumer.scope["user"]
@@ -104,22 +176,19 @@ class TestPlanningPokerConsumer:
 
         current_session = poker_consumer.current_session
 
-        current_session.current_task = task if has_current_task else None
+        current_session.current_task = task
         current_session.save()
 
         poker_consumer.save_vote(USER_VOTE)
 
-        if has_current_task:
-            assert task.votes.filter(user=user, value=USER_VOTE).exists()
+        assert task.votes.filter(user=user, value=USER_VOTE).exists()
 
-            PREV_VOTE = USER_VOTE
-            NEW_VOTE = 1
-            poker_consumer.save_vote(NEW_VOTE)
+        PREV_VOTE = USER_VOTE
+        NEW_VOTE = 1
+        poker_consumer.save_vote(NEW_VOTE)
 
-            assert not task.votes.filter(user=user, value=PREV_VOTE).exists()
-            assert task.votes.filter(user=user, value=NEW_VOTE).exists()
-        else:
-            assert not task.votes.filter(user=user, value=USER_VOTE).exists()
+        assert not task.votes.filter(user=user, value=PREV_VOTE).exists()
+        assert task.votes.filter(user=user, value=NEW_VOTE).exists()
 
     def test_participants_changed(self, poker_consumer):
         participants = ["user1", "user2"]
@@ -168,6 +237,9 @@ class TestPlanningPokerConsumer:
         MODERATOR_NAME = "Mod McModerator"
 
         current_session = poker_consumer.current_session
+        current_task = current_session.current_task
+        title, description = current_task.title, current_task.description
+
         poker_consumer.channel_layer = mock_channel_layer
         poker_consumer.scope["user"] = user_factory(
             name=NAME, email="regular@email.com"
@@ -202,8 +274,10 @@ class TestPlanningPokerConsumer:
                     'undecided_count': 0,
                     'mean': 2,
                     'median': 2,
-                    'std_dev': AnyNumber()
-                }
+                    'std_dev': AnyNumber(),
+                },
+                title=title,
+                description=description
             )
 
     def test_moderator_can_request_next_round(
@@ -215,10 +289,15 @@ class TestPlanningPokerConsumer:
         mock_channel_layer,
     ):
         current_session = poker_consumer.current_session
+        current_task = current_session.current_task
         moderator = create_moderator_for_poker(current_session)
 
         poker_consumer.channel_layer = mock_channel_layer
         poker_consumer.scope["user"] = user
+
+        current_task.start_discussion()
+        current_task.finish_discussion()
+        current_task.save()
 
         with patch.object(
             poker_consumer, "send_current_task", Mock()

@@ -10,6 +10,7 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Img,
 } from "@chakra-ui/react";
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
@@ -24,6 +25,7 @@ import { GameState, Task } from "./machine";
 import SaveNoteForm from "./save-note-form";
 import { chakraMarkdownComponents } from "./utils";
 import Votes from "./votes";
+import WaitScreen from "./wait-screen";
 
 type Props = {
   sendVote: (value: number) => void;
@@ -31,8 +33,8 @@ type Props = {
   currentTask?: Task;
   replayRound: () => void;
   revealCards: () => void;
-  finishRound: () => void;
-  saveRound: (shouldSaveRound: boolean, note: string) => void;
+  finishDiscussion: () => void;
+  finishRound: (shouldSaveRound: boolean, note: string) => void;
   isModerator: boolean;
 };
 
@@ -42,8 +44,8 @@ function Game({
   currentTask,
   revealCards,
   replayRound,
+  finishDiscussion,
   finishRound,
-  saveRound,
   isModerator,
 }: Props) {
   const bgColor = useColorModeValue("gray.50", "gray.600");
@@ -146,8 +148,12 @@ function Game({
           </Tabs>
         ) : null}
 
-        {isSavingResults && isModerator ? (
-          <SaveNoteForm saveRound={saveRound} />
+        {isSavingResults ? (
+          isModerator ? (
+            <SaveNoteForm saveRound={finishRound} />
+          ) : (
+            <WaitScreen />
+          )
         ) : null}
 
         {isVoting ? taskDescription : null}
@@ -167,7 +173,7 @@ function Game({
             w="80%"
             justifySelf="center"
             colorScheme="blue"
-            onClick={finishRound}
+            onClick={finishDiscussion}
           >
             Finish this round
           </Button>

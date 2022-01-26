@@ -23,8 +23,8 @@ def enable_db_access_for_all_tests(db):
 
 @pytest.fixture
 def task_factory():
-    def _factory(title='title', description='description', is_imported=True, **kwargs):
-        return Task.objects.create(title=title, description=description, is_imported=is_imported, **kwargs)
+    def _factory(title='title', description='description', **kwargs):
+        return Task.objects.create(title=title, description=description, **kwargs)
     return _factory
 
 
@@ -38,8 +38,9 @@ def poker_factory(task_factory, user):
     def _factory(moderator=user, tasks=2):
         session = PlanningPokerSession.objects.create(moderator=moderator)
         tasks = [task_factory(title=f"task-{i+1}") for i in range(tasks)]
+        tasks[0].start_round()
         for task in tasks:
-            task.planningpokersession = session
+            task.planning_poker_session = session
             task.save()
         session.current_task = tasks[0]
         session.save()
