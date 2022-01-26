@@ -46,6 +46,8 @@ function PokerGameLayout({
     copyLinkToGameToClipboard();
     toast({
       title: "Link copied!",
+      duration: 2000,
+      isClosable: true,
     });
   };
 
