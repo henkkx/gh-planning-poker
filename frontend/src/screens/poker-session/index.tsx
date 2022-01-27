@@ -58,6 +58,8 @@ function Poker() {
   const [gameState, send] = useMachine<PokerContextType, EventObject>(
     () => PokerMachine
   );
+  const { currentTask } = gameState.context;
+  const currentStage = gameState.value as GameState;
 
   const { id } = useParams<PokerParams>();
   const planningPokerUrl = BASE_SOCKET_URL + id;
@@ -66,10 +68,8 @@ function Poker() {
 
   const wsOptions = {
     onClose: (e: CloseEvent) => {
-      setCloseCode(e.code);
-      if (e.code === CODE_SESSION_ENDED) {
-        setShouldConnect(false);
-      }
+      const isFinished = currentStage === "finished";
+      setCloseCode(isFinished ? CODE_SESSION_ENDED : e.code);
     },
     shouldReconnect: (_: any) => !didUnmount.current,
     reconnectAttempts: 2,
@@ -82,14 +82,11 @@ function Poker() {
     readyState: wsConnectionState,
   } = useWebSocket(planningPokerUrl, wsOptions, shouldConnect);
 
-  const { currentTask } = gameState.context;
-  const currentStage = gameState.value as GameState;
-
   React.useEffect(() => {
     return () => {
       didUnmount.current = true;
     };
-  }, []);
+  }, [closeCode, setShouldConnect]);
 
   React.useEffect(
     function handleWebsocketMessage() {
@@ -133,6 +130,7 @@ function Poker() {
           break;
         case "no_tasks_left":
           send("FINISH_SESSION");
+          setShouldConnect(false);
       }
 
       console.log(lastJsonMessage);
@@ -197,13 +195,16 @@ function Poker() {
       );
   }
 
+  const sessionIsInactive =
+    wsConnectionState !== ReadyState.OPEN || currentStage === "finished";
+
   return (
     <PokerGameLayout
       title={currentTask?.title}
       players={players}
       tasks={tasks}
       activeTaskIdx={activeTaskIdx}
-      sessionIsInactive={wsConnectionState !== ReadyState.OPEN}
+      sessionIsInactive={sessionIsInactive}
     >
       {pokerGameContent}
     </PokerGameLayout>

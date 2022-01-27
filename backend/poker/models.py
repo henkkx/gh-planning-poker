@@ -26,6 +26,16 @@ class PlanningPokerSession(models.Model):
     )
     voters = models.ManyToManyField(User, related_name="poker_sessions")
 
+    def get_current_task_idx(self):
+        return self.tasks.filter(
+            state=TaskState.FINISHED
+        ).count()
+
+    def get_next_task(self):
+        return self.tasks.filter(
+            state=TaskState.NOT_STARTED
+        ).first()
+
     class Meta:
         db_table = "planningPokerSession"
 

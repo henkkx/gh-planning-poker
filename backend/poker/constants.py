@@ -50,3 +50,4 @@ class GameEvent:
     NEW_TASK_TO_ESTIMATE = "new_task_to_estimate"
     TASK_LIST_RECEIVED = "task_list_received"
     WAIT_FOR_NEXT_ROUND = "wait_for_next_round"
+    NO_TASKS_LEFT = "no_tasks_left"
