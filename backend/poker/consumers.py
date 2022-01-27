@@ -1,11 +1,10 @@
-import statistics
 from typing import Dict, List
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels_presence.models import Room, Presence
 from django.utils.functional import cached_property
 
-from .constants import CODE_SESSION_ENDED, UNSURE, GameEvent, TaskState
+from .constants import CODE_SESSION_ENDED, GameEvent, TaskState
 from .models import PlanningPokerSession, Task
 
 
@@ -73,7 +72,9 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         self.add_user_to_session()
 
     def send_game_info(self):
-        self._ensure_has_tasks_left()
+        if not self._has_task():
+            self.end_session()
+            return
         self.send_role()
         self.send_task_list()
         current_state = self.current_session.current_task.state
@@ -149,7 +150,9 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         send(destination, payload)
 
     def send_current_task(self, to_everyone=True):
-        self._ensure_has_tasks_left()
+        if not self._has_task():
+            self.end_session()
+            return
         current_task = self.current_task
         if current_task.state == TaskState.NOT_STARTED:
             current_task.start_round()
@@ -244,8 +247,6 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     def _has_task(self):
         return self.current_task is not None
 
-    def _ensure_has_tasks_left(self):
-        if not self._has_task():
-            self.send_event(GameEvent.NO_TASKS_LEFT)
-            self.close(CODE_SESSION_ENDED)
-            return
+    def end_session(self):
+        self.send_event(GameEvent.NO_TASKS_LEFT)
+        self.close(CODE_SESSION_ENDED)

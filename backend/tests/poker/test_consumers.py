@@ -210,8 +210,8 @@ class TestPlanningPokerConsumer:
 
         current_task = current_session.current_task
 
-        if has_current_task:
-            with patch.object(poker_consumer, "send_event", Mock()) as mock_send_event:
+        with patch.object(poker_consumer, "send_event", Mock()) as mock_send_event:
+            if has_current_task:
                 poker_consumer.send_current_task()
                 mock_send_event.assert_called_with(
                     event="new_task_to_estimate",
@@ -220,10 +220,10 @@ class TestPlanningPokerConsumer:
                     title=current_task.title,
                     description=current_task.description,
                 )
-        else:
-            with patch.object(poker_consumer, "close", Mock()) as mock_close:
-                poker_consumer.send_current_task()
-                mock_close.assert_called_with(CODE_SESSION_ENDED)
+            else:
+                with patch.object(poker_consumer, "close", Mock()) as mock_close:
+                    poker_consumer.send_current_task()
+                    mock_close.assert_called_with(CODE_SESSION_ENDED)
 
     def test_moderator_can_reveal_cards(
         self,
