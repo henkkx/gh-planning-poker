@@ -22,7 +22,7 @@ class PlanningPokerSessionSerializer(serializers.ModelSerializer):
             Task(
                 title=issue.title,
                 description=issue.body,
-                github_issue_number=issue.id,
+                github_issue_number=issue.number,
                 planning_poker_session=poker_session,
             )
             for issue in github_issues

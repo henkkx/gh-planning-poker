@@ -36,8 +36,14 @@ def task(task_factory):
 @pytest.fixture
 def poker_factory(task_factory, user):
     def _factory(moderator=user, tasks=2):
-        session = PlanningPokerSession.objects.create(moderator=moderator)
-        tasks = [task_factory(title=f"task-{i+1}") for i in range(tasks)]
+        session = PlanningPokerSession.objects.create(
+            moderator=moderator,
+            repo_name='test'
+        )
+        tasks = [
+            task_factory(title=f"task-{i}", github_issue_number=i)
+            for i in range(1, tasks+1)
+        ]
         tasks[0].start_round()
         for task in tasks:
             task.planning_poker_session = session

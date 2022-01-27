@@ -1,8 +1,8 @@
 class MockIssue:
 
-    def __init__(self, *, id, title='title', body='body', pull_request=None):
+    def __init__(self, *, number, title='title', body='body', pull_request=None):
         self.pull_request = pull_request
-        self.id = id
+        self.number = number
         self.title = title
         self.body = body
         self.pull_request = pull_request
@@ -11,8 +11,8 @@ class MockIssue:
 class MockRepo:
     def get_issues(self, state='open', labels=[]):
         return [
-            MockIssue(id=1, title='pr', pull_request=True),
-            MockIssue(id=2)
+            MockIssue(number=1, title='pr', pull_request=True),
+            MockIssue(number=2)
         ]
 
 

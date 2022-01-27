@@ -89,7 +89,8 @@ class TestPlanningPokerConsumer:
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_play_one_round(self, planning_poker_ws_client):
+    @patch('poker.models.post_issue_comment')
+    async def test_play_one_round(self, mock_post_comment, user, planning_poker_ws_client):
         _, ws = planning_poker_ws_client
 
         await ws.connect()
@@ -134,7 +135,18 @@ class TestPlanningPokerConsumer:
 
         # finish round and save a note about the results
         await ws.send_json_to({"event": "finish_round", "data": {"should_save_round": True, "note": "foo bar"}})
+
         resp = await ws.receive_json_from()
+
+        json_comment = '{"total_vote_count": 1, "undecided_count": 0, "mean": 40, "median": 40, "std_dev": "not enough votes"} \n foo bar'
+        mock_post_comment.assert_called_with(
+            user=user,
+            issue_number=1,
+            repo_name='test',
+            org_name=None,
+            comment=json_comment
+        )
+
         # moving on to the next round
         assert resp['event'] == "new_task_to_estimate"
 
@@ -280,8 +292,10 @@ class TestPlanningPokerConsumer:
                 description=description
             )
 
+    @patch('poker.models.post_issue_comment')
     def test_moderator_can_request_next_round(
         self,
+        mock_post_comment,
         poker_consumer,
         mock_async_to_sync,
         user,

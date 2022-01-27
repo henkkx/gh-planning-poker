@@ -26,7 +26,7 @@ def get_github_user(user: models.User) -> AuthenticatedUser:
     return build_authenticated_github_client(user).get_user()
 
 
-def get_github_repo(user, repo_name: str, org_name: Union[str, None]) -> Repository:
+def get_github_repo(user, repo_name: str, org_name: Union[str, None] = None) -> Repository:
     if org_name:
         github = build_authenticated_github_client(user)
         try:
@@ -53,3 +53,9 @@ def get_issues_from_repo(repo: Repository, labels: List[str]):
         raise IssuesNotFound
 
     return regular_issues
+
+
+def post_issue_comment(*, user, issue_number: int, repo_name: str, org_name: Union[str, None] = None, comment: str):
+    repo = get_github_repo(user, repo_name, org_name)
+    issue = repo.get_issue(issue_number)
+    issue.create_comment(comment)
