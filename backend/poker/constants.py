@@ -1,18 +1,20 @@
 
 CODE_SESSION_ENDED = 4000
+
 NOT_ESTIMATED = None
-NOT_DOABLE = 100
 UNSURE = 99
+NOT_DOABLE = 100
+I_NEED_A_COFFEE = 101
 HOURS_TO_COMPLETE_CHOICES = (
     (NOT_ESTIMATED, "not estimated"),
-    (1, "1 hour"),
-    (2, "2 hours"),
-    (3, "3 hours"),
-    (5, "5 hours"),
-    (8, "8 hours"),
-    (13, "13 hours"),
-    (20, "20 hours"),
-    (40, "40 hours"),
+    (1, "1"),
+    (2, "2"),
+    (3, "3"),
+    (5, "5"),
+    (8, "8"),
+    (13, "13"),
+    (20, "20"),
+    (40, "40"),
     (NOT_DOABLE, "the task is too large or complex, we need to reconsider it"),
     (UNSURE, "I'm unsure, we might need to clarify the requirements"),
 )

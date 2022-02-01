@@ -278,8 +278,8 @@ class TestPlanningPokerConsumer:
                 "cards_revealed",
                 to_everyone=True,
                 votes=[
-                    (f'{NAME} voted: "1 hour"'),
-                    (f'{MODERATOR_NAME} voted: "3 hours"'),
+                    (f'{NAME} voted: "1"'),
+                    (f'{MODERATOR_NAME} voted: "3"'),
                 ],
                 stats={
                     'total_vote_count': 2,

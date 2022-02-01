@@ -9,18 +9,18 @@ export const CODE_SESSION_ENDED = 4000;
 
 type VotingOptions = Array<[number, string]>;
 
-export const NOT_DOABLE = 100;
 export const UNSURE = 99;
+export const NOT_DOABLE = 100;
 
 export const VOTING_OPTIONS: VotingOptions = [
-  [1, "1 hour"],
-  [2, "2 hours"],
-  [3, "3 hours"],
-  [5, "5 hours"],
-  [8, "8 hours"],
-  [13, "13 hours"],
-  [20, "20 hours"],
-  [40, "40 hours"],
+  [1, "1"],
+  [2, "2"],
+  [3, "3"],
+  [5, "5"],
+  [8, "8"],
+  [13, "13"],
+  [20, "20"],
+  [40, "40"],
   [UNSURE, "?"],
   [NOT_DOABLE, "∞"],
 ];

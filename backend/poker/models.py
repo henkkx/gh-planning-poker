@@ -53,9 +53,7 @@ class Task(models.Model):
     )
     title = models.CharField(max_length=256)
     description = models.CharField(max_length=65536, null=True, default="")
-    hours = models.PositiveSmallIntegerField(
-        null=True, choices=HOURS_TO_COMPLETE_CHOICES
-    )
+
     github_issue_number = models.IntegerField(null=True)
     planning_poker_session = models.ForeignKey(
         "PlanningPokerSession",
@@ -77,7 +75,7 @@ class Task(models.Model):
     def get_stats(self):
         votes = self.votes.all()
         total_vote_count = len(votes)
-        # filter unsure and unclear options and only keep regular i.e ones from 1 to 40hours
+        # filter unsure and unclear options and only keep regular i.e ones from 1 to 40
         numeric_votes = [
             vote.value for vote in votes if vote.value < UNSURE
         ]
@@ -147,13 +145,6 @@ class Vote(models.Model):
         User, on_delete=models.CASCADE, related_name="votes")
 
     value = models.PositiveSmallIntegerField(choices=HOURS_TO_COMPLETE_CHOICES)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["task", "user"], name="cannot cast a vote twice on same task"
-            )
-        ]
 
     def __str__(self) -> str:
         return f'{self.user.name} voted: "{self.get_value_display()}"'
