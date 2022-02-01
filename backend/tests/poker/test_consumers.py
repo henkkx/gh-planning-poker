@@ -105,7 +105,7 @@ class TestPlanningPokerConsumer:
         await ws.send_json_to({"event": "vote", "data": {"value": 1}})
         resp = await ws.receive_json_from()
         assert resp['data'] == {'created': True,
-                                'vote': 'firstname lastname voted: "1 hour"'}
+                                'vote': 'firstname lastname voted: "1"'}
 
         # get votes and start discussion
         await ws.send_json_to({"event": "reveal_cards"})
