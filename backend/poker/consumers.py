@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels_presence.models import Room, Presence
@@ -150,9 +150,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         send(destination, payload)
 
     def send_current_task(self, to_everyone=True):
-        if not self._has_task():
-            self.end_session()
-            return
+
         current_task = self.current_task
         if current_task.state == TaskState.NOT_STARTED:
             current_task.start_round()
@@ -214,7 +212,7 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             to_everyone=True,
         )
 
-    def finish_round(self, should_save_round: bool, note: str):
+    def finish_round(self, should_save_round: bool, note: str, label: Union[str, None] = None):
         if not self._is_moderator:
             return
 
@@ -222,19 +220,24 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
         current_task = self.current_task
         if should_save_round:
-            current_task.save_round(note)
+            current_task.save_round(note, label)
         else:
             current_task.skip_saving()
         current_task.save()
 
+        self.start_next_round()
+
+    def start_next_round(self):
         next_task = self.current_session.get_next_task()
+        self.current_session.current_task = next_task
+        self.current_session.save()
+
         if next_task:
             next_task.start_round()
             next_task.save()
-
-        self.current_session.current_task = next_task
-        self.current_session.save()
-        self.send_current_task(to_everyone=True)
+            self.send_current_task(to_everyone=True)
+        else:
+            self.end_session()
 
     def replay_round(self):
         self.current_task.replay_round()

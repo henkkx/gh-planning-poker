@@ -7,7 +7,7 @@ import { useMachine } from "@xstate/react";
 
 import { FullPageProgress } from "../../components/Spinner";
 
-import Game from "./game";
+import Game, { RoundNotes } from "./game";
 import PokerMachine, {
   GameState,
   Player,
@@ -160,10 +160,10 @@ function Poker() {
   }, [sendJsonMessage]);
 
   const handleFinishRound = React.useCallback(
-    (shouldSaveRound: boolean, note: string) => {
+    (data: RoundNotes) => {
       sendJsonMessage({
         event: "finish_round",
-        data: { should_save_round: shouldSaveRound, note },
+        data,
       });
     },
     [sendJsonMessage]

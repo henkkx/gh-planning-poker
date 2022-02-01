@@ -1,10 +1,11 @@
 import json
 import statistics
+from typing import Union
 from django.db import models
 from django_fsm import FSMField, transition
 
 
-from api.github_utils import post_issue_comment
+from api.github_utils import get_github_repo
 from users.models import User
 from .constants import HOURS_TO_COMPLETE_CHOICES, UNSURE, TaskState
 
@@ -109,22 +110,21 @@ class Task(models.Model):
         pass
 
     @transition(field=state, source=TaskState.SAVING, target=TaskState.FINISHED)
-    def save_round(self, note: str):
-        self.note = note
+    def save_round(self, note: str, label: Union[str, None] = None):
+
         curr_session = self.planning_poker_session
         repo_name = curr_session.repo_name
         org_name = curr_session.org_name
         user = curr_session.moderator
         issue_number = self.github_issue_number
-        md_comment = json.dumps(self.get_stats()) + " \n " + note
+        comment = json.dumps(self.get_stats()) + " \n " + note
 
-        post_issue_comment(
-            user=user,
-            issue_number=issue_number,
-            repo_name=repo_name,
-            org_name=org_name,
-            comment=md_comment
-        )
+        repo = get_github_repo(user, repo_name, org_name)
+        issue = repo.get_issue(issue_number)
+        issue.create_comment(comment)
+
+        if label:
+            issue.add_to_labels(label)
 
     @transition(field=state, source=TaskState.SAVING, target=TaskState.FINISHED)
     def skip_saving(self):

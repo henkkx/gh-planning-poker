@@ -27,6 +27,12 @@ import { chakraMarkdownComponents } from "./utils";
 import Votes from "./votes";
 import WaitScreen from "./wait-screen";
 
+export type RoundNotes = {
+  should_save_round: boolean;
+  note?: string;
+  label?: string;
+};
+
 type Props = {
   sendVote: (value: number) => void;
   stage: GameState;
@@ -34,7 +40,7 @@ type Props = {
   replayRound: () => void;
   revealCards: () => void;
   finishDiscussion: () => void;
-  finishRound: (shouldSaveRound: boolean, note: string) => void;
+  finishRound: (data: RoundNotes) => void;
   isModerator: boolean;
 };
 

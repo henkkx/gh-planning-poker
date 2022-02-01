@@ -7,6 +7,13 @@ import {
   TabPanel,
   Button,
   SimpleGrid,
+  Checkbox,
+  useBoolean,
+  FormControl,
+  FormLabel,
+  Switch,
+  Input,
+  Flex,
 } from "@chakra-ui/react";
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
@@ -18,20 +25,23 @@ import { ScrollArea } from "../../../components/SidebarMenu/ScrollArea";
 import { chakraMarkdownComponents } from "./utils";
 
 function SaveNoteForm({ saveRound }: any) {
-  const [textNote, setTextNote] = React.useState<string>("");
-  const isTextOverLimit = textNote.length > 4000;
+  const [note, setNote] = React.useState<string>("");
+
+  const isTextOverLimit = note.length > 4000;
 
   let handleInputChange = (e: any) => {
     let inputValue = e.currentTarget.value;
-    setTextNote(inputValue);
+    setNote(inputValue);
   };
 
   let handleSubmitNote = (e: any) => {
     e.preventDefault();
-    saveRound(true, textNote);
+    const { labelInput } = e.currentTarget.elements;
+    const label = labelInput.value;
+    saveRound({ should_save_round: true, note, label });
   };
 
-  let handleSkipSaving = () => saveRound(false, null);
+  let handleSkipSaving = () => saveRound({ should_save_round: false, note });
 
   return (
     <chakra.form onSubmit={handleSubmitNote}>
@@ -43,7 +53,8 @@ function SaveNoteForm({ saveRound }: any) {
         <TabPanels>
           <TabPanel>
             <NoteTextArea
-              value={textNote}
+              maxH="350"
+              value={note}
               isInvalid={isTextOverLimit}
               onChange={handleInputChange}
             />
@@ -53,7 +64,7 @@ function SaveNoteForm({ saveRound }: any) {
               <ScrollArea h="250">
                 <ReactMarkdown
                   children={
-                    textNote ??
+                    note ??
                     "Type something in the editor to see what it looks like"
                   }
                   remarkPlugins={[remarkGfm]}
@@ -65,6 +76,13 @@ function SaveNoteForm({ saveRound }: any) {
           </TabPanel>
         </TabPanels>
       </Tabs>
+      <Flex justify="center">
+        <FormControl maxW="90%" id="labelInput">
+          <FormLabel mb="0">Enter a label for the issue (optional) </FormLabel>
+          <Input id="labelInput" type="text" />
+        </FormControl>
+      </Flex>
+
       <SimpleGrid p={1} columns={[1, 1, 2, 2]}>
         <Button onClick={handleSkipSaving} w="80%" mt="2" justifySelf="center">
           Don't save this round

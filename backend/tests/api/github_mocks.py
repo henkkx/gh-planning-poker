@@ -7,6 +7,12 @@ class MockIssue:
         self.body = body
         self.pull_request = pull_request
 
+    def create_comment(self, comment):
+        pass
+
+    def add_to_labels(self, label):
+        pass
+
 
 class MockRepo:
     def get_issues(self, state='open', labels=[]):
@@ -14,6 +20,9 @@ class MockRepo:
             MockIssue(number=1, title='pr', pull_request=True),
             MockIssue(number=2)
         ]
+
+    def get_issue(self, number):
+        return MockIssue(number=number)
 
 
 class MockGithubUser:

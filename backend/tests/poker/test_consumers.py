@@ -4,6 +4,7 @@ from channels_presence.models import Room
 from unittest.mock import Mock, patch
 from channels.testing import WebsocketCommunicator
 
+from tests.api.github_mocks import MockRepo
 from tests.utils import AnyNumber
 from poker.constants import CODE_SESSION_ENDED
 
@@ -89,10 +90,11 @@ class TestPlanningPokerConsumer:
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    @patch('poker.models.post_issue_comment')
-    async def test_play_one_round(self, mock_post_comment, user, planning_poker_ws_client):
+    @patch('poker.models.get_github_repo')
+    async def test_play_one_round(self, mock_get_github_repo, user, planning_poker_ws_client):
         _, ws = planning_poker_ws_client
 
+        mock_get_github_repo.return_value = MockRepo()
         await ws.connect()
 
         # ignore initial data
@@ -139,12 +141,8 @@ class TestPlanningPokerConsumer:
         resp = await ws.receive_json_from()
 
         json_comment = '{"total_vote_count": 1, "undecided_count": 0, "mean": 40, "median": 40, "std_dev": "not enough votes"} \n foo bar'
-        mock_post_comment.assert_called_with(
-            user=user,
-            issue_number=1,
-            repo_name='test',
-            org_name=None,
-            comment=json_comment
+        mock_get_github_repo.assert_called_with(
+            user, 'test', None
         )
 
         # moving on to the next round
@@ -213,29 +211,23 @@ class TestPlanningPokerConsumer:
             "participants_changed", participants=participants
         )
 
-    @pytest.mark.parametrize("has_current_task", [True, False])
-    def test_send_current_task(self, has_current_task, poker_consumer, task):
+    def test_send_current_task(self, poker_consumer, task):
         current_session = poker_consumer.current_session
 
-        current_session.current_task = task if has_current_task else None
+        current_session.current_task = task
         current_session.save()
 
         current_task = current_session.current_task
 
         with patch.object(poker_consumer, "send_event", Mock()) as mock_send_event:
-            if has_current_task:
-                poker_consumer.send_current_task()
-                mock_send_event.assert_called_with(
-                    event="new_task_to_estimate",
-                    to_everyone=True,
-                    id=current_task.id,
-                    title=current_task.title,
-                    description=current_task.description,
-                )
-            else:
-                with patch.object(poker_consumer, "close", Mock()) as mock_close:
-                    poker_consumer.send_current_task()
-                    mock_close.assert_called_with(CODE_SESSION_ENDED)
+            poker_consumer.send_current_task()
+            mock_send_event.assert_called_with(
+                event="new_task_to_estimate",
+                to_everyone=True,
+                id=current_task.id,
+                title=current_task.title,
+                description=current_task.description,
+            )
 
     def test_moderator_can_reveal_cards(
         self,
@@ -292,16 +284,17 @@ class TestPlanningPokerConsumer:
                 description=description
             )
 
-    @patch('poker.models.post_issue_comment')
+    @patch('poker.models.get_github_repo')
     def test_moderator_can_request_next_round(
         self,
-        mock_post_comment,
+        mock_get_github_repo,
         poker_consumer,
         mock_async_to_sync,
         user,
         create_moderator_for_poker,
         mock_channel_layer,
     ):
+        mock_get_github_repo.return_value = MockRepo()
         current_session = poker_consumer.current_session
         current_task = current_session.current_task
         moderator = create_moderator_for_poker(current_session)

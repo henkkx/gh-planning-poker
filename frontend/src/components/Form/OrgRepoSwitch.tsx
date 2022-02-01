@@ -1,5 +1,4 @@
 import { FormControl, FormLabel, Switch, SwitchProps } from "@chakra-ui/react";
-import React from "react";
 
 export function OrgRepoSwitch({ onChange }: SwitchProps) {
   return (
