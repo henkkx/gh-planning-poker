@@ -1,7 +1,7 @@
-from django.urls import path
+from django.urls import re_path
 from poker.consumers import PlanningPokerConsumer
 
 
 ws_urlpatterns = [
-    path("ws/poker/<int:game_id>", PlanningPokerConsumer.as_asgi())
+    re_path(r"ws/poker/(?P<game_id>[^/]+)$", PlanningPokerConsumer.as_asgi())
 ]
