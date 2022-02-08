@@ -1,3 +1,4 @@
+from uuid import uuid4
 import pytest
 from core.asgi import application
 from channels_presence.models import Room
@@ -6,7 +7,6 @@ from channels.testing import WebsocketCommunicator
 
 from tests.api.github_mocks import MockRepo
 from tests.utils import AnyNumber
-from poker.constants import CODE_SESSION_ENDED
 
 
 class TestPlanningPokerConsumer:
@@ -21,8 +21,9 @@ class TestPlanningPokerConsumer:
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
     async def test_rejects_if_no_pokersession_exists(self):
+        new_uuid = uuid4()
         ws = WebsocketCommunicator(
-            application=application, path=f"ws/poker/{42}")
+            application=application, path=f"ws/poker/{new_uuid}")
 
         is_connected, _ = await ws.connect()
         assert not is_connected

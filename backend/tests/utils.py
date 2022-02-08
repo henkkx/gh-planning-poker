@@ -6,3 +6,8 @@ class AnyInt:
 class AnyNumber:
     def __eq__(self, other):
         return isinstance(other, float) or isinstance(other, int)
+
+
+class AnyStr:
+    def __eq__(self, other):
+        return isinstance(other, str)

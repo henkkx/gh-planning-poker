@@ -1,6 +1,6 @@
 import pytest
 
-from tests.utils import AnyInt
+from tests.utils import AnyInt, AnyStr
 from poker.models import PlanningPokerSession
 from .github_mocks import MockGithub
 
@@ -42,7 +42,7 @@ class TestPokerSessionViews:
         response = api_client.post("/api/poker", data, format="json")
         assert response.status_code == 201
         assert response.data == {
-            "id": AnyInt(),
+            "id": AnyStr(),
             "current_task": AnyInt(),
             "repo_name": REPO_NAME,
             "org_name": ORG_NAME if is_org_repo else None,
