@@ -3,7 +3,6 @@ import {
   Heading,
   Select,
   SimpleGrid,
-  useBreakpointValue,
   useColorModeValue,
   Tab,
   TabList,
@@ -19,6 +18,7 @@ import remarkGfm from "remark-gfm";
 import { Card } from "../../../components/Card";
 import { ScrollArea } from "../../../components/SidebarMenu/ScrollArea";
 import { FullPageProgress } from "../../../components/Spinner";
+import { useIsMobile } from "../../../utils/hooks";
 import { ErrorCard } from "../../error";
 import { VOTING_OPTIONS, UNSURE } from "../constants";
 import { GameState, Task } from "./machine";
@@ -55,7 +55,7 @@ function Game({
   isModerator,
 }: Props) {
   const bgColor = useColorModeValue("gray.50", "gray.600");
-  const isMobile = useBreakpointValue({ base: true, md: false });
+  const isMobile = useIsMobile();
   const [selectedValue, setSelectedValue] = React.useState<number>(1);
 
   const isConnecting = stage === "connecting";
@@ -122,10 +122,10 @@ function Game({
   );
 
   const taskDescription = (
-    <Card bg={bgColor} mt="2" maxH="300">
-      <ScrollArea h="250">
-        <Heading as="h4" mb="4" size="md">
-          Description
+    <Card bg={bgColor} maxH="400" mb="2">
+      <ScrollArea maxH="350">
+        <Heading as="h3" mb="4" size="lg">
+          {currentTask?.title}
         </Heading>
         <ReactMarkdown
           children={taskDescriptionMarkdown}

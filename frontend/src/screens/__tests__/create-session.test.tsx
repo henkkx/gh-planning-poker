@@ -8,6 +8,7 @@ import {
   rest,
 } from "../../test/utils";
 import { CreateSessionView } from "../create-session";
+import * as hooks from "../../utils/hooks";
 
 type PostBody = {
   repo_name: string;
@@ -28,10 +29,23 @@ const handlers = [
       })
     );
   }),
+
+  rest.get("/api/recent", (req, res, ctx) => {
+    return res(
+      ctx.json({
+        repoName: "some repo",
+        id: "abcd",
+      })
+    );
+  }),
 ];
 const server = setupServer(...handlers.concat(defaultHandlers));
 
-beforeAll(() => server.listen());
+beforeAll(() => {
+  server.listen();
+  jest.spyOn(hooks, "useIsMobile").mockImplementation(() => false);
+});
+
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 

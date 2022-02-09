@@ -1,3 +1,4 @@
+import { useBreakpointValue } from "@chakra-ui/react";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
 
@@ -96,4 +97,6 @@ function useAsync<DataType>(initialState?: State<DataType>) {
   };
 }
 
-export { useAsync, usePathname };
+const useIsMobile = () => useBreakpointValue({ base: true, md: false });
+
+export { useAsync, usePathname, useIsMobile };

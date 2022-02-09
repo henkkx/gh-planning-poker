@@ -19,17 +19,17 @@ type Props = {
 
 function Votes({ votes, stats, bgColor }: Props) {
   return (
-    <Card bg={bgColor} mt="2" maxH="300">
-      <ScrollArea h="250">
+    <Card bg={bgColor} mt="2" maxH="400">
+      <ScrollArea maxH="350">
         {votes.length ? (
           <Table size="sm" mb="5">
             <Thead>
               <Tr>
                 <Th isNumeric>Total Votes</Th>
                 <Th isNumeric>Unsure votes</Th>
-                <Th isNumeric>Mean (h)</Th>
-                <Th isNumeric>Median (h)</Th>
-                <Th isNumeric>Standard Deviation (h) </Th>
+                <Th isNumeric>Mean </Th>
+                <Th isNumeric>Median</Th>
+                <Th isNumeric>Standard Deviation </Th>
               </Tr>
             </Thead>
             <Tbody>

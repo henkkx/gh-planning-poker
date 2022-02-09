@@ -16,9 +16,11 @@ import { OrgTextField } from "../../components/Form/OrgTextField";
 import { RepoTextField } from "../../components/Form/RepoTextField";
 import CreateSessionImg from "./new_game.svg";
 import * as api from "../../api";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { LabelsTextField } from "../../components/Form/LabelsTextField";
 import { FullPageProgress } from "../../components/Spinner";
+import { useAuth } from "../../auth";
+import { useIsMobile } from "../../utils/hooks";
 
 interface FormElements extends HTMLFormControlsCollection {
   repoInput: HTMLInputElement;
@@ -39,7 +41,17 @@ export const CreateSessionView = () => {
   const [isOrgRepoSelected, orgRepo] = useBoolean(false);
   const toast = useToast();
   const history = useHistory();
+  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [recentSession, setRecentSession] =
+    React.useState<api.RecentPokerSession>();
+
+  React.useEffect(() => {
+    api
+      .getMostRecentPokerSession()
+      .then(setRecentSession)
+      .catch((error) => toast({ title: error.toString() }));
+  }, [toast, setRecentSession]);
 
   function handleSubmit(e: React.FormEvent<GithubFormElement>) {
     e.preventDefault();
@@ -62,10 +74,16 @@ export const CreateSessionView = () => {
       history.push(`/play/${id}`);
     } catch (err: any) {
       let title, description;
-
       if (err.toString() === "Error: Not Found") {
-        title = `No issues matching all the following labels: [${labels}]`;
-        description = "Remember to enter the labels separated by a comma";
+        const hasIssues = !labels?.length;
+
+        if (hasIssues) {
+          title = `No open issues found matching all the following labels: [${labels}]`;
+          description = `Make sure that your repository has issues and that the labels are entered correctly, separated by commas`;
+        } else {
+          title = "No issues found in your repository";
+          description = "Create some issues in your repository first";
+        }
       } else {
         title = `Unable to create session - ${err}`;
         description = `No repository with the name "${repo_name}" was found in your ${
@@ -87,7 +105,19 @@ export const CreateSessionView = () => {
   }
 
   return (
-    <Box maxW="5xl" mt={12} mx="auto" px={{ sm: "8" }}>
+    <Box maxW="5xl" my={4} mx="auto" px={{ sm: "8" }}>
+      {recentSession ? (
+        <Button
+          as={Link}
+          to={`/play/${recentSession.id}`}
+          colorScheme="green"
+          size={isMobile ? "sm" : "md"}
+          mb="6"
+          mx="2"
+        >
+          {`Join Back to "${recentSession.repoName}"`}
+        </Button>
+      ) : null}
       <Card>
         <Stack direction={["column", "row"]} spacing="24px">
           <Box>

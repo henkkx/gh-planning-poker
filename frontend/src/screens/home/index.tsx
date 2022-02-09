@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  chakra,
   Flex,
   Heading,
   Img,
@@ -28,29 +29,24 @@ function Home() {
   }
 
   return (
-    <Box
-      pt="24"
-      pb="12"
-      maxW={{ base: "xl", md: "7xl" }}
-      mx="auto"
-      px={{ base: "6", md: "8" }}
-    >
+    <Box maxW={{ base: "xl", md: "7xl" }} mx="auto" px={{ base: "6", md: "8" }}>
       <Flex
         align="flex-start"
         direction={{ base: "column", lg: "row" }}
         justify="space-between"
         mb="20"
       >
-        <Box flex="1" maxW={{ lg: "xl" }} pt="6">
+        <Box flex="1" maxW={{ lg: "xl" }} py="6">
           <Heading as="h1" size="3xl" mt="8" fontWeight="extrabold">
             {isAuthenticated
               ? `Welcome ${user!.name}`
               : "Online Planning Poker with Github Integration"}
           </Heading>
           <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="xl">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua
-            adipiscing elit.
+            Planning poker is a consensus-based and gamified technique for
+            software engineering teams to estimate and discuss tasks and user
+            stories. This app can fetch the issues from your Github repository
+            and allow you to run planning poker sessions on them.
           </Text>
 
           <Button
@@ -65,25 +61,28 @@ function Home() {
             as={RouterLink}
             to={isAuthenticated ? "/play" : "/login"}
           >
-            Get Started for free
+            Get Started!
           </Button>
         </Box>
-        <Box boxSize={{ base: "20", lg: "8" }} />
         <Img
-          pos="relative"
+          pt="10"
           marginEnd="-10rem"
           w="50rem"
           src={HeroImg}
           alt="Illustration of a software team"
         />
       </Flex>
-      <Box>
-        <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="sm">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua adipiscing
-          elit.
+      <chakra.footer>
+        <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="md">
+          For more information about planning poker check out the{" "}
+          <chakra.a
+            color="lightblue"
+            href="https://www.atlassian.com/blog/platform/a-brief-overview-of-planning-poker"
+          >
+            Brief Overview of Planning Poker by Atlassian
+          </chakra.a>
         </Text>
-      </Box>
+      </chakra.footer>
     </Box>
   );
 }

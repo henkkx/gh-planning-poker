@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   useColorModeValue,
   Flex,
@@ -10,13 +11,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { HiClipboardCopy } from "react-icons/hi";
-
 import { MobileMenuButton } from "../../components/SidebarMenu/MobileMenuButton";
 import { NavSectionTitle } from "../../components/SidebarMenu/NavSectionTitle";
 import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
 import { SidebarLink } from "../../components/SidebarMenu/SidebarLink";
 import { useMobileMenuState } from "../../components/SidebarMenu/useMobileMenuState";
 import { Steps, Step } from "../../components/Steps";
+import { useIsMobile } from "../../utils/hooks";
 import { copyLinkToGameToClipboard } from "../../utils/misc";
 import { Player } from "./game/machine";
 
@@ -38,6 +39,7 @@ function PokerGameLayout({
   sessionIsInactive,
 }: Props) {
   const { isOpen, toggle } = useMobileMenuState();
+  const isMobile = useIsMobile();
   const toast = useToast();
   const sidebarBg = useColorModeValue("blue.800", "gray.800");
   const contentBg = useColorModeValue("white", "gray.700");
@@ -54,8 +56,8 @@ function PokerGameLayout({
     <Flex
       height="92vh"
       bg={sidebarBg}
-      overflow="hidden"
       sx={{ "--sidebar-width": "16rem" }}
+      pb="2"
     >
       <Box
         as="nav"
@@ -116,6 +118,7 @@ function PokerGameLayout({
                     {tasks.map((title) => (
                       <Step
                         key={title}
+                        onClick={() => toast({ title, isClosable: true })}
                         title={
                           title.length < 20
                             ? title
@@ -123,7 +126,7 @@ function PokerGameLayout({
                         }
                         tooltip={Tooltip}
                         tooltipProps={{
-                          placement: "right-start",
+                          placement: "start",
                           label: title,
                         }}
                       />
@@ -143,24 +146,14 @@ function PokerGameLayout({
         left={isOpen ? "var(--sidebar-width)" : "0"}
         transition="left 0.2s"
       >
-        <Box maxW="2560px" bg={contentBg} height="100%" rounded={{ md: "lg" }}>
+        <Box
+          maxW="2560px"
+          bg={contentBg}
+          height="100%"
+          rounded={{ md: "lg" }}
+          overflow="auto"
+        >
           <Flex direction="column" height="full">
-            <Flex
-              w="full"
-              py="4"
-              justify="space-between"
-              align="center"
-              px="10"
-            >
-              {!sessionIsInactive ? (
-                <Flex align="center" minH="8">
-                  <MobileMenuButton onClick={toggle} isOpen={isOpen} />
-                  <Heading size="md" as="h2">
-                    {title ?? "loading the title ..."}
-                  </Heading>
-                </Flex>
-              ) : null}
-            </Flex>
             <Flex direction="column" flex="1" px={[1, 1, 2, 4]} py="2">
               <Flex
                 justifyContent={"center"}
@@ -169,7 +162,8 @@ function PokerGameLayout({
                 rounded="xl"
                 minH="100%"
                 maxH="100%"
-                overflow="auto"
+                my="2"
+                py="4"
               >
                 {children}
               </Flex>

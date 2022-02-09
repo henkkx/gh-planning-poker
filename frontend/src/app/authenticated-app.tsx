@@ -1,5 +1,10 @@
-import { Box, Center, Heading, useColorModeValue } from "@chakra-ui/react";
-import * as React from "react";
+import {
+  chakra,
+  Box,
+  Center,
+  Heading,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { User } from "../auth";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { Navbar } from "../components/Navbar";
@@ -17,7 +22,7 @@ function AuthenticatedApp({ user }: Props) {
   const { name, email } = user;
 
   return (
-    <main>
+    <chakra.main>
       <Navbar>
         <Navbar.Brand>
           <Center marginEnd={6}>
@@ -50,7 +55,7 @@ function AuthenticatedApp({ user }: Props) {
       >
         <AppRoutes />
       </Box>
-    </main>
+    </chakra.main>
   );
 }
 

@@ -66,7 +66,11 @@ export const Template: React.FC = (props) => {
           <Tabs orientation="vertical" variant="unstyled">
             <TabList>
               {React.Children.map(links, (child) =>
-                React.cloneElement(child, { onClick: mobileNav.onClose })
+                React.cloneElement(child, {
+                  onClick: mobileNav.onClose,
+                  my: 6,
+                  size: "xl",
+                })
               )}
             </TabList>
             <TabIndicator

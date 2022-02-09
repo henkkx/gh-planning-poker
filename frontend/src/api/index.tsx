@@ -18,7 +18,6 @@ function isResponseOk(response: Response) {
   if (200 <= response.status && response.status <= 299) {
     return response.json();
   }
-
   throw Error(response.statusText);
 }
 
@@ -27,6 +26,7 @@ type PokerSessionData = {
   org_name?: string;
   labels?: string;
 };
+
 function createPokerSession(data: PokerSessionData, crsfToken: string) {
   const body = JSON.stringify(data);
 
@@ -40,4 +40,15 @@ function createPokerSession(data: PokerSessionData, crsfToken: string) {
   }).then(isResponseOk);
 }
 
-export { getCSRF, getUserInfo, createPokerSession };
+export type RecentPokerSession = {
+  repoName: string;
+  id: string;
+};
+
+function getMostRecentPokerSession() {
+  return fetch("/api/recent")
+    .then(isResponseOk)
+    .then((data) => data.mostRecentSession);
+}
+
+export { getCSRF, getUserInfo, createPokerSession, getMostRecentPokerSession };
