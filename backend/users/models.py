@@ -11,6 +11,12 @@ class User(AbstractUser):
     name = models.CharField(max_length=255, default='Github User')
     access_token = models.CharField(max_length=255, default='github_token')
 
+    most_recent_session = models.ForeignKey(
+        "poker.PlanningPokerSession",
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['access_token']
 

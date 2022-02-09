@@ -91,6 +91,8 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
     def add_user_to_session(self):
         self.current_session.voters.add(self.user)
+        self.user.most_recent_session = self.current_session
+        self.user.save()
         self.broadcast_participants()
         self.touch_presence()
 
@@ -253,3 +255,4 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
     def end_session(self):
         self.send_event(GameEvent.NO_TASKS_LEFT)
         self.close(CODE_SESSION_ENDED)
+        self.current_session.delete()

@@ -26,9 +26,14 @@ class PlanningPokerSession(models.Model):
     )
 
     moderator = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name="moderator_in"
+        User, on_delete=models.SET_NULL, related_name="moderator_in", null=True,
     )
-    voters = models.ManyToManyField(User, related_name="poker_sessions")
+    voters = models.ManyToManyField(User, related_name="voter_in")
+
+    def get_joining_details(self):
+        return {
+            "id": self.id, "repoName": self.repo_name
+        }
 
     def get_current_task_idx(self):
         return self.tasks.filter(

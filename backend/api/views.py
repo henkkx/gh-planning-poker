@@ -22,15 +22,27 @@ get_csrf = CSRF.as_view()
 
 
 class UserInfo(AuthRequiredMixin, APIView):
+
     def get(self, request):
         user = request.user
 
-        return Response(
-            {"name": user.name, "email": user.email, "isAuthenticated": True}
-        )
+        return Response({
+            "name": user.name,
+            "email": user.email,
+            "isAuthenticated": True,
+        })
 
 
 user_info_view = UserInfo.as_view()
+
+
+class MostRecentSession(AuthRequiredMixin, APIView):
+    def get(self, request):
+        recent = request.user.most_recent_session
+        return Response({"mostRecentSession": recent.get_joining_details() if recent else None})
+
+
+most_recent_session_view = MostRecentSession.as_view()
 
 
 class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):
