@@ -4,7 +4,7 @@ import {
   Flex,
   Box,
   Stack,
-  Heading,
+  Text,
   Avatar,
   Tooltip,
   Button,
@@ -53,12 +53,7 @@ function PokerGameLayout({
   };
 
   return (
-    <Flex
-      height="92vh"
-      bg={sidebarBg}
-      sx={{ "--sidebar-width": "16rem" }}
-      pb="2"
-    >
+    <Flex height="92vh" bg={sidebarBg} sx={{ "--sidebar-width": "16rem" }}>
       <Box
         as="nav"
         display="block"
@@ -149,21 +144,24 @@ function PokerGameLayout({
         <Box
           maxW="2560px"
           bg={contentBg}
-          height="100%"
+          h="100%"
+          py="2"
           rounded={{ md: "lg" }}
-          overflow="auto"
         >
-          <Flex direction="column" height="full">
-            <Flex direction="column" flex="1" px={[1, 1, 2, 4]} py="2">
+          <Flex direction="column" height="full" minH="100%">
+            <Flex direction="column" flex="1" px={[1, 1, 2, 4]} minH="100%">
+              {isMobile ? (
+                <MobileMenuButton mb="2" onClick={toggle} isOpen={isOpen}>
+                  Open Task Information
+                </MobileMenuButton>
+              ) : null}
               <Flex
                 justifyContent={"center"}
                 borderWidth="3px"
                 borderStyle="dashed"
                 rounded="xl"
                 minH="100%"
-                maxH="100%"
-                my="2"
-                py="4"
+                py="2"
               >
                 {children}
               </Flex>

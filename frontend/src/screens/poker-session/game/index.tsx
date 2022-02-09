@@ -95,7 +95,6 @@ function Game({
         ))}
       </Select>
       <Button
-        mt="2"
         mx={[1, 2, 2]}
         colorScheme="blue"
         onClick={(_) => sendVote(selectedValue)}
@@ -140,7 +139,7 @@ function Game({
     <SimpleGrid w="100%">
       <SimpleGrid columns={1} px={["1%", "2%", "5%", "10%"]}>
         {isDiscussing ? (
-          <Tabs variant="enclosed" mt="2" isFitted w="100%">
+          <Tabs mt="2" variant="soft-rounded" isFitted w="100%">
             <TabList>
               <Tab>Player Votes</Tab>
               <Tab>Task Description</Tab>

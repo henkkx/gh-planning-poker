@@ -1,29 +1,28 @@
-import { Box } from "@chakra-ui/react";
+import { Text, Button, ButtonProps } from "@chakra-ui/react";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
 
-interface MobileMenuButtonProps {
-  onClick: () => void;
+interface MobileMenuButtonProps extends ButtonProps {
   isOpen: boolean;
 }
 
 export const MobileMenuButton = (props: MobileMenuButtonProps) => {
-  const { onClick, isOpen } = props;
+  const { onClick, isOpen, ...rest } = props;
   return (
-    <Box
-      display={{ base: "block", md: "none" }}
-      ml="-8"
-      mr="2"
-      as="button"
-      type="button"
+    <Button
+      w={isOpen ? "25%" : "50%"}
+      display={{ base: "flex", md: "none" }}
       rounded="md"
       p="1"
-      fontSize="xl"
-      color="gray.500"
-      _hover={{ bg: "gray.100" }}
+      ml={isOpen ? "-100px" : "10px"}
+      fontSize="md"
+      colorScheme="blue"
       onClick={onClick}
+      textAlign="left"
+      leftIcon={isOpen ? <HiX /> : <HiMenuAlt1 />}
+      alignItems="center"
+      {...rest}
     >
-      <Box srOnly>{isOpen ? "Close Menu" : "Open Menu"}</Box>
-      {isOpen ? <HiX /> : <HiMenuAlt1 />}
-    </Box>
+      {isOpen ? "Close" : "Open Session Info"}
+    </Button>
   );
 };
