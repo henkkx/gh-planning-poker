@@ -20,7 +20,7 @@ describe("the app", () => {
     await screen.findByText(/welcome firstname lastname/i);
   });
 
-  it("renders unauthenticated content if user is not authenticated", async () => {
+  it("renders login screen if user is not authenticated", async () => {
     server.use(
       rest.get("/api/users/me", (req, res, ctx) => {
         return res(ctx.status(403));
@@ -32,7 +32,7 @@ describe("the app", () => {
     );
 
     expect(userGreeting).not.toBeInTheDocument();
-    const loginText = await screen.findByText(/login to get started/i);
-    expect(loginText).toBeInTheDocument();
+    const loginBtn = await screen.findByText(/login with github/i);
+    expect(loginBtn).toBeInTheDocument();
   });
 });
