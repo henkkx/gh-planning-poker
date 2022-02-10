@@ -12,6 +12,8 @@ type VotingOptions = Array<[number, string]>;
 export const UNSURE = 99;
 export const NOT_DOABLE = 100;
 
+export const INITIAL_VOTE_VALUE = 1;
+
 export const VOTING_OPTIONS: VotingOptions = [
   [1, "1"],
   [2, "2"],

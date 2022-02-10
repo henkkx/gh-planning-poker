@@ -14,6 +14,7 @@ import {
   Switch,
   Input,
   Flex,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
@@ -22,9 +23,14 @@ import remarkGfm from "remark-gfm";
 import { Card } from "../../../components/Card";
 import { NoteTextArea } from "../../../components/Form/NoteTextArea";
 import { ScrollArea } from "../../../components/SidebarMenu/ScrollArea";
+import { FullPageProgress } from "../../../components/Spinner";
 import { chakraMarkdownComponents } from "./utils";
 
 function SaveNoteForm({ saveRound }: any) {
+  const textColor = useColorModeValue("gray.600", "gray.50");
+  const bgColor = useColorModeValue("gray.50", "gray.600");
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const [note, setNote] = React.useState<string>("");
 
   const isTextOverLimit = note.length > 4000;
@@ -38,21 +44,27 @@ function SaveNoteForm({ saveRound }: any) {
     e.preventDefault();
     const { labelInput } = e.currentTarget.elements;
     const label = labelInput.value;
+    setIsLoading(true);
     saveRound({ should_save_round: true, note, label });
   };
 
   let handleSkipSaving = () => saveRound({ should_save_round: false, note });
 
+  if (isLoading) {
+    return <FullPageProgress text="Exporting to Github..." />;
+  }
+
   return (
     <chakra.form onSubmit={handleSubmitNote}>
-      <Tabs variant="enclosed" mt="2" isFitted w="100%">
+      <Tabs variant="soft-rounded" mt="2" isFitted w="100%">
         <TabList>
-          <Tab>Edit Note</Tab>
-          <Tab>Preview of the Markdown</Tab>
+          <Tab color={textColor}>Edit Note</Tab>
+          <Tab color={textColor}>Preview of the Markdown</Tab>
         </TabList>
         <TabPanels>
           <TabPanel>
             <NoteTextArea
+              bg={bgColor}
               maxH="350"
               value={note}
               isInvalid={isTextOverLimit}
@@ -60,8 +72,8 @@ function SaveNoteForm({ saveRound }: any) {
             />
           </TabPanel>
           <TabPanel>
-            <Card mt="2" maxH="300" minH="300">
-              <ScrollArea h="250">
+            <Card mt="2" maxH="350" bg={bgColor}>
+              <ScrollArea h="350">
                 <ReactMarkdown
                   children={
                     note ??

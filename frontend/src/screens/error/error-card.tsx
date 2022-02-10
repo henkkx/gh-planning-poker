@@ -12,7 +12,7 @@ import {
 import * as React from "react";
 import { Card } from "../../components/Card";
 
-import ErrorImg from "./error.svg";
+import DefaultErrorImg from "./error.svg";
 import { Link } from "react-router-dom";
 
 const DEFAULT_MESSAGE = "We could not find the the page you're looking for.";
@@ -22,6 +22,7 @@ type Props = {
   canTryAgain?: boolean;
   onTryAgain?: React.MouseEventHandler<HTMLButtonElement>;
   errorText?: string;
+  illustration?: string;
 };
 
 export const ErrorCard = ({
@@ -29,6 +30,7 @@ export const ErrorCard = ({
   canTryAgain,
   onTryAgain,
   errorText,
+  illustration,
 }: Props) => {
   return (
     <Card>
@@ -50,7 +52,7 @@ export const ErrorCard = ({
             </VStack>
           </Center>
         </Box>
-        <Img maxW="xs" src={ErrorImg} />
+        <Img maxW="xs" src={illustration ?? DefaultErrorImg} />
       </Stack>
     </Card>
   );

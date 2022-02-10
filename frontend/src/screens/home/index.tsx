@@ -36,7 +36,7 @@ function Home() {
         justify="space-between"
         mb="20"
       >
-        <Box flex="1" maxW={{ lg: "xl" }} py="6">
+        <Box flex="1" maxW={{ lg: "xl" }} pt="6">
           <Heading as="h1" size="3xl" mt="8" fontWeight="extrabold">
             {isAuthenticated
               ? `Welcome ${user!.name}`
@@ -65,18 +65,18 @@ function Home() {
           </Button>
         </Box>
         <Img
-          pt="10"
-          marginEnd="-10rem"
+          marginEnd="-5rem"
+          mt="10"
           w="50rem"
           src={HeroImg}
           alt="Illustration of a software team"
         />
       </Flex>
       <chakra.footer>
-        <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="md">
+        <Text color={mode("gray.600", "gray.400")} my="5" fontSize="md">
           For more information about planning poker check out the{" "}
           <chakra.a
-            color="lightblue"
+            color={mode("blue.600", "blue.400")}
             href="https://www.atlassian.com/blog/platform/a-brief-overview-of-planning-poker"
           >
             Brief Overview of Planning Poker by Atlassian

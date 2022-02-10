@@ -121,7 +121,7 @@ function PokerGameLayout({
                         }
                         tooltip={Tooltip}
                         tooltipProps={{
-                          placement: "start",
+                          placement: "auto",
                           label: title,
                         }}
                       />
@@ -150,7 +150,7 @@ function PokerGameLayout({
         >
           <Flex direction="column" height="full" minH="100%">
             <Flex direction="column" flex="1" px={[1, 1, 2, 4]} minH="100%">
-              {isMobile ? (
+              {isMobile && !sessionIsInactive ? (
                 <MobileMenuButton mb="2" onClick={toggle} isOpen={isOpen}>
                   Open Task Information
                 </MobileMenuButton>

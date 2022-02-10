@@ -20,7 +20,7 @@ import { ScrollArea } from "../../../components/SidebarMenu/ScrollArea";
 import { FullPageProgress } from "../../../components/Spinner";
 import { useIsMobile } from "../../../utils/hooks";
 import { ErrorCard } from "../../error";
-import { VOTING_OPTIONS, UNSURE } from "../constants";
+import { VOTING_OPTIONS, UNSURE, INITIAL_VOTE_VALUE } from "../constants";
 import { GameState, Task } from "./machine";
 import SaveNoteForm from "./save-note-form";
 import { chakraMarkdownComponents } from "./utils";
@@ -55,8 +55,13 @@ function Game({
   isModerator,
 }: Props) {
   const bgColor = useColorModeValue("gray.50", "gray.600");
+  const textColor = useColorModeValue("gray.600", "gray.50");
   const isMobile = useIsMobile();
-  const [selectedValue, setSelectedValue] = React.useState<number>(1);
+  const [voteValue, setVoteValue] = React.useState<number>(INITIAL_VOTE_VALUE);
+
+  React.useEffect(() => {
+    setVoteValue(INITIAL_VOTE_VALUE);
+  }, [stage]);
 
   const isConnecting = stage === "connecting";
   const isVoting = stage === "voting";
@@ -83,7 +88,7 @@ function Game({
     currentTask?.description ?? "no description provided.";
 
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setSelectedValue(parseInt(e.target.value));
+    setVoteValue(parseInt(e.target.value));
 
   const pokerButtons = isMobile ? (
     <SimpleGrid m={2} maxW={"100%"} columns={[1, 2, 2]}>
@@ -97,7 +102,7 @@ function Game({
       <Button
         mx={[1, 2, 2]}
         colorScheme="blue"
-        onClick={(_) => sendVote(selectedValue)}
+        onClick={(_) => sendVote(voteValue)}
       >
         Send Vote
       </Button>
@@ -135,14 +140,17 @@ function Game({
       </ScrollArea>
     </Card>
   );
+
   return (
     <SimpleGrid w="100%">
       <SimpleGrid columns={1} px={["1%", "2%", "5%", "10%"]}>
+        {isVoting ? taskDescription : null}
+
         {isDiscussing ? (
           <Tabs mt="2" variant="soft-rounded" isFitted w="100%">
             <TabList>
-              <Tab>Player Votes</Tab>
-              <Tab>Task Description</Tab>
+              <Tab color={textColor}>Player Votes</Tab>
+              <Tab color={textColor}>Task Description</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
@@ -153,6 +161,27 @@ function Game({
           </Tabs>
         ) : null}
 
+        {isDiscussing && isModerator ? (
+          <SimpleGrid p={1} columns={[1, 1, 2, 2]}>
+            <Button
+              w="80%"
+              justifySelf="center"
+              colorScheme="blue"
+              onClick={replayRound}
+            >
+              Replay round
+            </Button>
+            <Button
+              w="80%"
+              justifySelf="center"
+              colorScheme="blue"
+              onClick={finishDiscussion}
+            >
+              Finish this round
+            </Button>
+          </SimpleGrid>
+        ) : null}
+
         {isSavingResults ? (
           isModerator ? (
             <SaveNoteForm saveRound={finishRound} />
@@ -160,44 +189,19 @@ function Game({
             <WaitScreen />
           )
         ) : null}
-
-        {isVoting ? taskDescription : null}
       </SimpleGrid>
 
-      {isDiscussing && isModerator ? (
-        <SimpleGrid p={1} columns={[1, 1, 2, 2]}>
-          <Button
-            w="80%"
-            justifySelf="center"
-            colorScheme="blue"
-            onClick={replayRound}
-          >
-            Replay round
-          </Button>
-          <Button
-            w="80%"
-            justifySelf="center"
-            colorScheme="blue"
-            onClick={finishDiscussion}
-          >
-            Finish this round
-          </Button>
-        </SimpleGrid>
-      ) : (
-        <>
-          {isVoting ? pokerButtons : null}
-          {isModerator && isVoting ? (
-            <Button
-              w="60%"
-              justifySelf="center"
-              colorScheme="blue"
-              onClick={revealCards}
-            >
-              Reveal cards
-            </Button>
-          ) : null}
-        </>
-      )}
+      {isVoting ? pokerButtons : null}
+      {isModerator && isVoting ? (
+        <Button
+          w="60%"
+          justifySelf="center"
+          colorScheme="blue"
+          onClick={revealCards}
+        >
+          Reveal cards
+        </Button>
+      ) : null}
     </SimpleGrid>
   );
 }
