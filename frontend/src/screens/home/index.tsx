@@ -8,25 +8,12 @@ import {
   Text,
   useColorModeValue as mode,
 } from "@chakra-ui/react";
-import * as React from "react";
-import { Link as RouterLink, Redirect } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../auth";
-import { usePathname } from "../../utils/hooks";
-import Login from "../login";
 import HeroImg from "./hero_illustration.svg";
 
 function Home() {
   const { user } = useAuth();
-  const isAuthenticated = !!user;
-  const path = usePathname();
-
-  if (!isAuthenticated) {
-    if (path === "/login") {
-      return <Login />;
-    } else if (path !== "/") {
-      return <Redirect to="/" />;
-    }
-  }
 
   return (
     <Box maxW={{ base: "xl", md: "7xl" }} mx="auto" px={{ base: "6", md: "8" }}>
@@ -38,15 +25,14 @@ function Home() {
       >
         <Box flex="1" maxW={{ lg: "xl" }} pt="6">
           <Heading as="h1" size="3xl" mt="8" fontWeight="extrabold">
-            {isAuthenticated
-              ? `Welcome ${user!.name}`
-              : "Online Planning Poker with Github Integration"}
+            {`Welcome ${user!.name}`}
           </Heading>
           <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="xl">
-            Planning poker is a consensus-based and gamified technique for
-            software engineering teams to estimate and discuss tasks and user
-            stories. This app can fetch the issues from your Github repository
-            and allow you to run planning poker sessions on them.
+            Planning poker is a consensus-based and gamified technique for task
+            estimation. It is used by software engineering teams to discuss user
+            stories in the form of a poker-like card game. This app will allow
+            you to run planning poker sessions on issues imported from your
+            Github repository.
           </Text>
 
           <Button
@@ -59,7 +45,7 @@ function Home() {
             fontSize="md"
             fontWeight="bold"
             as={RouterLink}
-            to={isAuthenticated ? "/play" : "/login"}
+            to={"/play"}
           >
             Get Started!
           </Button>

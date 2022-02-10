@@ -14,6 +14,18 @@ function getUserInfo(): Promise<User> {
     });
 }
 
+async function logout() {
+  const crsfToken = await getCSRF();
+  const response = await fetch("/api/users/logout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": crsfToken,
+    },
+  });
+  return isResponseOk(response);
+}
+
 function isResponseOk(response: Response) {
   if (200 <= response.status && response.status <= 299) {
     return response.json();
@@ -51,4 +63,10 @@ function getMostRecentPokerSession() {
     .then((data) => data.mostRecentSession);
 }
 
-export { getCSRF, getUserInfo, createPokerSession, getMostRecentPokerSession };
+export {
+  getCSRF,
+  getUserInfo,
+  createPokerSession,
+  getMostRecentPokerSession,
+  logout,
+};

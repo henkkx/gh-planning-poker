@@ -1,46 +1,58 @@
-import { Box, Button, Heading } from "@chakra-ui/react";
-import { FaGithub } from "react-icons/fa";
-import { openGithubLoginPage } from "../../auth/github";
+import {
+  Box,
+  chakra,
+  Flex,
+  Heading,
+  Img,
+  Text,
+  useColorModeValue as mode,
+} from "@chakra-ui/react";
+import { GithubButton } from "./github-button";
 
-import { Card } from "../../components/Card";
-
-export function GithubButton() {
-  return (
-    <Box mt="8" align="center" justify="center">
-      <Button
-        size="lg"
-        leftIcon={<FaGithub />}
-        onClick={() => openGithubLoginPage({ state: window.location.href })}
-      >
-        Login with Github
-      </Button>
-    </Box>
-  );
-}
+import HeroImg from "../home/hero_illustration.svg";
 
 function Login() {
   return (
-    <Box display="flex" minH="100vh" py="12" px={{ base: "4", lg: "8" }}>
-      <Box mx="auto" align="center">
-        <Heading
-          color="teal"
-          as="h1"
-          size="2xl"
-          mt="2"
-          mb="12"
-          fontWeight="extrabold"
-        >
-          Planning Poker For Github
-        </Heading>
-
-        <Card>
-          <Heading textAlign="center" size="xl" fontWeight="extrabold">
-            Login to Get Started
+    <Box maxW={{ base: "xl", md: "7xl" }} mx="auto" px={{ base: "6", md: "8" }}>
+      <Flex
+        align="flex-start"
+        direction={{ base: "column", lg: "row" }}
+        justify="space-between"
+        mb="20"
+      >
+        <Box flex="1" maxW={{ lg: "xl" }} pt="6">
+          <Heading as="h1" size="3xl" mt="8" fontWeight="extrabold">
+            Online Planning Poker with Github Integration
           </Heading>
+          <Text color={mode("gray.600", "gray.400")} mt="5" fontSize="xl">
+            Planning poker is a consensus-based and gamified technique for task
+            estimation. It is used by software engineering teams to discuss user
+            stories in the form of a poker-like card game. This app will allow
+            you to run planning poker sessions on issues imported from your
+            Github repository.
+          </Text>
 
           <GithubButton />
-        </Card>
-      </Box>
+        </Box>
+        <Img
+          marginEnd="-5rem"
+          mt="10"
+          w="50rem"
+          src={HeroImg}
+          alt="Illustration of a software team"
+        />
+      </Flex>
+      <chakra.footer>
+        <Text color={mode("gray.600", "gray.400")} my="5" fontSize="md">
+          For more information about planning poker check out the{" "}
+          <chakra.a
+            color={mode("blue.600", "blue.400")}
+            href="https://www.atlassian.com/blog/platform/a-brief-overview-of-planning-poker"
+          >
+            Brief Overview of Planning Poker by Atlassian
+          </chakra.a>
+        </Text>
+      </chakra.footer>
     </Box>
   );
 }

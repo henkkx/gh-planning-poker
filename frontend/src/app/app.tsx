@@ -8,11 +8,15 @@ const AuthenticatedApp = React.lazy(
 const UnauthenticatedApp = React.lazy(() => import("../screens/login/"));
 
 export const App = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <React.Suspense fallback={<FullPageProgress />}>
-      {user ? <AuthenticatedApp user={user} /> : <UnauthenticatedApp />}
+      {user ? (
+        <AuthenticatedApp logout={logout!} user={user} />
+      ) : (
+        <UnauthenticatedApp />
+      )}
     </React.Suspense>
   );
 };

@@ -10,6 +10,7 @@ class User(AbstractUser):
 
     name = models.CharField(max_length=255, default='Github User')
     access_token = models.CharField(max_length=255, default='github_token')
+    avatar_url = models.URLField(null=True)
 
     most_recent_session = models.ForeignKey(
         "poker.PlanningPokerSession",

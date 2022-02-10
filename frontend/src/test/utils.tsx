@@ -2,6 +2,7 @@ import * as React from "react";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 import { render, RenderOptions } from "@testing-library/react";
+import user from "@testing-library/user-event";
 import { ChakraProvider, theme } from "@chakra-ui/react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "../auth";
@@ -34,5 +35,4 @@ const customRender = (ui: React.ReactElement, options?: RenderOptions) =>
   render(ui, { wrapper: AllProviders, ...options });
 
 export * from "@testing-library/react";
-import user from "@testing-library/user-event";
 export { customRender as render, setupServer, rest, defaultHandlers, user };

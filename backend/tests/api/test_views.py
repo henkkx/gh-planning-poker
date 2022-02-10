@@ -15,6 +15,7 @@ class TestUserViews:
         response = api_client.get("/api/users/me")
 
         assert response.data == {
+            "avatarUrl": None,
             "name": user.name,
             "email": user.email,
             "isAuthenticated": True,

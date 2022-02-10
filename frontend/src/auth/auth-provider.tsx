@@ -2,11 +2,13 @@ import * as React from "react";
 import * as api from "../api";
 import { FullPageProgress } from "../components/Spinner";
 import { useAsync } from "../utils/hooks";
+import { refreshPage } from "../utils/misc";
 
 export type User = {
   name: string;
   email: string;
   isAuthenticated: boolean;
+  avatarUrl?: string;
 };
 
 type AuthContextValue = {
@@ -32,7 +34,7 @@ function AuthProvider(props: AuthContextProps) {
     isSuccess,
     run,
     setData,
-  } = useAsync<User>();
+  } = useAsync<User | undefined>();
 
   React.useEffect(() => {
     const userInfoPromise = api.getUserInfo();
@@ -40,9 +42,8 @@ function AuthProvider(props: AuthContextProps) {
   }, [run]);
 
   const logout = React.useCallback(() => {
-    // auth.logout();
-    // queryCache.clear();
-    // setData(undefined);
+    api.logout();
+    setData(undefined);
   }, []);
 
   const value: AuthContextValue = React.useMemo(

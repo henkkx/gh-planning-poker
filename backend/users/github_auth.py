@@ -48,5 +48,6 @@ def get_github_user_info(access_token: str) -> Dict[str, str]:
     user_info = {
         "email": email_adr,
         "name": fullname,
+        "avatar_url": user.avatar_url
     }
     return user_info

@@ -4,7 +4,9 @@ import {
   Center,
   Heading,
   useColorModeValue,
+  Button,
 } from "@chakra-ui/react";
+import * as React from "react";
 import { User } from "../auth";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { Navbar } from "../components/Navbar";
@@ -15,11 +17,16 @@ import AppRoutes from "./routes";
 
 type Props = {
   user: User;
+  logout: () => void;
 };
 
-function AuthenticatedApp({ user }: Props) {
+function AuthenticatedApp({ user, logout }: Props) {
   const path = usePathname();
-  const { name, email } = user;
+  const { name, email, avatarUrl } = user;
+
+  React.useEffect(() => {
+    console.log(avatarUrl);
+  }, [avatarUrl]);
 
   return (
     <chakra.main>
@@ -39,9 +46,12 @@ function AuthenticatedApp({ user }: Props) {
           </NavTabLink>
         </Navbar.Links>
         <Navbar.UserProfile>
+          <Button variant="outline" onClick={logout}>
+            Logout
+          </Button>
           <UserProfile
+            avatarUrl={avatarUrl ?? "no_avatar_url_found"}
             name={name}
-            avatarUrl="avatar_url_for_user_profile"
             email={email}
           />
           <ColorModeSwitcher />

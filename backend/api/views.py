@@ -1,13 +1,15 @@
+from .mixins import AuthRequiredMixin, PublicApiMixin
+from .serializers import PlanningPokerSessionSerializer
+from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
+from poker.models import PlanningPokerSession
 from django.middleware import csrf
+from django.contrib.auth import logout
 from rest_framework import exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
-
-from poker.models import PlanningPokerSession
-from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
-from .serializers import PlanningPokerSessionSerializer
-from .mixins import AuthRequiredMixin, PublicApiMixin
+from users.github_auth import get_github_user_info
+from users.services import get_or_create_user
 
 
 class CSRF(PublicApiMixin, APIView):
@@ -25,15 +27,28 @@ class UserInfo(AuthRequiredMixin, APIView):
 
     def get(self, request):
         user = request.user
+        token = user.access_token
+        user_info = get_github_user_info(token)
+        user, _ = get_or_create_user(access_token=token, **user_info)
 
         return Response({
             "name": user.name,
             "email": user.email,
             "isAuthenticated": True,
+            "avatarUrl": user.avatar_url,
         })
 
 
 user_info_view = UserInfo.as_view()
+
+
+class Logout(AuthRequiredMixin, APIView):
+    def post(self, request):
+        logout(request)
+        return Response({"ok": True})
+
+
+logout_view = Logout.as_view()
 
 
 class MostRecentSession(AuthRequiredMixin, APIView):

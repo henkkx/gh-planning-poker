@@ -4,6 +4,7 @@ import {
   Flex,
   HStack,
   IconButton,
+  SimpleGrid,
   Spacer,
   Stack,
   TabIndicator,
@@ -82,12 +83,12 @@ export const Template: React.FC = (props) => {
           </Tabs>
           <Divider />
 
-          <Flex>
+          <SimpleGrid columns={2} spacing={8}>
             {
               children.find((child) => child.type === UserProfile)?.props
                 .children
             }
-          </Flex>
+          </SimpleGrid>
         </Stack>
       </MobileNavContent>
     </Flex>
