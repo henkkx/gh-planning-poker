@@ -1,7 +1,7 @@
 import { Flex, Heading } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/react";
 
-const FullPageProgress = ({ text }: any) => (
+const FullPageProgress = ({ text }: { text?: string }) => (
   <Flex
     fontSize="4em"
     height="90vh"

@@ -91,6 +91,7 @@ export const CreateSessionView = () => {
         } Github Account`;
       }
       setIsLoading(false);
+      orgRepo.off();
       toast({
         title,
         description,

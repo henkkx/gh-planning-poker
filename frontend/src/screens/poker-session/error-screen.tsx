@@ -1,6 +1,6 @@
 import { refreshPage } from "../../utils/misc";
 import { ErrorCard } from "../error";
-import { CODE_SESSION_ENDED } from "./constants";
+import { CODE_SESSION_ENDED } from "../../utils/constants";
 import GameFinished from "./finished.svg";
 
 type Props = { closeCode?: number };

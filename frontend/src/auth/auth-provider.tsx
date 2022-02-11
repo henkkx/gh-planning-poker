@@ -2,7 +2,6 @@ import * as React from "react";
 import * as api from "../api";
 import { FullPageProgress } from "../components/Spinner";
 import { useAsync } from "../utils/hooks";
-import { refreshPage } from "../utils/misc";
 
 export type User = {
   name: string;

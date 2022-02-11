@@ -74,7 +74,7 @@ function useAsync<DataType>(initialState?: State<DataType>) {
         },
         (error) => {
           setError(error);
-          // throw error;
+          throw error;
         }
       );
     },

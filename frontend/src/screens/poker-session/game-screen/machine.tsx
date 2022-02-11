@@ -1,8 +1,4 @@
-import { createMachine, assign, Typestate } from "xstate";
-
-const updateCurrentTask: any = assign({
-  currentTask: (_, event) => event,
-});
+import { createMachine, assign, Typestate, AssignAction } from "xstate";
 
 type Vote = number;
 
@@ -31,6 +27,10 @@ export type GameState =
   | "discussing"
   | "saving"
   | "finished";
+
+const updateCurrentTask: AssignAction<PokerContextType, any> = assign({
+  currentTask: (_, event) => event,
+});
 
 const PokerMachine = createMachine<
   PokerContextType,

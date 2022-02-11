@@ -26,7 +26,17 @@ import { ScrollArea } from "../../../components/SidebarMenu/ScrollArea";
 import { FullPageProgress } from "../../../components/Spinner";
 import { chakraMarkdownComponents } from "./utils";
 
-function SaveNoteForm({ saveRound }: any) {
+export type RoundNotes = {
+  should_save_round: boolean;
+  note?: string;
+  label?: string;
+};
+
+type Props = {
+  finishRound: (data: RoundNotes) => void;
+};
+
+function SaveNoteForm({ finishRound }: Props) {
   const textColor = useColorModeValue("gray.600", "gray.50");
   const bgColor = useColorModeValue("gray.50", "gray.600");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -45,10 +55,10 @@ function SaveNoteForm({ saveRound }: any) {
     const { labelInput } = e.currentTarget.elements;
     const label = labelInput.value;
     setIsLoading(true);
-    saveRound({ should_save_round: true, note, label });
+    finishRound({ should_save_round: true, note, label });
   };
 
-  let handleSkipSaving = () => saveRound({ should_save_round: false, note });
+  let handleSkipSaving = () => finishRound({ should_save_round: false, note });
 
   if (isLoading) {
     return <FullPageProgress text="Exporting to Github..." />;

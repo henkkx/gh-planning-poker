@@ -7,16 +7,16 @@ const AuthenticatedApp = React.lazy(
 );
 const UnauthenticatedApp = React.lazy(() => import("../screens/login/"));
 
-export const App = () => {
+export function App() {
   const { user, logout } = useAuth();
 
   return (
     <React.Suspense fallback={<FullPageProgress />}>
-      {user ? (
+      {user?.isAuthenticated ? (
         <AuthenticatedApp logout={logout!} user={user} />
       ) : (
         <UnauthenticatedApp />
       )}
     </React.Suspense>
   );
-};
+}

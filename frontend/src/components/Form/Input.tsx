@@ -3,7 +3,6 @@ import {
   InputProps,
   useColorModeValue,
 } from "@chakra-ui/react";
-import React from "react";
 
 export const Input = (props: InputProps) => (
   <ChakraInput

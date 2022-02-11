@@ -19,7 +19,7 @@ import { useMobileMenuState } from "../../components/SidebarMenu/useMobileMenuSt
 import { Steps, Step } from "../../components/Steps";
 import { useIsMobile } from "../../utils/hooks";
 import { copyLinkToGameToClipboard } from "../../utils/misc";
-import { Player } from "./game/machine";
+import { Player } from "./game-screen/machine";
 
 type Props = {
   players: Array<Player>;
@@ -32,7 +32,6 @@ type Props = {
 
 function PokerGameLayout({
   players,
-  title,
   children,
   tasks,
   activeTaskIdx,

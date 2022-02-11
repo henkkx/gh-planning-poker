@@ -1,11 +1,9 @@
 import * as React from "react";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
-import { render, RenderOptions } from "@testing-library/react";
+import { render as defaultRender, RenderOptions } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import { ChakraProvider, theme } from "@chakra-ui/react";
-import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "../auth";
+import AppProviders from "../utils/providers";
 
 const defaultHandlers = [
   rest.get("/api/csrf", (req, res, ctx) => {
@@ -23,16 +21,8 @@ const defaultHandlers = [
   }),
 ];
 
-const AllProviders = ({ children }: { children?: React.ReactNode }) => (
-  <ChakraProvider theme={theme}>
-    <BrowserRouter>
-      <AuthProvider>{children}</AuthProvider>
-    </BrowserRouter>
-  </ChakraProvider>
-);
-
 const customRender = (ui: React.ReactElement, options?: RenderOptions) =>
-  render(ui, { wrapper: AllProviders, ...options });
+  defaultRender(ui, { wrapper: AppProviders, ...options });
 
 export * from "@testing-library/react";
 export { customRender as render, setupServer, rest, defaultHandlers, user };

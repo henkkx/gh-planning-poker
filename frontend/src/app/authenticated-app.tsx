@@ -24,10 +24,6 @@ function AuthenticatedApp({ user, logout }: Props) {
   const path = usePathname();
   const { name, email, avatarUrl } = user;
 
-  React.useEffect(() => {
-    console.log(avatarUrl);
-  }, [avatarUrl]);
-
   return (
     <chakra.main>
       <Navbar>

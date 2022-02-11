@@ -1,11 +1,15 @@
-import { FormControl, FormLabel, InputProps } from "@chakra-ui/react";
+import { InputProps } from "@chakra-ui/react";
+import { FormField } from "./FormField";
 import { Input } from "./Input";
 
 export const RepoTextField = (props: InputProps) => {
   return (
-    <FormControl isRequired id="repoInput">
-      <FormLabel>Name of your Github Repsitory</FormLabel>
+    <FormField
+      labelText="Name of your Github Repsitory"
+      isRequired
+      id="repoInput"
+    >
       <Input type="text" {...props} placeholder="super-cool-repo-1" />
-    </FormControl>
+    </FormField>
   );
 };
