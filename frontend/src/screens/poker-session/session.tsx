@@ -207,6 +207,7 @@ export function Poker() {
       sessionIsInactive={sessionIsInactive}
       endSession={handleEndSession}
       repoName={repoName}
+      isModerator={isModerator}
     >
       {pokerGameContent}
     </PokerGameLayout>

@@ -32,6 +32,7 @@ type Props = {
   sessionIsInactive: boolean;
   endSession: () => void;
   repoName: string;
+  isModerator: boolean;
 };
 
 function PokerGameLayout({
@@ -42,6 +43,7 @@ function PokerGameLayout({
   sessionIsInactive,
   endSession,
   repoName,
+  isModerator,
 }: Props) {
   const { isOpen, toggle } = useMobileMenuState();
   const isMobile = useIsMobile();
@@ -95,14 +97,16 @@ function PokerGameLayout({
                   >
                     Copy link to the game
                   </Button>
-                  <AlertDialogButton
-                    leftIcon={<HiTrash />}
-                    header="End Session"
-                    body="Are you sure? The estimations exported to Github so far will not be affected"
-                    onClick={endSession}
-                    size="sm"
-                    mb="4"
-                  />
+                  {isModerator ? (
+                    <AlertDialogButton
+                      leftIcon={<HiTrash />}
+                      header="End Session"
+                      body="Are you sure? The estimations exported to Github so far will not be affected"
+                      onClick={endSession}
+                      size="sm"
+                      mb="4"
+                    />
+                  ) : null}
                 </Box>
               </Stack>
 
