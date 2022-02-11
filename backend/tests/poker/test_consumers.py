@@ -75,7 +75,8 @@ class TestPlanningPokerConsumer:
         assert task_list == {
             'data': {
                 'current_idx': 0,
-                'tasks': ['task-1', 'task-2']
+                'tasks': ['task-1', 'task-2'],
+                'repo_name': 'test'
             },
             'event': 'task_list_received',
             'type': 'send.json'

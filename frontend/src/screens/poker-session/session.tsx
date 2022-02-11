@@ -50,6 +50,7 @@ export function Poker() {
   const [players, setPlayers] = React.useState<Array<Player>>([]);
   const [isModerator, setIsModerator] = React.useState(false);
   const [tasks, setTasks] = React.useState<Array<string>>(["loading tasks..."]);
+  const [repoName, setRepoName] = React.useState("loading repo...");
   const { nextStep, activeStep, setActiveStep } = useSteps({ initialStep: 0 });
 
   const { id } = useParams<{ id: string }>();
@@ -90,6 +91,7 @@ export function Poker() {
         case "task_list_received":
           setTasks(data.tasks);
           setActiveStep(data.current_idx);
+          setRepoName(data.repo_name);
           break;
         case "participants_changed":
           setPlayers(data.participants);
@@ -160,6 +162,14 @@ export function Poker() {
     [sendJsonMessage]
   );
 
+  const handleEndSession = React.useCallback(
+    () =>
+      sendJsonMessage({
+        event: "end_session",
+      }),
+    [sendJsonMessage]
+  );
+
   let pokerGameContent;
 
   switch (wsConnectionState) {
@@ -195,6 +205,8 @@ export function Poker() {
       tasks={tasks}
       activeTaskIdx={activeStep}
       sessionIsInactive={sessionIsInactive}
+      endSession={handleEndSession}
+      repoName={repoName}
     >
       {pokerGameContent}
     </PokerGameLayout>

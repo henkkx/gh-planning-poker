@@ -1,15 +1,14 @@
-from .mixins import AuthRequiredMixin, PublicApiMixin
-from .serializers import PlanningPokerSessionSerializer
-from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
-from poker.models import PlanningPokerSession
 from django.middleware import csrf
 from django.contrib.auth import logout
 from rest_framework import exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
-from users.github_auth import get_github_user_info
-from users.services import get_or_create_user
+
+from .mixins import AuthRequiredMixin, PublicApiMixin
+from .serializers import PlanningPokerSessionSerializer
+from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
+from poker.models import PlanningPokerSession
 
 
 class CSRF(PublicApiMixin, APIView):

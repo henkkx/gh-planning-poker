@@ -53,3 +53,4 @@ class GameEvent:
     TASK_LIST_RECEIVED = "task_list_received"
     WAIT_FOR_NEXT_ROUND = "wait_for_next_round"
     NO_TASKS_LEFT = "no_tasks_left"
+    END_SESSION = "end_session"

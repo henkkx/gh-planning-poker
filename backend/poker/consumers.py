@@ -18,6 +18,8 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
             GameEvent.FINISH_DISCUSSION: self.finish_discussion,
             GameEvent.REPLAY_ROUND: self.replay_round,
             GameEvent.PARTICIPANTS_CHANGED: self.participants_changed,
+            GameEvent.END_SESSION: self.end_session
+
         }
 
     @property
@@ -90,9 +92,9 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
         next_action_by[current_state]()
 
     def add_user_to_session(self):
-        self.current_session.voters.add(self.user)
         self.user.most_recent_session = self.current_session
         self.user.save()
+        self.current_session.voters.add(self.user)
         self.broadcast_participants()
         self.touch_presence()
 
@@ -168,11 +170,13 @@ class PlanningPokerConsumer(JsonWebsocketConsumer):
 
     def send_task_list(self):
         current_idx = self.current_session.get_current_task_idx()
+        repo_name = self.current_session.repo_name
 
         self.send_event(
             event=GameEvent.TASK_LIST_RECEIVED,
             to_everyone=False,
             tasks=self.tasks,
+            repo_name=repo_name,
             current_idx=current_idx
         )
 

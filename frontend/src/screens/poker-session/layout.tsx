@@ -4,13 +4,14 @@ import {
   Flex,
   Box,
   Stack,
-  Text,
   Avatar,
   Tooltip,
   Button,
   useToast,
+  Heading,
+  Text,
 } from "@chakra-ui/react";
-import { HiClipboardCopy } from "react-icons/hi";
+import { HiClipboardCopy, HiTrash } from "react-icons/hi";
 import { MobileMenuButton } from "../../components/SidebarMenu/MobileMenuButton";
 import { NavSectionTitle } from "../../components/SidebarMenu/NavSectionTitle";
 import { ScrollArea } from "../../components/SidebarMenu/ScrollArea";
@@ -20,6 +21,7 @@ import { Steps, Step } from "../../components/Steps";
 import { useIsMobile } from "../../utils/hooks";
 import { copyLinkToGameToClipboard } from "../../utils/misc";
 import { Player } from "./game-screen/machine";
+import { AlertDialogButton } from "../../components/AlertDialogButton";
 
 type Props = {
   players: Array<Player>;
@@ -28,6 +30,8 @@ type Props = {
   children: React.ReactNode;
   activeTaskIdx: number;
   sessionIsInactive: boolean;
+  endSession: () => void;
+  repoName: string;
 };
 
 function PokerGameLayout({
@@ -36,6 +40,8 @@ function PokerGameLayout({
   tasks,
   activeTaskIdx,
   sessionIsInactive,
+  endSession,
+  repoName,
 }: Props) {
   const { isOpen, toggle } = useMobileMenuState();
   const isMobile = useIsMobile();
@@ -68,25 +74,38 @@ function PokerGameLayout({
           {!sessionIsInactive ? (
             <ScrollArea pt="5" pb="6">
               <Stack pb="2">
-                <NavSectionTitle>Invite Players</NavSectionTitle>
+                <NavSectionTitle> Session Information </NavSectionTitle>
                 <Box
                   mx="auto"
                   maxW="lg"
-                  py="4"
                   px={{ base: "2", md: "2" }}
                   minH="50px"
                 >
+                  <Heading size="small" as="h4">
+                    Github Repository:
+                  </Heading>
+                  <Text mb="4"> {repoName} </Text>
                   <Button
                     aria-label="Copy Invite Link"
                     colorScheme="blue"
                     leftIcon={<HiClipboardCopy />}
                     onClick={handleCopyLink}
                     size="sm"
+                    mb="2"
                   >
                     Copy link to the game
                   </Button>
+                  <AlertDialogButton
+                    leftIcon={<HiTrash />}
+                    header="End Session"
+                    body="Are you sure? The estimations exported to Github so far will not be affected"
+                    onClick={endSession}
+                    size="sm"
+                    mb="4"
+                  />
                 </Box>
               </Stack>
+
               <Stack pb="6">
                 <NavSectionTitle>Participants</NavSectionTitle>
 
