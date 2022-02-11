@@ -27,9 +27,6 @@ class UserInfo(AuthRequiredMixin, APIView):
 
     def get(self, request):
         user = request.user
-        token = user.access_token
-        user_info = get_github_user_info(token)
-        user, _ = get_or_create_user(access_token=token, **user_info)
 
         return Response({
             "name": user.name,

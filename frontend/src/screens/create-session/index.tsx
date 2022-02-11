@@ -1,3 +1,5 @@
+import * as React from "react";
+import { Link, useHistory } from "react-router-dom";
 import {
   Box,
   Button,
@@ -9,17 +11,15 @@ import {
   useToast,
   useBoolean,
 } from "@chakra-ui/react";
-import * as React from "react";
+
 import { Card } from "../../components/Card";
 import { OrgRepoSwitch } from "../../components/Form/OrgRepoSwitch";
 import { OrgTextField } from "../../components/Form/OrgTextField";
 import { RepoTextField } from "../../components/Form/RepoTextField";
 import CreateSessionImg from "./new_game.svg";
 import * as api from "../../api";
-import { Link, useHistory } from "react-router-dom";
 import { LabelsTextField } from "../../components/Form/LabelsTextField";
 import { FullPageProgress } from "../../components/Spinner";
-import { useAuth } from "../../auth";
 import { useIsMobile } from "../../utils/hooks";
 
 interface FormElements extends HTMLFormControlsCollection {
