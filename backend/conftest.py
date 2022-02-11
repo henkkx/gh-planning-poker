@@ -64,7 +64,7 @@ def poker_consumer(planning_poker_session, user_factory):
     consumer = PlanningPokerConsumer()
     consumer.scope = {
         'url_route': {'kwargs': {'game_id': planning_poker_session.id}},
-        'user': user_factory(name='Poker User', email='random@email.com')
+        'user': user_factory(name='Poker User', username='random')
     }
     consumer.channel_name = 'poker_session_1'
     return consumer
@@ -72,20 +72,20 @@ def poker_consumer(planning_poker_session, user_factory):
 
 @pytest.fixture
 def user_factory():
-    def _factory(email='user@email.com', access_token='token', **kwargs):
-        return create_user(email=email, access_token=access_token, **kwargs)
+    def _factory(username='user', access_token='token', **kwargs):
+        return create_user(username=username, access_token=access_token, **kwargs)
     return _factory
 
 
 @pytest.fixture
 def user(user_factory):
-    return user_factory(email='user@email.com', name='firstname lastname')
+    return user_factory(username='user', name='firstname lastname')
 
 
 @pytest.fixture
 def create_moderator_for_poker(user_factory):
-    def _create(session, email='moderator@email.com', name='Moderator', **kwargs):
-        moderator = user_factory(email=email, name=name, **kwargs)
+    def _create(session, username='moderator', name='Moderator', **kwargs):
+        moderator = user_factory(username=username, name=name, **kwargs)
         session.moderator = moderator
         session.save()
         return moderator

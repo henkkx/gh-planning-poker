@@ -14,7 +14,7 @@ const defaultHandlers = [
     return res(
       ctx.json({
         name: "Firstname Lastname",
-        email: "user@email.com",
+        username: "user",
         isAuthenticated: true,
       })
     );

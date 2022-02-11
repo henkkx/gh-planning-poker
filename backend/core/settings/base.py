@@ -153,9 +153,10 @@ SITE_ID = 1
 CLIENT_ID = os.environ.get("CLIENT_ID", "no_github_client_id_set")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "no_github_secret_set")
 
-REACT_APP_BASE_URL = os.environ.get("REACT_APP_BASE_URL", "http://127.0.0.1:3000/")
+REACT_APP_BASE_URL = os.environ.get(
+    "REACT_APP_BASE_URL", "http://127.0.0.1:3000/")
 
-SUPER_USER_EMAIL = os.environ.get("SUPER_USER_EMAIL")
+SUPER_USERNAME = os.environ.get("SUPER_USERNAME")
 ASGI_THREADS = 5
 
 ASGI_APPLICATION = "core.asgi.application"

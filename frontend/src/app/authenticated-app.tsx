@@ -22,7 +22,7 @@ type Props = {
 
 function AuthenticatedApp({ user, logout }: Props) {
   const path = usePathname();
-  const { name, email, avatarUrl } = user;
+  const { name, username, avatarUrl } = user;
 
   return (
     <chakra.main>
@@ -48,7 +48,7 @@ function AuthenticatedApp({ user, logout }: Props) {
           <UserProfile
             avatarUrl={avatarUrl ?? "no_avatar_url_found"}
             name={name}
-            email={email}
+            username={username}
           />
           <ColorModeSwitcher />
         </Navbar.UserProfile>

@@ -17,7 +17,7 @@ class TestUserViews:
         assert response.data == {
             "avatarUrl": None,
             "name": user.name,
-            "email": user.email,
+            "username": user.username,
             "isAuthenticated": True,
         }
 

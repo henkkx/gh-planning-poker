@@ -248,7 +248,7 @@ class TestPlanningPokerConsumer:
 
         poker_consumer.channel_layer = mock_channel_layer
         poker_consumer.scope["user"] = user_factory(
-            name=NAME, email="regular@email.com"
+            name=NAME, username="regular"
         )
 
         VOTE_1, VOTE_2 = 1, 3

@@ -5,7 +5,7 @@ import { useAsync } from "../utils/hooks";
 
 export type User = {
   name: string;
-  email: string;
+  username: string;
   isAuthenticated: boolean;
   avatarUrl?: string;
 };

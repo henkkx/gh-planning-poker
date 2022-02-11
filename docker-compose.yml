@@ -17,7 +17,7 @@ services:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET=${CLIENT_SECRET}
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
-      - SUPER_USER_EMAIL=${SUPER_USER_EMAIL}
+      - SUPER_USERNAME=${SUPER_USERNAME}
   frontend:
     build: ./frontend
     volumes:

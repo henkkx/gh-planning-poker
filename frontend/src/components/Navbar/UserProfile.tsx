@@ -3,11 +3,11 @@ import * as React from "react";
 
 interface Props {
   name: string;
-  email: string;
+  username: string;
   avatarUrl: string;
 }
 
-export const UserProfile: React.FC<Props> = ({ name, email, avatarUrl }) => {
+export const UserProfile: React.FC<Props> = ({ name, username, avatarUrl }) => {
   return (
     <HStack spacing={3} order={{ base: 1, md: 2 }} flex="1">
       <Avatar name={name} size="sm" src={avatarUrl} />
@@ -16,7 +16,7 @@ export const UserProfile: React.FC<Props> = ({ name, email, avatarUrl }) => {
           {name}
         </Text>
         <Text fontSize="sm" lineHeight="shorter" opacity={0.7}>
-          {email}
+          {username}
         </Text>
       </Flex>
     </HStack>

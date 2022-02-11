@@ -8,7 +8,7 @@ type Options = {
 };
 
 function createGithubUrlParams(options: Options) {
-  const scope = ["read:user", "user:email", "repo"].join(" ");
+  const scope = ["read:user", "repo"].join(" ");
   const params = {
     response_type: "code",
     client_id: CLIENT_ID,

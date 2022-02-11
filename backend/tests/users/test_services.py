@@ -4,25 +4,25 @@ from users.models import User
 
 class TestServices:
     def test_create_user(self, db):
-        email = 'user@example.com'
+        username = 'user'
         token = 'test token'
         user = create_user(
-            email=email,
+            username=username,
             access_token=token
         )
-        that_same_guy = User.objects.filter(email=email).first()
+        that_same_guy = User.objects.filter(username=username).first()
         assert user == that_same_guy
         assert token == that_same_guy.access_token
 
     def test_get_or_create_user(self, db):
-        email = 'user@example.com'
+        username = 'user'
         token = 'test token'
         user, user_was_created = get_or_create_user(
-            email=email,
+            username=username,
             access_token=token
         )
         that_same_guy = User.objects.filter(
-            email=email).first()
+            username=username).first()
         assert user_was_created
         assert user == that_same_guy
         assert token == that_same_guy.access_token
@@ -30,7 +30,7 @@ class TestServices:
         new_token = 'new_token'
         # should not create new user, just update the token
         still_the_same_guy, user_was_created = get_or_create_user(
-            email=email,
+            username=username,
             access_token=new_token)
 
         assert user == still_the_same_guy

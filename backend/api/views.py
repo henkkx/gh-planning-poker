@@ -7,7 +7,7 @@ from rest_framework.generics import CreateAPIView
 
 from .mixins import AuthRequiredMixin, PublicApiMixin
 from .serializers import PlanningPokerSessionSerializer
-from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, get_github_repo, get_issues_from_repo
+from .github_utils import IssuesNotFound, OrgNotFound, RepoNotFound, build_authenticated_github_client, get_github_repo, get_issues_from_repo
 from poker.models import PlanningPokerSession
 
 
@@ -29,7 +29,7 @@ class UserInfo(AuthRequiredMixin, APIView):
 
         return Response({
             "name": user.name,
-            "email": user.email,
+            "username": user.username,
             "isAuthenticated": True,
             "avatarUrl": user.avatar_url,
         })
@@ -54,6 +54,18 @@ class MostRecentSession(AuthRequiredMixin, APIView):
 
 
 most_recent_session_view = MostRecentSession.as_view()
+
+
+class SearchRepos(AuthRequiredMixin, APIView):
+    def get(self, request):
+
+        user = request.user
+
+        github_client = build_authenticated_github_client(
+            user.access_token
+
+        )
+        github_username = user.github_username
 
 
 class PlanningPokerSessionView(AuthRequiredMixin, CreateAPIView):

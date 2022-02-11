@@ -36,17 +36,12 @@ def get_github_access_token(code: str) -> str:
 def get_github_user_info(access_token: str) -> Dict[str, str]:
     github = Github(access_token)
     user = github.get_user()
-    email_adr = user.email
-
-    # user has not set a publicly visible email
-    if email_adr is None:
-        email_info = user.get_emails()[0]
-        email_adr = email_info[0]
+    username = user.login
 
     # users are not guaranteed to have a name
-    fullname = user.name or email_adr
+    fullname = user.name or username
     user_info = {
-        "email": email_adr,
+        "username": username,
         "name": fullname,
         "avatar_url": user.avatar_url
     }
