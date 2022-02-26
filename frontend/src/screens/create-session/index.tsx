@@ -5,11 +5,12 @@ import {
   Button,
   chakra,
   Divider,
-  Heading,
   Stack,
   Img,
   useToast,
   useBoolean,
+  Heading,
+  Text,
 } from "@chakra-ui/react";
 
 import { Card } from "../../components/Card";
@@ -75,7 +76,7 @@ export const CreateSessionView = () => {
     } catch (err: any) {
       let title, description;
       if (err.toString() === "Error: Not Found") {
-        const hasIssues = !labels?.length;
+        const hasIssues = !!labels?.length;
 
         if (hasIssues) {
           title = `No open issues found matching all the following labels: [${labels}]`;
@@ -125,6 +126,12 @@ export const CreateSessionView = () => {
             <Heading size="md" mb="4">
               Create a new planning poker session
             </Heading>
+            <Text fontSize="12" mb="2">
+              *Please note if you have lots of open issues (50+) and do not
+              search by labels, it may take ~10s to retrieve them from github.
+              Moreover, one session can only have max 30 issues. It is thus
+              reccomended to search them by labels
+            </Text>
             <Divider mb="6" />
             <chakra.form onSubmit={handleSubmit} maxW="sm">
               <Stack spacing="4">

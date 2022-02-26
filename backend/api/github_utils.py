@@ -43,11 +43,16 @@ def get_github_repo(user, repo_name: str, org_name: Union[str, None] = None) -> 
 
 
 def get_issues_from_repo(repo: Repository, labels: List[str]):
-    pr_and_regular_issues = repo.get_issues(state="open", labels=labels)
+    pr_and_regular_issues = repo.get_issues(
+        state="open", labels=labels
+    )
     # pull requests are considered issues by github but we only want to keep regular issues and discard PRs
     regular_issues = [
         i for i in pr_and_regular_issues if i.pull_request is None
     ]
+
+    if len(regular_issues) > 30:
+        return regular_issues[:30]
 
     if not regular_issues:
         raise IssuesNotFound

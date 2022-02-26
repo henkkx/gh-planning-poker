@@ -61,7 +61,7 @@ describe("create-session screen", () => {
   it("should create a planning poker session", async () => {
     render(<CreateSessionView />);
     const REPO_NAME = "test-repository-name";
-    const input = await screen.findByText(/name of your github repsitory/i);
+    const input = await screen.findByText(/name of your github repository/i);
     user.type(input, REPO_NAME);
     const submitButton = screen.getByText(/create a session/i);
 
@@ -76,7 +76,9 @@ describe("create-session screen", () => {
     const REPO_NAME = "test-repository-name";
     const ORG_NAME = "Kaiba Corp";
 
-    const repoInput = await screen.findByText(/name of your github repsitory/i);
+    const repoInput = await screen.findByText(
+      /name of your github repository/i
+    );
     user.type(repoInput, REPO_NAME);
 
     const toggle = screen.getByLabelText(

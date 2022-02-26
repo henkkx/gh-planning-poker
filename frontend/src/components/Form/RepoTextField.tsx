@@ -5,7 +5,7 @@ import { Input } from "./Input";
 export const RepoTextField = (props: InputProps) => {
   return (
     <FormField
-      labelText="Name of your Github Repsitory"
+      labelText="Name of your Github Repository"
       isRequired
       id="repoInput"
     >
