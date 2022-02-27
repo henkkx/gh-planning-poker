@@ -140,7 +140,7 @@ export const CreateSessionView = () => {
                 {isOrgRepoSelected ? (
                   <>
                     <OrgTextField isDisabled={!isOrgRepoSelected} />
-                    <Divider />{" "}
+                    <Divider />
                   </>
                 ) : null}
                 <RepoTextField />
