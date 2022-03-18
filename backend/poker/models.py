@@ -123,7 +123,16 @@ class Task(models.Model):
         org_name = curr_session.org_name
         user = curr_session.moderator
         issue_number = self.github_issue_number
-        comment = json.dumps(self.get_stats()) + " \n " + note
+        stats = self.get_stats()
+        cols = stats.keys()
+
+        # create markdown table from the stats of the round
+        table_head = " | " + " | ".join(cols) + " | \n "
+        separator = " | " + " | ".join(["---" for _ in cols]) + " | \n "
+        table_body = " | " + " | ".join(map(str, stats.values())) + " | \n "
+
+        comment = "## Planning Poker Stats: \n " + \
+            table_head + separator + table_body + "## Notes \n " + note
 
         repo = get_github_repo(user, repo_name, org_name)
         issue = repo.get_issue(issue_number)
